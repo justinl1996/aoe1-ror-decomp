@@ -280,7 +280,7 @@ TRIBE_Game::~TRIBE_Game() {
     RESFILE_close_new_resource_file("Interfac.drs");
 
     if (StringTableX != 0) {
-        FreeLibrary(StringTableX);
+        surface_string_table_close(StringTableX);
         StringTableX = 0;
     }
 }
@@ -370,7 +370,7 @@ int TRIBE_Game::setup() {
         }
     }
 
-    StringTableX = LoadLibraryA(new_string_dll_name);
+    StringTableX = surface_string_table_open(new_string_dll_name);
     if (StringTableX == 0) {
         this->error_code = 1;
         return 0;
@@ -748,7 +748,7 @@ void TRIBE_Game::set_load_game_name(char* file_name) {
 
 char* TRIBE_Game::get_string(long string_id, char* str, int max_len) {
     // The expansion table takes precedence; the base table supplies missing strings.
-    if (LoadStringA(StringTableX, (int) string_id, str, max_len) == 0) {
+    if (surface_string_table_load(StringTableX, (unsigned int) string_id, str, max_len) == 0) {
         return this->RGE_Base_Game::get_string(string_id, str, max_len);
     }
     str[max_len - 1] = '\0';

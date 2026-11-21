@@ -3,15 +3,13 @@
 
 #include <windows.h>
 
-// TRegistry stores three registry handles, a disposition value, and the
-// 256-byte query buffer at offset 0x10.
+// TRegistry reads and writes the game's settings under one key, for the
+// current user (UseUserKey) or the machine. The values live in a settings
+// file now (port/sdl/settings.cpp), with the registry's types and results.
 
 class TRegistry {
   public:
-    HKEY ghMachineKey;
-    HKEY ghUserKey;
-    HKEY ghMachineKeyRead;
-    unsigned long gdwDisp;
+    char Key[256];
     char Data[256];
 
     TRegistry(const char* Key);
@@ -23,7 +21,5 @@ class TRegistry {
     long RegGet(int UseUserKey, const char* lptszName, unsigned char* lpData, unsigned long* lpdwDataSize);
     int RegGetInt(int UseUserKey, const char* lptszName);
 };
-
-typedef char registry_size_check[(sizeof(TRegistry) == 0x110) ? 1 : -1];
 
 #endif

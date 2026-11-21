@@ -124,7 +124,7 @@ extern "C" GUID ZONE_GUID;
 
 // BaseGame process globals. The executable stores these values at the named
 // addresses. The types follow their direct uses in BaseGame and its clients.
-extern HMODULE StringTable;
+extern void* StringTable;
 extern TRegistry* Regs;
 extern TSound_Driver* sound_driver;
 extern TChat* chat;

@@ -305,7 +305,7 @@ int RGE_Base_Game::setup() {
         if (!this->setup_cmd_options()) {
             this->error_code = RGE_ERROR_SETUP_COMMAND_OPTIONS;
         } else {
-            StringTable = LoadLibraryA(this->string_dll_name);
+            StringTable = surface_string_table_open(this->string_dll_name);
             if (StringTable == 0) {
                 this->error_code = RGE_ERROR_SETUP;
             } else {
@@ -575,7 +575,7 @@ RGE_Base_Game::~RGE_Base_Game() {
     }
 
     if (StringTable != 0 && StringTable != this->prog_info->instance) {
-        FreeLibrary(StringTable);
+        surface_string_table_close(StringTable);
         StringTable = 0;
     }
 
@@ -685,7 +685,7 @@ char* RGE_Base_Game::get_string(long text_id) {
 }
 
 char* RGE_Base_Game::get_string(long string_id, char* str, int max_len) {
-    int result = LoadStringA(StringTable, string_id, str, max_len);
+    int result = surface_string_table_load(StringTable, string_id, str, max_len);
     if (!result) {
         *str = 0;
     }

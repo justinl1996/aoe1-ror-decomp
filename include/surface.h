@@ -106,6 +106,24 @@ MMRESULT surface_mmio_descend(HMMIO mmio, LPMMCKINFO chunk, const MMCKINFO* pare
 MMRESULT surface_mmio_ascend(HMMIO mmio, LPMMCKINFO chunk, UINT flags);
 MMRESULT surface_mmio_create_chunk(HMMIO mmio, LPMMCKINFO chunk, UINT flags);
 
+// Settings (port/sdl/settings.cpp): registry-style values kept in
+// settings.ini next to the executable, under a key, for the current user
+// (user != 0) or the machine. They return what RegQueryValueExA and
+// RegSetValueExA return (ERROR_SUCCESS, ERROR_FILE_NOT_FOUND,
+// ERROR_MORE_DATA with the size needed).
+long surface_setting_get(int user, const char* key, const char* name, unsigned long* type, unsigned char* data,
+                         unsigned long* size);
+long surface_setting_set(int user, const char* key, const char* name, unsigned long type, const unsigned char* data,
+                         unsigned long size);
+
+// String tables (port/sdl/strings.cpp): the RT_STRING resources of a
+// language DLL, read from the file. open takes the DLL's name, as
+// LoadLibraryA did; load is LoadStringA (Windows-1252 text, 0 when the id
+// has no string).
+void* surface_string_table_open(const char* dll_name);
+void surface_string_table_close(void* table);
+int surface_string_table_load(void* table, unsigned int id, char* buffer, int max_length);
+
 // Presenting the primary surface (port/sdl/surface.cpp).
 //
 // set_target: the primary surface was created for this window. In exclusive

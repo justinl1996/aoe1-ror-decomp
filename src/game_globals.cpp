@@ -544,7 +544,7 @@ unsigned int ds_silence_chunks = 0;
 long ds_last_percent = 0;
 
 void* AppInst = 0;
-HMODULE StringTable = 0;
+void* StringTable = 0;
 TRegistry* Regs = 0;
 TSound_Driver* sound_driver = 0;
 TChat* chat = 0;
