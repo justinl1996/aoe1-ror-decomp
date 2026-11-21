@@ -34,6 +34,9 @@ void surface_present_palette(const PALETTEENTRY* entries);
 // The primary surface's pixels inside rect changed. dc holds those pixels
 // as a DIB section with the current palette as its color table.
 void surface_present_primary(const unsigned char* bits, long pitch, long width, long height, const RECT* rect, HDC dc);
+// Show a change that was held back because the last present was too recent.
+// Called once per iteration of the game's main loop.
+void surface_present_flush(void);
 
 #endif // AOE_SDL
 

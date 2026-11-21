@@ -1,6 +1,6 @@
 # SDL2 port on Windows: task breakdown
 
-Status: written 2026-11-21. Done: Tasks 0 and 1 (see "Progress" at the end).
+Status: written 2026-11-21. Done: Tasks 0, 1 and 2 (see "Progress" at the end).
 The rest is still a plan.
 
 Scope: **Windows only for now.** The target is the clang-cl PE build
@@ -418,7 +418,35 @@ has to supply:
   `WM_NCCALCSIZE` straight to the game too.
 - Not checked: a running game. See the next section.
 
-### Testing under Wine
+### Task 2 — done 2026-11-21
+
+- `port/sdl/surface.cpp` creates an SDL renderer on the attached window
+  (accelerated, falling back to software, no vsync, nearest scaling) and a
+  streaming ARGB texture the size of the primary surface (of the client
+  area outside exclusive mode). Each primary-surface change converts only
+  the changed rectangle through a 256-entry palette table.
+- Presenting is throttled: a change presents at once unless the last
+  present was under 4 ms ago; otherwise it is left pending, and
+  `surface_present_flush` (called each iteration of `RGE_Base_Game::run`)
+  shows it. `WM_PAINT` presents the last frame again before the game
+  handles it, because a swap chain does not survive being covered or
+  remapped the way a real primary surface did.
+- `RGE_Base_Game::clear_window` clears the primary surface instead of
+  filling the window with GDI.
+- Done as planned without touching the fullscreen branches: the game
+  already sizes its popup window so the client area equals the game
+  resolution, at the top-left of the screen. Making that a proper window or
+  a scaled fullscreen is Task 4.
+- Checked under Wine: at 1024x768 the menu screens are pixel-identical to
+  the plain clang build in three of four runs; the fourth, the first run in
+  a fresh prefix, showed a black main menu at the 15 s mark, before the
+  `WM_PAINT` re-present existed. The scenario editor renders correctly, and
+  its first screen is pixel-identical. At 800x600 the menus render 1:1 in
+  the top-left corner and clicks land where they should.
+- Not checked: palette fades on the credits screen, and which SDL renderer
+  Wine ends up using.
+
+
 
 - The test setup (Xvfb without root, a separate Wine prefix with a fake CD
   drive, screenshot and comparison scripts) lives under `build/sdl_test/`

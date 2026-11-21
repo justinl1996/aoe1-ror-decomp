@@ -903,10 +903,16 @@ int RGE_Base_Game::run() {
                 } else {
                     this->handle_idle();
                 }
+#ifdef AOE_SDL
+                surface_present_flush();
+#endif
                 continue;
             }
         }
 
+#ifdef AOE_SDL
+        surface_present_flush();
+#endif
         if (GetMessageA(&msg, 0, 0, 0) == 0) {
             return (int) msg.wParam;
         }
@@ -2257,6 +2263,16 @@ void RGE_Base_Game::clear_window() {
     RECT rect;
     HDC dc;
     HBRUSH brush;
+
+#ifdef AOE_SDL
+    // SDL draws the primary surface into the window, so clear that instead
+    // of painting over the window with GDI (on a real 8-bit display the
+    // window and the primary surface were the same pixels).
+    if (this->draw_system != 0 && this->draw_system->PrimarySurface != 0) {
+        this->draw_system->ClearPrimarySurface();
+        return;
+    }
+#endif
 
     if (this->prog_window != 0) {
         dc = GetDC(this->prog_window);
