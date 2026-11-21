@@ -1,6 +1,6 @@
 # SDL2 port on Windows: task breakdown
 
-Status: written 2026-11-21. Done: Tasks 0, 1 and 2 (see "Progress" at the end).
+Status: written 2026-11-21. Done: Tasks 0 to 3 (see "Progress" at the end).
 The rest is still a plan.
 
 Scope: **Windows only for now.** The target is the clang-cl PE build
