@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum GdiKind { GDI_DC = 1, GDI_FONT, GDI_PEN, GDI_BRUSH, GDI_REGION };
+enum GdiKind { GDI_DC = 1, GDI_FONT, GDI_PEN, GDI_BRUSH, GDI_REGION, GDI_PALETTE };
 
 struct GdiObject {
     int kind;
@@ -57,6 +57,12 @@ struct GdiBrush {
 struct GdiRegion {
     GdiObject head;
     RECT rect;
+};
+
+struct GdiPalette {
+    GdiObject head;
+    int count;
+    PALETTEENTRY* entries;
 };
 
 struct GdiDc {
@@ -370,8 +376,153 @@ BOOL gdi_delete_object(HGDIOBJ handle) {
         DeleteObject(object->win32);
     if (object->kind == GDI_FONT && ((GdiFont*) object)->ttf != 0)
         TTF_CloseFont(((GdiFont*) object)->ttf);
+    if (object->kind == GDI_PALETTE)
+        free(((GdiPalette*) object)->entries);
     free(object);
     return TRUE;
+}
+
+// ---------------------------------------------------------------------------
+// Palettes. Logical palettes are only colour tables now: the game's frame
+// gets its colours from DirectDraw's palette (ddraw_memory.cpp), so
+// selecting and realizing a palette into a window's context, which mattered
+// on an 8-bit desktop, does nothing.
+
+static GdiPalette* our_palette(const void* handle) {
+    return (GdiPalette*) lookup(handle, GDI_PALETTE);
+}
+
+static GdiPalette* make_palette(int count) {
+    GdiPalette* palette = (GdiPalette*) calloc(1, sizeof(GdiPalette));
+    if (palette == 0)
+        return 0;
+    palette->entries = (PALETTEENTRY*) calloc(count > 0 ? count : 1, sizeof(PALETTEENTRY));
+    if (palette->entries == 0) {
+        free(palette);
+        return 0;
+    }
+    palette->count = count;
+    track(&palette->head, GDI_PALETTE);
+    return palette;
+}
+
+HPALETTE gdi_create_palette(const LOGPALETTE* logpalette) {
+    if (logpalette == 0 || logpalette->palNumEntries == 0)
+        return 0;
+    GdiPalette* palette = make_palette(logpalette->palNumEntries);
+    if (palette == 0)
+        return 0;
+    memcpy(palette->entries, logpalette->palPalEntry, palette->count * sizeof(PALETTEENTRY));
+    return (HPALETTE) palette;
+}
+
+// GDI's halftone palette is a colour cube for drawing true-colour images on
+// a 256-colour display; this one is a 6x6x6 cube and a grey ramp.
+HPALETTE gdi_create_halftone_palette(HDC) {
+    GdiPalette* palette = make_palette(256);
+    if (palette == 0)
+        return 0;
+    int i = 0;
+    for (int r = 0; r < 6; ++r)
+        for (int g = 0; g < 6; ++g)
+            for (int b = 0; b < 6; ++b, ++i) {
+                palette->entries[i].peRed = (BYTE) (r * 51);
+                palette->entries[i].peGreen = (BYTE) (g * 51);
+                palette->entries[i].peBlue = (BYTE) (b * 51);
+            }
+    for (int grey = 0; i < 256; ++i, ++grey) {
+        BYTE level = (BYTE) (grey * 255 / 39);
+        palette->entries[i].peRed = level;
+        palette->entries[i].peGreen = level;
+        palette->entries[i].peBlue = level;
+    }
+    return (HPALETTE) palette;
+}
+
+UINT gdi_get_palette_entries(void* handle, UINT start, UINT count, PALETTEENTRY* entries) {
+    GdiPalette* palette = our_palette(handle);
+    if (palette == 0)
+        return 0;
+    if (entries == 0)
+        return (UINT) palette->count;
+    if (start >= (UINT) palette->count)
+        return 0;
+    if (count > palette->count - start)
+        count = palette->count - start;
+    memcpy(entries, palette->entries + start, count * sizeof(PALETTEENTRY));
+    return count;
+}
+
+UINT gdi_set_palette_entries(void* handle, UINT start, UINT count, const PALETTEENTRY* entries) {
+    GdiPalette* palette = our_palette(handle);
+    if (palette == 0 || entries == 0 || start >= (UINT) palette->count)
+        return 0;
+    if (count > palette->count - start)
+        count = palette->count - start;
+    memcpy(palette->entries + start, entries, count * sizeof(PALETTEENTRY));
+    return count;
+}
+
+BOOL gdi_resize_palette(void* handle, UINT count) {
+    GdiPalette* palette = our_palette(handle);
+    if (palette == 0 || count == 0)
+        return FALSE;
+    PALETTEENTRY* entries = (PALETTEENTRY*) realloc(palette->entries, count * sizeof(PALETTEENTRY));
+    if (entries == 0)
+        return FALSE;
+    if (count > (UINT) palette->count)
+        memset(entries + palette->count, 0, (count - palette->count) * sizeof(PALETTEENTRY));
+    palette->entries = entries;
+    palette->count = (int) count;
+    return TRUE;
+}
+
+// The entry nearest in RGB space; the lowest index on a tie.
+UINT gdi_get_nearest_palette_index(void* handle, COLORREF color) {
+    GdiPalette* palette = our_palette(handle);
+    if (palette == 0)
+        return CLR_INVALID;
+    int r = GetRValue(color);
+    int g = GetGValue(color);
+    int b = GetBValue(color);
+    long best = 0x7FFFFFFF;
+    UINT best_index = 0;
+    for (int i = 0; i < palette->count; ++i) {
+        long dr = palette->entries[i].peRed - r;
+        long dg = palette->entries[i].peGreen - g;
+        long db = palette->entries[i].peBlue - b;
+        long distance = dr * dr + dg * dg + db * db;
+        if (distance < best) {
+            best = distance;
+            best_index = (UINT) i;
+            if (distance == 0)
+                break;
+        }
+    }
+    return best_index;
+}
+
+// GetObjectA for a palette: its entry count, as a WORD.
+int gdi_get_object(void* handle, int size, void* out) {
+    GdiPalette* palette = our_palette(handle);
+    if (palette == 0 || out == 0 || size < (int) sizeof(WORD))
+        return 0;
+    *(WORD*) out = (WORD) palette->count;
+    return sizeof(WORD);
+}
+
+HPALETTE gdi_select_palette(HDC, void*, BOOL) {
+    return 0;
+}
+
+UINT gdi_realize_palette(HDC) {
+    return 0;
+}
+
+// A true-colour display has no system palette: GetSystemPaletteEntries
+// fails there, and the game then uses its own table of the static colours.
+UINT gdi_get_system_palette_entries(HDC, UINT, UINT, PALETTEENTRY*) {
+    return 0;
 }
 
 // ---------------------------------------------------------------------------

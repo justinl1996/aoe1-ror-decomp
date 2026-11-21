@@ -125,7 +125,7 @@ long Time_Line_Panel::setup(
     this->set_background(back_pic_in);
     this->set_special_events(special_event_pic_in);
 
-    unsigned char pal_idx = (unsigned char) GetNearestPaletteIndex(this->render_area->DrawSystem->Pal, 0);
+    unsigned char pal_idx = (unsigned char) gdi_get_nearest_palette_index(this->render_area->DrawSystem->Pal, 0);
     this->set_back_color(1, pal_idx);
 
     return 1;
@@ -633,7 +633,7 @@ void Time_Line_Panel::draw_axis() {
     char temp_str[100];
     uchar white_color;
 
-    white_color = (uchar) GetNearestPaletteIndex(this->render_area->DrawSystem->Pal, 0xFFFFFF);
+    white_color = (uchar) gdi_get_nearest_palette_index(this->render_area->DrawSystem->Pal, 0xFFFFFF);
 
     if (this->render_area->Lock(s_tpnl_tml_draw_axis, 1) != 0) {
         this->render_area->FillRect(
@@ -692,8 +692,8 @@ void Time_Line_Panel::draw_special_events() {
     HGDIOBJ old_font;
 
     if (this->timeline_flag != 0) {
-        GetNearestPaletteIndex(this->render_area->DrawSystem->Pal, 0xFFFFFF);
-        GetNearestPaletteIndex(this->render_area->DrawSystem->Pal, 0);
+        gdi_get_nearest_palette_index(this->render_area->DrawSystem->Pal, 0xFFFFFF);
+        gdi_get_nearest_palette_index(this->render_area->DrawSystem->Pal, 0);
 
         if (this->render_area->Lock("tpnl_tml::draw_special_events", 1) != 0) {
             for (event = this->time_slice_events; event != 0; event = event->next) {
@@ -1075,7 +1075,7 @@ void Time_Line_Panel::draw_timeline() {
                                     }
 
                                     unsigned char player_color =
-                                        (unsigned char) (GetNearestPaletteIndex(this->render_area->DrawSystem->Pal, color));
+                                        (unsigned char) (gdi_get_nearest_palette_index(this->render_area->DrawSystem->Pal, color));
 
                                     player = (TRIBE_Player*) rge_base_game->world->players[player_index + 1];
                                     unsigned char population = player->history->get_history_entry(0, time_slice);
@@ -1160,7 +1160,7 @@ void Time_Line_Panel::draw_icon(Special_Events* event_ptr, short icon_number, uc
     long total;
     long hi_top;
     long q_top;
-    unsigned int(__stdcall * getNearest)(void*, unsigned long) = GetNearestPaletteIndex;
+    unsigned int (*getNearest)(void*, unsigned long) = gdi_get_nearest_palette_index;
     getNearest(this->render_area->DrawSystem->Pal, 0xffffff);
     temp_str[0] = (char) getNearest(this->render_area->DrawSystem->Pal, 0);
 

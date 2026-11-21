@@ -11,6 +11,23 @@
 #include <string.h>
 
 // ---------------------------------------------------------------------------
+// timeGetTime: milliseconds from SDL's clock. timeGetTime counted from
+// system start; this starts from the wall clock, so values (and the random
+// seed the game takes from one) still differ between runs.
+
+#include <time.h>
+
+DWORD surface_time_get_time(void) {
+    static Uint32 offset = 0;
+    static int started = 0;
+    if (started == 0) {
+        offset = (Uint32) time(0) * 1000u;
+        started = 1;
+    }
+    return (DWORD) (SDL_GetTicks() + offset);
+}
+
+// ---------------------------------------------------------------------------
 // Multimedia timer: timeSetEvent on SDL's timer thread. As with WINMM, the
 // callback runs on another thread.
 

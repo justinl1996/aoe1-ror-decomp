@@ -81,7 +81,7 @@ void RGE_Panel_Time::draw() {
                         unsigned char map_color = rge_base_game->world->players[pi]->color_table->map_color;
                         HPALETTE palette = (HPALETTE) rge_base_game->draw_system->Pal;
 
-                        GetPaletteEntries(palette, map_color, 1, &paletteColor);
+                        gdi_get_palette_entries(palette, map_color, 1, &paletteColor);
 
                         COLORREF color =
                             (((paletteColor.peBlue & 0xFF) << 8 | (paletteColor.peGreen & 0xFF)) << 8

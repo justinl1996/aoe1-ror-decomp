@@ -489,6 +489,14 @@ static void translate_text(const char* text) {
     }
 }
 
+// While the game has input disabled (loading), mouse messages are dropped,
+// as when the game gave the mouse capture to a hidden window.
+static int mouse_input_enabled = 1;
+
+void surface_set_mouse_input(int enabled) {
+    mouse_input_enabled = enabled != 0;
+}
+
 static void activate(int active) {
     if (active == window_app_active)
         return;
@@ -513,6 +521,8 @@ static void translate_event(const SDL_Event* event) {
             translate_text(event->text.text);
             break;
         case SDL_MOUSEMOTION:
+            if (mouse_input_enabled == 0)
+                break;
             input_post(WM_MOUSEMOVE, mouse_key_flags(), mouse_point(event->motion.x, event->motion.y));
             break;
         case SDL_MOUSEBUTTONDOWN:
@@ -528,6 +538,8 @@ static void translate_event(const SDL_Event* event) {
                 msg = twice ? WM_MBUTTONDBLCLK : (down ? WM_MBUTTONDOWN : WM_MBUTTONUP);
             else
                 break;
+            if (mouse_input_enabled == 0)
+                break;
             input_post(msg, mouse_key_flags(), mouse_point(event->button.x, event->button.y));
             break;
         }
@@ -537,11 +549,7 @@ static void translate_event(const SDL_Event* event) {
                     activate(1);
                     break;
                 case SDL_WINDOWEVENT_FOCUS_LOST:
-                    // On Windows a focused EDIT box takes the keyboard focus
-                    // from SDL's window, but the game is still the active
-                    // application.
-                    if (GetForegroundWindow() != sdl_hwnd)
-                        activate(0);
+                    activate(0);
                     break;
                 case SDL_WINDOWEVENT_EXPOSED:
                     window_invalidate_all();
@@ -821,6 +829,117 @@ static LRESULT CALLBACK bridge_wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPARA
     if (msg >= WM_USER)
         return CallWindowProcA((FARPROC) window_game_proc, wnd, msg, wparam, lparam);
     return CallWindowProcA((FARPROC) window_sdl_proc, wnd, msg, wparam, lparam);
+}
+
+// ---------------------------------------------------------------------------
+// The game window as a whole
+
+void surface_show_main_window(void) {
+    if (sdl_window == 0)
+        return;
+    SDL_ShowWindow(sdl_window);
+    SDL_RaiseWindow(sdl_window);
+}
+
+void surface_set_window_title(const char* title) {
+    if (sdl_window != 0)
+        SDL_SetWindowTitle(sdl_window, title != 0 ? title : "");
+}
+
+BOOL surface_get_client_rect(HWND wnd, RECT* rect) {
+    if (wnd == sdl_hwnd && sdl_window != 0 && map_active()) {
+        rect->left = 0;
+        rect->top = 0;
+        rect->right = map_game_width();
+        rect->bottom = map_game_height();
+        return TRUE;
+    }
+    if (wnd == sdl_hwnd && sdl_window != 0) {
+        int width;
+        int height;
+        SDL_GetWindowSize(sdl_window, &width, &height);
+        rect->left = 0;
+        rect->top = 0;
+        rect->right = width;
+        rect->bottom = height;
+        return TRUE;
+    }
+    return GetClientRect(wnd, rect);
+}
+
+void surface_get_display_size(long* width, long* height) {
+    SDL_DisplayMode mode;
+    int display = sdl_window != 0 ? SDL_GetWindowDisplayIndex(sdl_window) : 0;
+    if (SDL_WasInit(SDL_INIT_VIDEO) == 0 || SDL_GetDesktopDisplayMode(display < 0 ? 0 : display, &mode) != 0) {
+        mode.w = 1024;
+        mode.h = 768;
+    }
+    *width = mode.w;
+    *height = mode.h;
+}
+
+// What DefWindowProcA did for the game window's messages: closing destroys
+// the window (the game then quits), and the rest needs nothing. Messages
+// Windows itself sends to SDL's window still need Windows' handling there.
+LRESULT surface_def_window_proc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+#ifdef _WIN32
+    return DefWindowProcA(wnd, msg, wparam, lparam);
+#else
+    if (msg == WM_CLOSE && wnd == sdl_hwnd && window_game_proc != 0) {
+        window_game_proc(wnd, WM_DESTROY, 0, 0);
+        return 0;
+    }
+    if (msg == WM_ERASEBKGND)
+        return 1;
+    return 0;
+#endif
+}
+
+void surface_message_box(const char* text, const char* title, UINT type) {
+    Uint32 flags = SDL_MESSAGEBOX_INFORMATION;
+    if ((type & MB_ICONMASK) == MB_ICONHAND)
+        flags = SDL_MESSAGEBOX_ERROR;
+    else if ((type & MB_ICONMASK) == MB_ICONEXCLAMATION)
+        flags = SDL_MESSAGEBOX_WARNING;
+    SDL_ShowSimpleMessageBox(flags, title != 0 ? title : "", text != 0 ? text : "", sdl_window);
+}
+
+void surface_message_beep(void) {
+#ifdef _WIN32
+    MessageBeep((UINT) -1);
+#endif
+}
+
+// One copy of the game at a time. A second copy brings the first to the
+// front and stops.
+static HANDLE instance_mutex = 0;
+
+int surface_claim_single_instance(const char* name, const char* title) {
+#ifdef _WIN32
+    instance_mutex = CreateMutexA(0, TRUE, name);
+    if (instance_mutex != 0 && GetLastError() == ERROR_ALREADY_EXISTS) {
+        CloseHandle(instance_mutex);
+        instance_mutex = 0;
+        HWND other = FindWindowA(0, title);
+        if (other != 0) {
+            if (IsIconic(other))
+                ShowWindow(other, SW_RESTORE);
+            SetForegroundWindow(other);
+        }
+        return 0;
+    }
+#endif
+    return 1;
+}
+
+void surface_release_single_instance(void) {
+#ifdef _WIN32
+    if (instance_mutex != 0) {
+        ReleaseMutex(instance_mutex);
+        CloseHandle(instance_mutex);
+        instance_mutex = 0;
+    }
+#endif
 }
 
 // ---------------------------------------------------------------------------

@@ -12,9 +12,6 @@
 
 static char scr_cred_draw_context_name[] = "scr_cred::draw";
 
-extern "C" __declspec(dllimport) unsigned int __stdcall GetPaletteEntries(
-    void* hpal, unsigned int start, unsigned int count, tagPALETTEENTRY* entries
-);
 
 void RGE_translate_palette(tagPALETTEENTRY*, tagPALETTEENTRY*, tagPALETTEENTRY, long, int, int);
 void RGE_fade_palette_start(
@@ -135,7 +132,7 @@ long TRIBE_Credits_Screen::handle_idle() {
             if (this->palette == 0) {
                 this->render_area->GetPalette(this->color_table);
             } else {
-                GetPaletteEntries(this->palette, 0, 256, this->color_table);
+                gdi_get_palette_entries(this->palette, 0, 256, this->color_table);
             }
 
             RGE_fade_palette_start(this->render_area, this->color, 0.5f, 1, (tagPALETTEENTRY*) 0, 0xFF, -1);

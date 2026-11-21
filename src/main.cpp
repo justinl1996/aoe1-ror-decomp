@@ -5,6 +5,7 @@
 #include "../include/tribegam.h"
 #include "../include/game_globals.h"
 #include "../include/resource_ids.h"
+#include "../include/surface.h"
 
 extern "C" int __stdcall WinMain(HINSTANCE prog_inst, HINSTANCE prev_inst, char* cmd_line, int show_wnd_flag) {
     int retval;
@@ -89,7 +90,7 @@ extern "C" int __stdcall WinMain(HINSTANCE prog_inst, HINSTANCE prev_inst, char*
             game->get_string(STRING_ID_ERROR_TITLE, title, 256);
             game->get_string2(RGE_STRING_TYPE_ERROR, error_code, 0, msg, 256);
             delete game;
-            MessageBoxA(NULL, msg, title, MB_ICONHAND);
+            surface_message_box(msg, title, MB_ICONHAND);
         }
     }
     return retval;

@@ -2,6 +2,7 @@
 #include "../include/Res_file.h"
 #include "../include/debuglog.h"
 #include "../include/game_globals.h"
+#include "../include/surface.h"
 #include <ctype.h>
 #include <fcntl.h>
 #include <io.h>
@@ -35,20 +36,20 @@ void __cdecl RESFILE_open_new_resource_file(char* resFileName, char* password, c
         fHandle = (int) CreateFileA(resFile, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
         if (fHandle == -1) {
             sprintf(error_msg, "Error: Open_new_ResFile, mapped file %s not Found.", resFileName);
-            MessageBoxA(0, error_msg, "RESOURCE ERROR", MB_ICONEXCLAMATION);
+            surface_message_box(error_msg, "RESOURCE ERROR", MB_ICONEXCLAMATION);
             return;
         }
 
         HANDLE mapping = CreateFileMappingA((HANDLE) fHandle, 0, PAGE_READONLY, 0, 0, 0);
         CloseHandle((HANDLE) fHandle);
         if (mapping == 0) {
-            MessageBoxA(0, "Error: Open_Mapped_ResFile, Could not map file(1).", "RESOURCE ERROR", MB_ICONEXCLAMATION);
+            surface_message_box("Error: Open_Mapped_ResFile, Could not map file(1).", "RESOURCE ERROR", MB_ICONEXCLAMATION);
             return;
         }
 
         mapped_file_data = (unsigned char*) MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0);
         if (mapped_file_data == 0) {
-            MessageBoxA(0, "Error: Open_Mapped_ResFile, Could not map file to addr.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
+            surface_message_box("Error: Open_Mapped_ResFile, Could not map file to addr.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
             return;
         }
         CloseHandle(mapping);
@@ -56,14 +57,14 @@ void __cdecl RESFILE_open_new_resource_file(char* resFileName, char* password, c
         fHandle = _open(resFile, _O_BINARY);
         if (fHandle == -1) {
             sprintf(error_msg, "Error: Open_new_ResFile, file %s not Found.", resFileName);
-            MessageBoxA(0, error_msg, "RESOURCE ERROR", MB_ICONEXCLAMATION);
+            surface_message_box(error_msg, "RESOURCE ERROR", MB_ICONEXCLAMATION);
             return;
         }
     }
 
     ResFileHdr* newFile = (ResFileHdr*) malloc(sizeof(ResFileHdr));
     if (newFile == 0) {
-        MessageBoxA(0, "Error: Out of memory in Open_resfile.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
+        surface_message_box("Error: Out of memory in Open_resfile.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
         return;
     }
 
@@ -81,14 +82,14 @@ void __cdecl RESFILE_open_new_resource_file(char* resFileName, char* password, c
         if (read(fHandle, &rHeader, 64) != 0x40) {
             // clang-format off
             __asm int 3
-            MessageBoxA(0, "Error: Reading resfile header.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
+            surface_message_box("Error: Reading resfile header.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
             // clang-format on
             return;
         }
         newFile->header = (resfile_header*) malloc(rHeader.directory_size);
         lseek(fHandle, 0, 0);
         if (read(fHandle, newFile->header, rHeader.directory_size) != rHeader.directory_size) {
-            MessageBoxA(0, "Error: Reading resfile header data.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
+            surface_message_box("Error: Reading resfile header data.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
             return;
         }
     }
@@ -104,12 +105,12 @@ void __cdecl RESFILE_open_new_resource_file(char* resFileName, char* password, c
     }
 
     if (strcmp(newFile->header->password, password) != 0) {
-        MessageBoxA(0, "Error: Open_ResFile, Corruption detected in resfile.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
+        surface_message_box("Error: Open_ResFile, Corruption detected in resfile.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
         return;
     }
 
     if (strncmp(newFile->header->version, "1.00", 4) != 0) {
-        MessageBoxA(0, "Error: Open_ResFile, Resfile not correct.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
+        surface_message_box("Error: Open_ResFile, Resfile not correct.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
     }
 }
 
@@ -200,7 +201,7 @@ unsigned char* __cdecl RESFILE_load(unsigned long rType, unsigned long rId, int&
     if (RESFILE_locate_resource(rType, rId, infile, offset, mapped_file, datalength) == 0) {
         if (resource_missing_flag != 0) {
             sprintf(error_string, "ERROR: res_read_bin, resource type %4.4c , id %d, not found", rType, rId);
-            MessageBoxA(0, error_string, "RESOURCE ERROR", MB_ICONEXCLAMATION);
+            surface_message_box(error_string, "RESOURCE ERROR", MB_ICONEXCLAMATION);
         }
         return 0;
     }
@@ -215,13 +216,13 @@ unsigned char* __cdecl RESFILE_load(unsigned long rType, unsigned long rId, int&
     unsigned char* data = (unsigned char*) malloc(datalength);
     rDataSize = datalength;
     if (data == 0) {
-        MessageBoxA(0, "Error: Out of memory in res_read_bin.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
+        surface_message_box("Error: Out of memory in res_read_bin.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
         return 0;
     }
 
     lseek(infile, offset, 0);
     if (read(infile, data, datalength) != datalength) {
-        MessageBoxA(0, "Error: unable to read resource", "RESOURCE ERROR", MB_ICONEXCLAMATION);
+        surface_message_box("Error: unable to read resource", "RESOURCE ERROR", MB_ICONEXCLAMATION);
         return 0;
     }
 

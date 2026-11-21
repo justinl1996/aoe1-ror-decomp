@@ -146,7 +146,7 @@ static void edit_delete_selection(TEditPanel* panel) {
 static int edit_insert(TEditPanel* panel, const char* chars, int length) {
     int current = (int) strlen(panel->text) - (edit_sel_end(panel) - edit_sel_start(panel));
     if (current + length > edit_max_len(panel)) {
-        MessageBeep((UINT) -1);
+        surface_message_beep();
         return 0;
     }
     edit_delete_selection(panel);
@@ -662,7 +662,7 @@ int TEditPanel::verify_char(int key) {
     this->update_text();
     if (this->sel_len == 0) {
         if (this->text_len >= this->fixed_len - 1) {
-            MessageBeep((UINT) -1);
+            surface_message_beep();
             return 0;
         }
     }
@@ -691,7 +691,7 @@ int TEditPanel::verify_char(int key) {
                 goto invalid;
             if (this->format == 1)
                 goto valid;
-            MessageBeep((UINT) -1);
+            surface_message_beep();
             return 0;
         case 4:
         case 5:
@@ -716,14 +716,14 @@ int TEditPanel::verify_char(int key) {
     }
     if (validation_result == 0)
         goto valid;
-    MessageBeep((UINT) -1);
+    surface_message_beep();
     return 0;
 valid_chars:
     if (key != '/' && key != '"' && key != '*' && key != '?' && key != '>' && key != '<' && key != '|')
         goto valid;
     goto invalid;
 invalid:
-    MessageBeep((UINT) -1);
+    surface_message_beep();
     return 0;
 valid:
     return 1;
@@ -810,7 +810,7 @@ void TEditPanel::draw() {
 
     if (this->brush != 0 && this->active != 0 && this->have_focus != 0) {
         unsigned char temp_color =
-            (unsigned char) GetNearestPaletteIndex((HPALETTE) this->render_area->DrawSystem->Pal, this->back_color);
+            (unsigned char) gdi_get_nearest_palette_index((HPALETTE) this->render_area->DrawSystem->Pal, this->back_color);
         this->render_area->Clear(&this->clip_rect, temp_color);
     } else if (this->parent_panel != 0) {
         if (this->bevel_type >= 2 && this->bevel_type <= 7) {

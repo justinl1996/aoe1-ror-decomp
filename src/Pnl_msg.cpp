@@ -227,9 +227,9 @@ void TMessagePanel::draw(void) {
     old_font = gdi_select_object(this->render_area->DrawDc, this->font);
 
     if (this->index_color != 0) {
-        GetPaletteEntries(rge_base_game->draw_system->Pal, this->font_color, 1, &paletteColor);
+        gdi_get_palette_entries(rge_base_game->draw_system->Pal, this->font_color, 1, &paletteColor);
         font_rgb = ((unsigned long) paletteColor.peBlue << 16) | ((unsigned long) paletteColor.peGreen << 8) | paletteColor.peRed;
-        GetPaletteEntries(rge_base_game->draw_system->Pal, this->back_color, 1, &paletteColor);
+        gdi_get_palette_entries(rge_base_game->draw_system->Pal, this->back_color, 1, &paletteColor);
         back_rgb = ((unsigned long) paletteColor.peBlue << 16) | ((unsigned long) paletteColor.peGreen << 8) | paletteColor.peRed;
     } else {
         font_rgb = this->font_color1;
@@ -361,9 +361,9 @@ int TMessagePanel::render_to_image_buffer() {
     old_font = gdi_select_object(this->ImageBuffer->DrawDc, this->font);
 
     if (this->index_color != 0) {
-        GetPaletteEntries(rge_base_game->draw_system->Pal, this->font_color, 1, &paletteColor);
+        gdi_get_palette_entries(rge_base_game->draw_system->Pal, this->font_color, 1, &paletteColor);
         font_rgb = ((unsigned long) paletteColor.peBlue << 16) | ((unsigned long) paletteColor.peGreen << 8) | paletteColor.peRed;
-        GetPaletteEntries(rge_base_game->draw_system->Pal, this->back_color, 1, &paletteColor);
+        gdi_get_palette_entries(rge_base_game->draw_system->Pal, this->back_color, 1, &paletteColor);
         back_rgb = ((unsigned long) paletteColor.peBlue << 16) | ((unsigned long) paletteColor.peGreen << 8) | paletteColor.peRed;
     } else {
         font_rgb = this->font_color1;

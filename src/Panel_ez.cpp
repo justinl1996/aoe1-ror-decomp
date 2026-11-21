@@ -610,7 +610,7 @@ int TEasy_Panel::set_palette(char* file_name, long resource_file_id) {
     }
 
     tagPALETTEENTRY palette_entries[256];
-    if (GetPaletteEntries(p, 0, 256, palette_entries) != 0) {
+    if (gdi_get_palette_entries(p, 0, 256, palette_entries) != 0) {
         this->shadow_color_table = new RGE_Color_Table(this->render_area, this->shadow_amount, 0, palette_entries);
     }
     return 1;
@@ -709,7 +709,7 @@ void TEasy_Panel::set_shadow_amount(long val) {
     }
 
     if (this->palette != 0 && this->shadow_amount > 0) {
-        if (GetPaletteEntries(this->palette, 0, 256, palette_entries)) {
+        if (gdi_get_palette_entries(this->palette, 0, 256, palette_entries)) {
             this->shadow_color_table = new RGE_Color_Table(this->render_area, this->shadow_amount, 0, palette_entries);
         }
     }
@@ -1621,18 +1621,8 @@ long TEasy_Panel::action(TPanel* fromPanel, long actionIn, unsigned long a1, uns
     return TPanel::action(fromPanel, actionIn, a1, a2);
 }
 
+// This set the system's window and window-text colours to the panel's, for
+// the Windows edit boxes. The game draws its edit boxes now, so the system
+// colours are left alone.
 void TEasy_Panel::set_system_colors() {
-    unsigned long cols;
-    int elems;
-    PALETTEENTRY pe;
-
-    GetPaletteEntries(this->palette, this->color, 1, &pe);
-    cols = (pe.peBlue << 16) | (pe.peGreen << 8) | pe.peRed;
-    elems = 5;
-    SetSysColors(1, &elems, &cols);
-
-    GetPaletteEntries(this->palette, this->text_color1, 1, &pe);
-    cols = (pe.peBlue << 16) | (pe.peGreen << 8) | pe.peRed;
-    elems = 8;
-    SetSysColors(1, &elems, &cols);
 }

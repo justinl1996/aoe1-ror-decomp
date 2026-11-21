@@ -1,5 +1,8 @@
 #include "../include/com_hand.h"
 #include "../include/surface.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
 #include "../include/program_mode.h"
 #include "../include/tribegam.h"
 #include "../include/resource_ids.h"
@@ -237,10 +240,7 @@ TRIBE_Game::~TRIBE_Game() {
     this->inHandleIdle = 0;
     this->prog_mode = ProgModeNone;
 
-    if (this->input_disabled_window != 0) {
-        DestroyWindow((HWND) this->input_disabled_window);
-        this->input_disabled_window = 0;
-    }
+    this->input_disabled_window = 0;
 
     this->close_game_screens(1);
 
@@ -321,9 +321,7 @@ int TRIBE_Game::setup() {
     char cmd_line[256];
     char str[1024];
     ICINFO ici;
-    WIN32_FIND_DATAA file_data;
-    SYSTEMTIME file_time;
-    HANDLE file_handle;
+    struct _stat file_data;
     char* option;
     int result;
 
@@ -380,11 +378,11 @@ int TRIBE_Game::setup() {
                                     { 0x57, 0x7B, 0xB4, 0x00 }, { 0x3F, 0x5F, 0xA0, 0x00 }, { 0x27, 0x3F, 0x91, 0x00 },
                                     { 0x17, 0x27, 0x7B, 0x00 } };
 
-    SetPaletteEntries(this->prog_palette, 248, 7, pal_entries);
+    gdi_set_palette_entries(this->prog_palette, 248, 7, pal_entries);
 
-    this->input_disabled_window = CreateWindowExA(
-        0, "STATIC", "InputDisabledWindow", WS_CHILD, 0, 0, 1, 1, this->prog_window, 0, (HINSTANCE) this->prog_info->instance, 0
-    );
+    // There is no hidden window for disabling input any more:
+    // RGE_Base_Game::disable_input turns the SDL layer's mouse input off.
+    this->input_disabled_window = 0;
 
     // These packed values are the video type "vidc" and the lowercase handler "iv41".
     video_codec_available = ICInfo(MAKEFOURCC('v', 'i', 'd', 'c'), MAKEFOURCC('i', 'v', '4', '1'), &ici);
@@ -459,28 +457,31 @@ int TRIBE_Game::setup() {
     run_log("------------------------------", 0);
     run_log("", 1);
 
-    file_handle = FindFirstFileA(_pgmptr, &file_data);
-    if (file_handle != INVALID_HANDLE_VALUE) {
-        ZeroMemory(&file_time, sizeof(file_time));
-        FileTimeToSystemTime(&file_data.ftLastWriteTime, &file_time);
-        sprintf(
-            str, "program=%s, size=%d, date=%d/%d/%d, time=%d:%d:%d", _pgmptr, file_data.nFileSizeLow, file_time.wMonth,
-            file_time.wMonth, file_time.wYear, file_time.wHour, file_time.wMinute, file_time.wSecond
-        );
-        run_log(str, 0);
-        FindClose(file_handle);
+    // The program's and the data file's size and date, from the C
+    // runtime's _stat (FindFirstFileA before; the date is UTC, as it was).
+    // The month is logged twice, as it always was.
+    if (_stat(_pgmptr, &file_data) == 0) {
+        struct tm* file_time = gmtime(&file_data.st_mtime);
+        if (file_time != 0) {
+            sprintf(
+                str, "program=%s, size=%d, date=%d/%d/%d, time=%d:%d:%d", _pgmptr, (int) file_data.st_size,
+                file_time->tm_mon + 1, file_time->tm_mon + 1, file_time->tm_year + 1900, file_time->tm_hour,
+                file_time->tm_min, file_time->tm_sec
+            );
+            run_log(str, 0);
+        }
     }
 
-    file_handle = FindFirstFileA(this->prog_info->game_data_file, &file_data);
-    if (file_handle != INVALID_HANDLE_VALUE) {
-        ZeroMemory(&file_time, sizeof(file_time));
-        FileTimeToSystemTime(&file_data.ftLastWriteTime, &file_time);
-        sprintf(
-            str, "data=%s, size=%d, date=%d/%d/%d, time=%d:%d:%d", this->prog_info->game_data_file, file_data.nFileSizeLow,
-            file_time.wMonth, file_time.wMonth, file_time.wYear, file_time.wHour, file_time.wMinute, file_time.wSecond
-        );
-        run_log(str, 0);
-        FindClose(file_handle);
+    if (_stat(this->prog_info->game_data_file, &file_data) == 0) {
+        struct tm* file_time = gmtime(&file_data.st_mtime);
+        if (file_time != 0) {
+            sprintf(
+                str, "data=%s, size=%d, date=%d/%d/%d, time=%d:%d:%d", this->prog_info->game_data_file,
+                (int) file_data.st_size, file_time->tm_mon + 1, file_time->tm_mon + 1, file_time->tm_year + 1900,
+                file_time->tm_hour, file_time->tm_min, file_time->tm_sec
+            );
+            run_log(str, 0);
+        }
     }
 
     sprintf(str, "options=%s", this->prog_info->cmd_line);
@@ -625,7 +626,7 @@ int TRIBE_Game::setup_palette() {
                                         { 0x57, 0x7B, 0xB4, 0x00 }, { 0x3F, 0x5F, 0xA0, 0x00 }, { 0x27, 0x3F, 0x91, 0x00 },
                                         { 0x17, 0x27, 0x7B, 0x00 } };
 
-        SetPaletteEntries(prog_palette, 248, 7, pal_entries);
+        gdi_set_palette_entries(prog_palette, 248, 7, pal_entries);
     }
     return 1;
 }
@@ -1050,16 +1051,12 @@ RGE_Scenario* TRIBE_Game::new_scenario_info(int infile) {
     return new T_Scenario(infile, 0);
 }
 
-extern "C" __declspec(dllimport) int __stdcall MessageBoxA(
-    void* hWnd, const char* lpText, const char* lpCaption, unsigned int uType
-);
-
 void TRIBE_Game::show_error_message(int error_code_in) {
     char title[256];
     char msg[256];
     this->get_string(STRING_ID_ERROR_DIALOG_TITLE, title, 256);
     this->get_string2(RGE_STRING_TYPE_ERROR, error_code_in, 0, msg, 256);
-    MessageBoxA(this->prog_window, msg, title, MB_ICONHAND);
+    surface_message_box(msg, title, MB_ICONHAND);
 }
 
 static char status_screen[] = "Status Screen";
@@ -3303,7 +3300,6 @@ int TRIBE_Game::processCheatCode(int playerID, char* text) {
 #include <string.h>
 
 extern void __cdecl run_log(char* str, int show_time);
-extern "C" __declspec(dllimport) int __stdcall IsIconic(void* window);
 
 void TRIBE_Game::let_game_begin() {
     int i;

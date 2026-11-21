@@ -107,11 +107,10 @@ TDrawSystem::~TDrawSystem() {
 void TDrawSystem::CheckAvailModes(int full_screen) {
     if (full_screen == 0) {
         this->ModeAvail640 = 1;
-        void* dc = CreateICA("DISPLAY", 0, 0, 0);
-        if (dc != 0) {
-            int width = GetDeviceCaps(dc, HORZRES);
-            GetDeviceCaps(dc, VERTRES);
-            DeleteDC(dc);
+        long width;
+        long height;
+        surface_get_display_size(&width, &height);
+        {
             if (width >= 800)
                 this->ModeAvail800 = 1;
             if (width >= 1024)
@@ -309,7 +308,7 @@ int TDrawSystem::Init(
     }
 
     if (this->Pal != 0) {
-        GetPaletteEntries(this->Pal, 0, 256, color_table);
+        gdi_get_palette_entries(this->Pal, 0, 256, color_table);
     } else {
         for (int index = 0; index < 256; ++index) {
             color_table[index].peRed = 0;
@@ -524,7 +523,7 @@ int TDrawSystem::CreateSurfaces() {
             if (area == 0)
                 return 0;
             if (this->ScreenMode == 1) {
-                GetClientRect(this->Wnd, &wnd_rect);
+                surface_get_client_rect((HWND) this->Wnd, &wnd_rect);
                 if (!this->PrimaryArea->Init(this, wnd_rect.right, wnd_rect.bottom, 0, 1))
                     return 0;
             } else {
@@ -539,7 +538,7 @@ int TDrawSystem::CreateSurfaces() {
         if (area2 == 0)
             return 0;
         if (this->ScreenMode == 1) {
-            GetClientRect(this->Wnd, &wnd_rect);
+            surface_get_client_rect((HWND) this->Wnd, &wnd_rect);
             if (!this->DrawArea->Init(this, wnd_rect.right, wnd_rect.bottom, 0, 0))
                 return 0;
         } else {
@@ -556,7 +555,7 @@ void TDrawSystem::HandleSize(void* hwnd, unsigned int msg, unsigned int wParam, 
 
     if (this->DrawType == 1 || this->ScreenMode == 1) {
         RECT rect;
-        GetClientRect(this->Wnd, &rect);
+        surface_get_client_rect((HWND) this->Wnd, &rect);
         this->ScreenWidth = rect.right;
         this->ScreenHeight = rect.bottom;
     }
@@ -576,11 +575,9 @@ void TDrawSystem::HandlePaletteChanged(void* hwnd, unsigned int msg, unsigned in
 
 int TDrawSystem::HandleQueryNewPalette(void* hwnd, unsigned int msg, unsigned int wParam, long lParam) {
     if (this->Pal != 0 && (this->DrawType == 1 || this->ScreenMode == 1)) {
-        void* hdc = GetDC(this->Wnd);
-        if (this->Pal != 0)
-            SelectPalette(hdc, this->Pal, 0);
-        unsigned char result = (unsigned char) RealizePalette(hdc);
-        ReleaseDC(this->Wnd, hdc);
+        // Realizing the palette into the window mattered only on an 8-bit
+        // desktop (gdi.cpp).
+        unsigned char result = (unsigned char) gdi_realize_palette(0);
         if (result != 0) {
             surface_invalidate_rect(this->Wnd, NULL, FALSE);
             return 1;
@@ -598,15 +595,15 @@ void TDrawSystem::Paint(tagRECT* rect) {
         return;
 
     if (this->ScreenMode == 1) {
-        GetClientRect(this->Wnd, &src);
+        surface_get_client_rect((HWND) this->Wnd, &src);
 
         dest.left = src.left;
         dest.top = src.top;
         dest.right = src.right;
         dest.bottom = src.bottom;
 
-        ClientToScreen(this->Wnd, (POINT*) &dest.left);
-        ClientToScreen(this->Wnd, (POINT*) &dest.right);
+        surface_client_to_screen((HWND) this->Wnd, (POINT*) &dest.left);
+        surface_client_to_screen((HWND) this->Wnd, (POINT*) &dest.right);
     } else {
         src.left = 0;
         src.top = 0;
@@ -888,7 +885,7 @@ void TDrawSystem::SetPalette(void* pal_in) {
     this->Pal = pal_in;
 
     if (pal_in) {
-        GetPaletteEntries(pal_in, 0, 256, color_table);
+        gdi_get_palette_entries(pal_in, 0, 256, color_table);
     } else {
         for (int index = 0; index < 256; ++index) {
             color_table[index].peRed = 0;

@@ -55,6 +55,27 @@ HWND surface_get_capture(void);
 // length copied into buffer (always 0-terminated).
 int surface_get_clipboard_text(char* buffer, int size);
 void surface_set_clipboard_text(const char* text, int length);
+// The game window as a whole: show and raise it, its title, its client
+// rectangle (game pixels), and DefWindowProcA for its messages.
+void surface_show_main_window(void);
+void surface_set_window_title(const char* title);
+BOOL surface_get_client_rect(HWND wnd, RECT* rect);
+LRESULT surface_def_window_proc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam);
+// The desktop's size in pixels.
+void surface_get_display_size(long* width, long* height);
+// While mouse input is off, the game gets no mouse messages (it used to give
+// the mouse capture to a hidden window while loading).
+void surface_set_mouse_input(int enabled);
+// A message box (MessageBoxA's MB_ICON* flags choose its look), and the
+// default beep (nothing where there is none).
+void surface_message_box(const char* text, const char* title, UINT type);
+void surface_message_beep(void);
+// One copy of the game at a time: 0 if another is running (it is brought
+// to the front).
+int surface_claim_single_instance(const char* name, const char* title);
+void surface_release_single_instance(void);
+// timeGetTime.
+DWORD surface_time_get_time(void);
 // Key state as of the key messages the game has received.
 SHORT surface_get_key_state(int vk);
 SHORT surface_get_async_key_state(int vk);
@@ -183,6 +204,20 @@ int gdi_draw_text_ex(HDC dc, LPSTR text, int length, RECT* rect, UINT format, DR
 BOOL gdi_move_to_ex(HDC dc, int x, int y, POINT* previous);
 BOOL gdi_line_to(HDC dc, int x, int y);
 int gdi_fill_rect(HDC dc, const RECT* rect, HBRUSH brush);
+// Palettes: colour tables with GDI's calls. A palette handle may be passed
+// as void* (the draw system keeps its palette as one). Selecting and
+// realizing a palette does nothing, and there is no system palette (as on
+// a true-colour display).
+HPALETTE gdi_create_palette(const LOGPALETTE* logpalette);
+HPALETTE gdi_create_halftone_palette(HDC dc);
+UINT gdi_get_palette_entries(void* palette, UINT start, UINT count, PALETTEENTRY* entries);
+UINT gdi_set_palette_entries(void* palette, UINT start, UINT count, const PALETTEENTRY* entries);
+BOOL gdi_resize_palette(void* palette, UINT count);
+UINT gdi_get_nearest_palette_index(void* palette, COLORREF color);
+int gdi_get_object(void* object, int size, void* out);
+HPALETTE gdi_select_palette(HDC dc, void* palette, BOOL background);
+UINT gdi_realize_palette(HDC dc);
+UINT gdi_get_system_palette_entries(HDC dc, UINT start, UINT count, PALETTEENTRY* entries);
 // Surface device contexts, for port/sdl/ddraw_memory.cpp.
 HDC gdi_create_surface_dc(void);
 void gdi_set_surface_dc_target(HDC dc, unsigned char* bits, long pitch, long width, long height,

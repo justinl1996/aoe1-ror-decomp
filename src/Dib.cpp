@@ -1,5 +1,6 @@
 
 #include "../include/dib.h"
+#include "../include/surface.h"
 #include "../include/drawarea.h"
 #include "../include/basegame.h"
 #include "../include/Shape.h"
@@ -681,7 +682,7 @@ void* __cdecl ReadPalette(char* FileName, long ResourceId, int MakeIdentity) {
             }
         }
         if (ResourceId) {
-            hpal = CreatePalette((const tagLOGPALETTE*) lp);
+            hpal = gdi_create_palette((const tagLOGPALETTE*) lp);
             if (MakeIdentity) {
                 if (rge_base_game->draw_system->DrawType == 1 || rge_base_game->draw_system->ScreenMode == 1)
                     CreateIdentityPalette(hpal);
@@ -861,12 +862,12 @@ HPALETTE __cdecl DibCreatePalette(BITMAPINFOHEADER* pdib) {
                     ++rgb;
                 } while (--colors != 0);
             }
-            hpal = CreatePalette(log_palette);
+            hpal = gdi_create_palette(log_palette);
             LocalFree(log_palette);
         }
     } else {
         dc = GetDC(0);
-        hpal = CreateHalftonePalette(dc);
+        hpal = gdi_create_halftone_palette(dc);
         ReleaseDC(0, dc);
     }
     return hpal;
@@ -1047,8 +1048,8 @@ BITMAPINFOHEADER* __cdecl DibFromBitmap(HBITMAP hbm, DWORD biStyle, UINT biBits,
     }
 
     hdc = CreateCompatibleDC(NULL);
-    hpal = (HPALETTE) SelectPalette(hdc, palette, FALSE);
-    RealizePalette(hdc);
+    hpal = (HPALETTE) gdi_select_palette(hdc, palette, FALSE);
+    gdi_realize_palette(hdc);
     SetStretchBltMode(hdc, STRETCH_HALFTONE);
 
     GetDIBits(hdc, hbm, 0, lpbi->biHeight, NULL, (LPBITMAPINFO) lpbi, wUsage);
@@ -1099,7 +1100,7 @@ BITMAPINFOHEADER* __cdecl DibFromBitmap(HBITMAP hbm, DWORD biStyle, UINT biBits,
         lpbiNew = NULL;
     }
 
-    SelectPalette(hdc, hpal, FALSE);
+    gdi_select_palette(hdc, hpal, FALSE);
     DeleteDC(hdc);
     return lpbiNew;
 }
@@ -1142,7 +1143,7 @@ BOOL __cdecl DibSetUsage(UsagePDIB pdib, HPALETTE hpal, UINT wUsage) {
             default:
             case DIB_RGB_COLORS:
                 colors = (colors < 256) ? colors : 256;
-                GetPaletteEntries(hpal, 0, colors, ape);
+                gdi_get_palette_entries(hpal, 0, colors, ape);
                 for (n = 0; n < colors; n++) {
                     pRgb[n].rgbRed = ape[n].peRed;
                     pRgb[n].rgbGreen = ape[n].peGreen;
@@ -1352,7 +1353,7 @@ void __cdecl DibMapToPalette(BITMAPINFOHEADER* pdib, void* hpal, int TransLogic,
         return;
 
     lpRgb = DibColors(pdib);
-    GetObjectA((HGDIOBJ) hpal, sizeof(nDibColors), &nDibColors);
+    gdi_get_object((HGDIOBJ) hpal, sizeof(nDibColors), &nDibColors);
     nPalColors = DibNumColors(pdib);
     SizeImage = DibSizeImage(pdib);
 
@@ -1386,7 +1387,7 @@ void __cdecl DibMapToPalette(BITMAPINFOHEADER* pdib, void* hpal, int TransLogic,
                 ZeroBlue = lpRgb->rgbBlue;
                 HitEnd = 1;
             }
-            ZeroIndex = (unsigned char) GetNearestPaletteIndex((HPALETTE) hpal, RGB(ZeroRed, ZeroGreen, ZeroBlue));
+            ZeroIndex = (unsigned char) gdi_get_nearest_palette_index((HPALETTE) hpal, RGB(ZeroRed, ZeroGreen, ZeroBlue));
         } while (ZeroIndex == 0);
     }
 
@@ -1396,14 +1397,14 @@ void __cdecl DibMapToPalette(BITMAPINFOHEADER* pdib, void* hpal, int TransLogic,
             if (i == TransIndex) {
                 xlat[i] = 0;
             } else {
-                xlat[i] = (unsigned char) GetNearestPaletteIndex(
+                xlat[i] = (unsigned char) gdi_get_nearest_palette_index(
                     (HPALETTE) hpal, RGB(lpRgb[i].rgbRed, lpRgb[i].rgbGreen, lpRgb[i].rgbBlue)
                 );
                 if (xlat[i] == 0)
                     xlat[i] = ZeroIndex;
             }
         } else {
-            xlat[i] = (unsigned char) GetNearestPaletteIndex(
+            xlat[i] = (unsigned char) gdi_get_nearest_palette_index(
                 (HPALETTE) hpal, RGB(lpRgb[i].rgbRed, lpRgb[i].rgbGreen, lpRgb[i].rgbBlue)
             );
         }
@@ -1458,7 +1459,7 @@ void __cdecl DibMapToPalette(BITMAPINFOHEADER* pdib, void* hpal, int TransLogic,
     }
 
     for (i = 0; i < nDibColors; ++i) {
-        GetPaletteEntries((HPALETTE) hpal, i, 1, &pe);
+        gdi_get_palette_entries((HPALETTE) hpal, i, 1, &pe);
         lpRgb[i].rgbRed = pe.peRed;
         lpRgb[i].rgbGreen = pe.peGreen;
         lpRgb[i].rgbBlue = pe.peBlue;
@@ -1471,7 +1472,6 @@ void __cdecl CreateIdentityPalette(void* hpal) {
         PALETTEENTRY new_pal[256];
         HWND hwnd;
     } palette_locals;
-    HDC hdc;
     struct {
         PALETTEENTRY entries[256];
         PALETTEENTRY api_overrun;
@@ -1479,15 +1479,11 @@ void __cdecl CreateIdentityPalette(void* hpal) {
     int system_palette_failed = 0;
     int source_palette_failed = 0;
 
-    palette_locals.hwnd = GetActiveWindow();
-    if (palette_locals.hwnd != 0)
-        hdc = GetDC(palette_locals.hwnd);
-    else
-        hdc = GetDC(0);
-
-    if (GetSystemPaletteEntries(hdc, 0, 256, palette_locals.new_pal + 1) == 0)
+    // There is no system palette (gdi.cpp), so the static colours come from
+    // System_color_Table below.
+    if (gdi_get_system_palette_entries(0, 0, 256, palette_locals.new_pal + 1) == 0)
         system_palette_failed = 1;
-    if (GetPaletteEntries((HPALETTE) hpal, 0, 256, from_locals.entries + 1) == 0)
+    if (gdi_get_palette_entries((HPALETTE) hpal, 0, 256, from_locals.entries + 1) == 0)
         source_palette_failed = 1;
 
     for (int i = 11; i < 247; ++i) {
@@ -1510,9 +1506,8 @@ void __cdecl CreateIdentityPalette(void* hpal) {
         } while (index >= 0);
     }
 
-    ReleaseDC(palette_locals.hwnd, hdc);
-    ResizePalette((HPALETTE) hpal, 256);
-    SetPaletteEntries((HPALETTE) hpal, 0, 256, palette_locals.new_pal + 1);
+    gdi_resize_palette((HPALETTE) hpal, 256);
+    gdi_set_palette_entries((HPALETTE) hpal, 0, 256, palette_locals.new_pal + 1);
 }
 
 void* __cdecl CopyPalette(void* hpal) {
@@ -1521,7 +1516,7 @@ void* __cdecl CopyPalette(void* hpal) {
     if (!hpal)
         return 0;
 
-    GetObjectA((HGDIOBJ) hpal, 4, &nNumEntries);
+    gdi_get_object((HGDIOBJ) hpal, 4, &nNumEntries);
     if (!nNumEntries)
         return 0;
 
@@ -1532,8 +1527,8 @@ void* __cdecl CopyPalette(void* hpal) {
     pal->palVersion = 0x300;
     pal->palNumEntries = (WORD) nNumEntries;
 
-    GetPaletteEntries((HPALETTE) hpal, 0, nNumEntries, pal->palPalEntry);
-    void* result = CreatePalette(pal);
+    gdi_get_palette_entries((HPALETTE) hpal, 0, nNumEntries, pal->palPalEntry);
+    void* result = gdi_create_palette(pal);
     LocalFree((HLOCAL) pal);
     return result;
 }

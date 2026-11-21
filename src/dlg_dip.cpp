@@ -1,6 +1,7 @@
 // This file owns every normal function in the compiland.
 
 #include "../include/dlg_dip.h"
+#include "../include/surface.h"
 #include "../include/program_mode.h"
 #include "../include/asm_draw.h"
 #include "../include/tcommand.h"
@@ -121,7 +122,7 @@ TribeDiplomacyDialog::TribeDiplomacyDialog(TScreenPanel* parentPanel) : TDialogP
     int row = 0;
     int a = 80;
     while (player_id < world->player_num) {
-        GetPaletteEntries(this->palette, world->players[player_id]->color_table->map_color, 1, &paletteColor);
+        gdi_get_palette_entries(this->palette, world->players[player_id]->color_table->map_color, 1, &paletteColor);
 
         int disable_buttons;
         if (rge_base_game->prog_mode == ProgModeGameOver || player_id == world->curr_player

@@ -1,5 +1,6 @@
 
 #include "../include/Pnl_scr.h"
+#include "../include/surface.h"
 
 extern void __cdecl RGE_fade_palette(TDrawArea*, PALETTEENTRY, float, unsigned char, PALETTEENTRY*, int, int);
 
@@ -53,7 +54,7 @@ void TScreenPanel::set_focus(int have_focus_in) {
             if (!this->palette) {
                 this->render_area->GetPalette(local.color_table);
             } else {
-                GetPaletteEntries(this->palette, 0, 256, local.color_table);
+                gdi_get_palette_entries(this->palette, 0, 256, local.color_table);
             }
 
             RGE_fade_palette(this->render_area, color, 0.13f, 1, 0, -1, -1);

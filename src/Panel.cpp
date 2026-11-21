@@ -307,9 +307,10 @@ int TPanelSystem::setup(void) {
     panel_list->panel = 0;
     panel_list->prev_node = panel_list;
     panel_list->next_node = panel_list;
-    save_back_color = GetSysColor(COLOR_WINDOW);
-    save_text_color = GetSysColor(COLOR_WINDOWTEXT);
-    saved_colors = 1;
+    // The game used to set the system's window colours for its edit boxes,
+    // and restored them on exit. The edit boxes are drawn by the game now,
+    // so the system colours are left alone.
+    saved_colors = 0;
     return 1;
 }
 
@@ -404,17 +405,12 @@ void TPanelSystem::release_palette(void* pal) {
     }
 }
 
+// The game is English only, with no input method editor (IME).
 void TPanelSystem::DisableIME(void) {
-    if (ImeEnabled != 0) {
-        Imc = ImmAssociateContext(AppWnd, 0);
-        ImeEnabled = 0;
-    }
+    ImeEnabled = 0;
 }
 
 void TPanelSystem::EnableIME(void) {
-    if (Imc != 0 && ImeEnabled == 0) {
-        ImmAssociateContext(AppWnd, Imc);
-    }
 }
 
 int TPanelSystem::IsIMEEnabled() {
@@ -479,19 +475,7 @@ int TPanelSystem::restart_sound_system(void) {
 }
 
 void TPanelSystem::restore_system_colors(void) {
-    int elems[2];
-    unsigned long colors[2];
-
-    if (saved_colors != 0) {
-        if (GetSysColor(COLOR_WINDOW) == save_back_color && GetSysColor(COLOR_WINDOWTEXT) == save_text_color) {
-            return;
-        }
-        colors[0] = save_back_color;
-        elems[0] = COLOR_WINDOW;
-        elems[1] = COLOR_WINDOWTEXT;
-        colors[1] = save_text_color;
-        SetSysColors(2, elems, colors);
-    }
+    // Nothing to restore: see TPanelSystem::setup.
 }
 
 void TPanelSystem::set_restore(void) {

@@ -327,12 +327,12 @@ int RGE_Base_Game::setup() {
                                && (GetDXVersion(&DXVersion, &DXPlatform), DXVersion < RGE_REQUIRED_DIRECTX_VERSION)) {
                         this->error_code = RGE_ERROR_DIRECTX_VERSION;
                     } else {
-                        SystemParametersInfoA(SPI_GETSCREENSAVEACTIVE, 0, &this->screen_saver_enabled, 0);
-                        if (this->screen_saver_enabled != 0)
-                            SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE, 0, 0, SPIF_SENDCHANGE);
-                        SystemParametersInfoA(SPI_GETLOWPOWERACTIVE, 0, &this->low_power_enabled, 0);
-                        if (this->low_power_enabled != 0)
-                            SystemParametersInfoA(SPI_SETLOWPOWERACTIVE, 0, 0, SPIF_SENDCHANGE);
+                        // The game turned the system's screen saver and power
+                        // saving off while it ran. SDL keeps the screen saver
+                        // away while its window is up, without changing
+                        // system settings.
+                        this->screen_saver_enabled = 0;
+                        this->low_power_enabled = 0;
 
                         this->save_check_for_cd = this->check_for_cd(0);
                         if (!this->setup_class())
@@ -371,8 +371,7 @@ int RGE_Base_Game::setup() {
                                     this->setup_timings();
                                     this->handle_size(this->prog_window, 0, 0, 0);
                                     this->prog_ready = 1;
-                                    ShowWindow(this->prog_window, SW_SHOW);
-                                    SetFocus(this->prog_window);
+                                    surface_show_main_window();
                                     this->mouse_on();
                                     this->is_timer = surface_set_timer(this->prog_window, 1, 50);
 
@@ -542,10 +541,6 @@ RGE_Base_Game::~RGE_Base_Game() {
         this->draw_area = 0;
     }
 
-    if (this->screen_saver_enabled != 0)
-        SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE, 1, 0, SPIF_SENDCHANGE);
-    if (this->low_power_enabled != 0)
-        SystemParametersInfoA(SPI_SETLOWPOWERACTIVE, 1, 0, SPIF_SENDCHANGE);
 
     if (this->prog_palette != 0) {
         panel_system.release_palette(this->prog_palette);
@@ -557,10 +552,8 @@ RGE_Base_Game::~RGE_Base_Game() {
         this->registry = 0;
     }
 
-    if (this->prog_mutex != 0) {
-        CloseHandle(this->prog_mutex);
-        this->prog_mutex = 0;
-    }
+    surface_release_single_instance();
+    this->prog_mutex = 0;
 
     rge_base_game = 0;
 
@@ -1506,29 +1499,10 @@ int RGE_Base_Game::setup_cmd_options() {
     return 1;
 }
 
+// SDL creates the game window with its own window class
+// (port/sdl/window.cpp), so the game registers none.
 int RGE_Base_Game::setup_class() {
-    if (prog_info->prev_instance != 0) {
-        return 1;
-    }
-
-    WNDCLASSA cls;
-    cls.hCursor = 0;
-    char menu_name_first = *prog_info->menu_name;
-    cls.lpszMenuName = s_empty_string;
-    if (menu_name_first != 0) {
-        cls.lpszMenuName = prog_info->menu_name;
-    }
-    cls.hIcon = LoadIconA(prog_info->instance, prog_info->icon_name);
-    cls.lpszClassName = prog_info->prog_name;
-    cls.hbrBackground = 0;
-
-    cls.hInstance = (HINSTANCE) prog_info->instance;
-    cls.style = CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS;
-    cls.lpfnWndProc = rge_base_game_wnd_proc;
-    cls.cbWndExtra = 0;
-    cls.cbClsExtra = 0;
-
-    return RegisterClassA(&cls) != 0;
+    return 1;
 }
 
 int RGE_Base_Game::setup_main_window() {
@@ -1547,15 +1521,8 @@ int RGE_Base_Game::setup_main_window() {
 }
 
 int RGE_Base_Game::setup_graphics_system() {
-    if (this->prog_info->use_dir_draw != 0) {
-        HDC dc = GetDC(0);
-        int bits = GetDeviceCaps(dc, BITSPIXEL);
-        ReleaseDC(0, dc);
-        if (bits < 8) {
-            this->error_code = RGE_ERROR_SETUP_COLOR_DEPTH;
-            return 0;
-        }
-    }
+    // The desktop's colour depth no longer matters: SDL converts the 8-bit
+    // frame for any display.
 
     unsigned char draw_mode;
     unsigned char draw_type;
@@ -2148,33 +2115,10 @@ int RGE_Base_Game::check_expiration() {
 }
 
 int RGE_Base_Game::check_multi_copies() {
-    this->prog_mutex = CreateMutexA(0, 1, this->prog_info->prog_name);
-    if (GetLastError() == ERROR_ALREADY_EXISTS) {
-        HWND window = FindWindowA(this->prog_info->prog_name, this->prog_info->prog_title);
-        if (window != 0) {
-            if (this->check_prog_argument("LOBBY") != 0) {
-                surface_send_message(window, WM_CLOSE, 0, 0);
-                if (this->prog_mutex != 0)
-                    ReleaseMutex(this->prog_mutex);
-                return 1;
-            }
-            if (surface_is_iconic(window) != 0)
-                ShowWindow(window, SW_SHOWNORMAL);
-            SetForegroundWindow(window);
-            BringWindowToTop(GetLastActivePopup(window));
-        }
-
-        if (this->prog_mutex != 0) {
-            ReleaseMutex(this->prog_mutex);
-            CloseHandle(this->prog_mutex);
-            this->prog_mutex = 0;
-        }
-        return 0;
-    }
-
-    if (this->prog_mutex != 0)
-        ReleaseMutex(this->prog_mutex);
-    return 1;
+    // A second copy brings the first to the front and stops. (With LOBBY it
+    // used to close the first copy instead; multiplayer is not ported.)
+    this->prog_mutex = 0;
+    return surface_claim_single_instance(this->prog_info->prog_name, this->prog_info->prog_title);
 }
 
 int RGE_Base_Game::check_paint() {
@@ -2209,8 +2153,10 @@ int RGE_Base_Game::check_paint() {
             this->set_render_all();
             break;
         case 3:
+            // Surfaces that cannot be restored: quit, as destroying the
+            // window did. (In-memory surfaces are never lost.)
             surface_validate_rect(this->prog_window, 0);
-            DestroyWindow(this->prog_window);
+            surface_send_message(this->prog_window, WM_DESTROY, 0, 0);
             return 0;
         default:
             break;
@@ -2219,24 +2165,12 @@ int RGE_Base_Game::check_paint() {
 }
 
 void RGE_Base_Game::clear_window() {
-    RECT rect;
-    HDC dc;
-    HBRUSH brush;
-
     // SDL draws the primary surface into the window, so clear that instead
     // of painting over the window with GDI (on a real 8-bit display the
     // window and the primary surface were the same pixels).
+    // Before the primary surface exists, SDL's window is still black.
     if (this->draw_system != 0 && this->draw_system->PrimarySurface != 0) {
         this->draw_system->ClearPrimarySurface();
-        return;
-    }
-
-    if (this->prog_window != 0) {
-        dc = GetDC(this->prog_window);
-        GetClientRect(this->prog_window, &rect);
-        brush = gdi_get_stock_object(BLACK_BRUSH);
-        gdi_fill_rect(dc, &rect, brush);
-        ReleaseDC(this->prog_window, dc);
     }
 }
 
@@ -2496,8 +2430,6 @@ LRESULT CALLBACK RGE_Base_Game::wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPAR
     LRESULT retval = 0;
     int mouse_down;
     int save_debug_timeGetTime_on;
-    DWORD game_thread;
-    DWORD window_thread;
     TPanel* panel;
 
     color_log(0x24, 0x24, 3);
@@ -2671,13 +2603,9 @@ LRESULT CALLBACK RGE_Base_Game::wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPAR
 
         case WM_ACTIVATE:
             if (this->prog_ready != 0) {
-                if (LOWORD(wparam) == 0) {
-                    game_thread = GetWindowThreadProcessId(this->prog_window, 0);
-                    window_thread = GetWindowThreadProcessId((HWND) lparam, 0);
-                    if (window_thread == game_thread) {
-                        save_active_wnd = (HWND) lparam;
-                    }
-                }
+                // The window taking over activation used to be remembered
+                // when it was one of the game's own (an edit box or video
+                // window). The game has no other windows now.
 
                 if (wnd == this->prog_window && LOWORD(wparam) != 0 && HIWORD(wparam) != 0 && save_active_wnd != 0) {
                     save_active_wnd = 0;
@@ -2746,7 +2674,7 @@ LRESULT CALLBACK RGE_Base_Game::wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPAR
     }
 
     color_log(0x54, 0x24, 3);
-    retval = DefWindowProcA(wnd, msg, wparam, lparam);
+    retval = surface_def_window_proc(wnd, msg, wparam, lparam);
 
     if (mouse_down != 0) {
         color_log(0x4C, 0x5F, 4);
@@ -3142,17 +3070,9 @@ int RGE_Base_Game::handle_query_new_palette(HWND wnd, UINT msg, WPARAM wparam, L
         return this->draw_system->HandleQueryNewPalette(wnd, msg, wparam, lparam);
     }
 
-    HDC dc = GetDC(wnd);
-    if (panel_system.currentPanel() != 0) {
-        TEasy_Panel* panel = (TEasy_Panel*) panel_system.currentPanel();
-        if (panel->get_palette() != 0)
-            SelectPalette(dc, panel->get_palette(), 0);
-    } else {
-        if (this->prog_palette != 0)
-            SelectPalette(dc, this->prog_palette, 0);
-    }
-    int result = RealizePalette(dc);
-    ReleaseDC(wnd, dc);
+    // Realizing a palette into the window mattered only on an 8-bit desktop
+    // (gdi.cpp); nothing changes.
+    int result = 0;
     if (result != 0)
         surface_invalidate_rect(wnd, NULL, FALSE);
     if (this->draw_system != 0)
@@ -3305,17 +3225,17 @@ void RGE_Base_Game::calc_timing_text() {
     );
 }
 void RGE_Base_Game::show_timings() {
-    SetWindowTextA(this->prog_window, this->timing_text);
+    surface_set_window_title(this->timing_text);
 }
 void RGE_Base_Game::show_comm(void) {
     char str[256];
     sprintf(str, "%s", this->comm_handler->GetCommInfo(1));
-    SetWindowTextA(this->prog_window, str);
+    surface_set_window_title(str);
 }
 void RGE_Base_Game::show_ai(void) {
     char str[256];
     sprintf(str, "No AI Information for Player #%d.", (int) this->world->curr_player);
-    SetWindowTextA(this->prog_window, str);
+    surface_set_window_title(str);
 }
 
 void RGE_Base_Game::send_game_options() {
@@ -3736,20 +3656,13 @@ void RGE_Base_Game::disable_input() {
     }
     panel_system.DisableInput();
     this->input_enabled = 0;
-    if (this->input_disabled_window != 0) {
-        if (surface_get_capture()) {
-            surface_release_capture();
-        }
-        surface_set_capture(this->input_disabled_window);
-    }
+    // The mouse capture used to go to a hidden window, so the game saw no
+    // mouse messages.
+    surface_set_mouse_input(0);
 }
 
 void RGE_Base_Game::enable_input() {
-    if (this->input_disabled_window != 0) {
-        if (surface_get_capture()) {
-            surface_release_capture();
-        }
-    }
+    surface_set_mouse_input(1);
     panel_system.EnableInput();
     this->input_enabled = 1;
     if (this->is_mouse_on != 0) {
@@ -3759,9 +3672,6 @@ void RGE_Base_Game::enable_input() {
 }
 
 void RGE_Base_Game::set_screen_size(long wid, long hgt) {
-    RECT win_rect;
-    RECT client_rect;
-
     if (this->draw_area->Width != wid || this->draw_area->Height != hgt) {
         if (this->draw_system->DrawType == 2 && this->draw_system->ScreenMode == 2) {
             surface_set_cursor(NULL);
@@ -3775,37 +3685,9 @@ void RGE_Base_Game::set_screen_size(long wid, long hgt) {
             return;
         }
 
-        long horz_res = 0;
-        long vert_res = 0;
-        HDC dc = CreateICA("DISPLAY", 0, 0, 0);
-        if (dc != 0) {
-            horz_res = GetDeviceCaps(dc, HORZRES);
-            vert_res = GetDeviceCaps(dc, VERTRES);
-            DeleteDC(dc);
-        }
-
-        if (wid <= horz_res && hgt <= vert_res) {
-            if (horz_res == wid && vert_res == hgt) {
-                this->window_style = WS_POPUP | WS_VISIBLE | WS_CLIPCHILDREN | WS_SYSMENU;
-                SetWindowLongA(this->prog_window, GWL_STYLE, this->window_style);
-                SetWindowLongA(this->prog_window, GWL_EXSTYLE, this->window_style);
-            } else {
-                this->window_style = WS_VISIBLE | WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-                SetWindowLongA(this->prog_window, GWL_EXSTYLE, this->window_style);
-                SetWindowLongA(this->prog_window, GWL_STYLE, this->window_style);
-            }
-
-            SetWindowPos(this->prog_window, 0, 0, 0, wid, hgt, 0);
-            GetWindowRect(this->prog_window, &win_rect);
-            GetClientRect(this->prog_window, &client_rect);
-
-            if (client_rect.right != wid || client_rect.bottom != hgt) {
-                SetWindowPos(
-                    this->prog_window, 0, win_rect.left, win_rect.top, wid + win_rect.right - win_rect.left - client_rect.right,
-                    hgt + win_rect.bottom - win_rect.top - client_rect.bottom, 0
-                );
-            }
-        }
+        // Outside DirectDraw's fullscreen mode the game resized its window
+        // to the new screen size. The game always draws as if fullscreen,
+        // and the window's size is the SDL layer's.
     }
 }
 
@@ -4028,5 +3910,5 @@ unsigned long __cdecl debug_timeGetTime(char* source_name, int source_line) {
         }
         return debug_timeGetTime_time;
     }
-    return timeGetTime();
+    return surface_time_get_time();
 }

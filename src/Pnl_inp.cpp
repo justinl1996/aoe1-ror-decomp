@@ -7,7 +7,7 @@ static char pnl_inp_draw[] = "pnl_inp::draw";
 extern void operator delete(void*);
 
 TInputPanel::TInputPanel() :
-    TTextPanel(), caret_color(0), caret_interval(GetCaretBlinkTime()), caret_last_time(0), draw_caret(1), overLengthSound(0),
+    TTextPanel(), caret_color(0), caret_interval(530) /* Windows' default caret blink time */, caret_last_time(0), draw_caret(1), overLengthSound(0),
     input_buffer(0), input_buffer1(0), input_buffer2(0), input_len(0), max_len(0), insert_mode(1), input_pos(0) {
     this->handle_mouse_input = 1;
     this->bevel_type = 1;
@@ -115,7 +115,7 @@ long TInputPanel::char_action(long key, short count) {
                     if (this->overLengthSound != 0)
                         this->overLengthSound->play();
                     else
-                        MessageBeep(0xFFFFFFFF);
+                        surface_message_beep();
                     return 1;
                 }
                 break;
@@ -132,7 +132,7 @@ long TInputPanel::char_action(long key, short count) {
                 if (this->overLengthSound != 0)
                     this->overLengthSound->play();
                 else
-                    MessageBeep(0xFFFFFFFF);
+                    surface_message_beep();
                 return 1;
             case FormatFile:
             case FormatFileNoExt:
@@ -145,7 +145,7 @@ long TInputPanel::char_action(long key, short count) {
                     if (this->overLengthSound != 0)
                         this->overLengthSound->play();
                     else
-                        MessageBeep(0xFFFFFFFF);
+                        surface_message_beep();
                     return 1;
                 }
                 break;
@@ -155,7 +155,7 @@ long TInputPanel::char_action(long key, short count) {
                     if (this->overLengthSound != 0)
                         this->overLengthSound->play();
                     else
-                        MessageBeep(0xFFFFFFFF);
+                        surface_message_beep();
                     return 1;
                 }
                 break;
@@ -438,7 +438,7 @@ int TInputPanel::insert_character(long c) {
         if (this->overLengthSound != 0)
             this->overLengthSound->play();
         else
-            MessageBeep(0xFFFFFFFF);
+            surface_message_beep();
         return 0;
     }
 
@@ -541,33 +541,17 @@ int TInputPanel::backspace_character() {
 
 int TInputPanel::paste() {
     int len;
-    HANDLE data_handle;
-    char* locked;
     char* old_str;
     char* new_cur;
     char* old_tail;
     char* dst_tail;
     char new_str[0x1000];
-    len = 0;
-    new_str[0] = 0;
-    if (!IsClipboardFormatAvailable(CF_TEXT))
+    // The clipboard is SDL's (at most 0xFFF characters, as before).
+    for (int i = 0; i < 0x1000; ++i)
+        new_str[i] = 0;
+    len = surface_get_clipboard_text(new_str, 0x1000);
+    if (len <= 0)
         return 0;
-    if (!OpenClipboard(this->render_area->Wnd))
-        return 0;
-    data_handle = GetClipboardData(CF_TEXT);
-    if (data_handle != 0) {
-        locked = (char*) GlobalLock(data_handle);
-        if (locked != 0) {
-            len = _mbslen((const unsigned char*) locked);
-            if (len > 0xfff)
-                len = 0xfff;
-            for (int i = 0; i < 0x1000; ++i)
-                new_str[i] = 0;
-            _mbsncpy((unsigned char*) new_str, (const unsigned char*) locked, len);
-            GlobalUnlock(data_handle);
-        }
-    }
-    CloseClipboard();
     {
         int total_len;
         int max_len;
@@ -579,7 +563,7 @@ int TInputPanel::paste() {
                 this->overLengthSound->play();
                 return 0;
             }
-            MessageBeep(0xffffffff);
+            surface_message_beep();
             return 0;
         }
     }

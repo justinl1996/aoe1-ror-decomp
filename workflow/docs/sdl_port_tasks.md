@@ -795,6 +795,71 @@ use GDI, and text is drawn with SDL_ttf.
   sequencer fallback with real MIDI; volume changes from the options
   screen; saved-game music positions.
 
+### The game's other Windows calls — done 2026-11-21
+
+The Windows calls the game needs at run time now go through the port layer,
+with implementations that do not need Windows (task 3 of the Linux list).
+Out-of-scope features keep their Windows calls for now: intro videos
+(`MCIWndCreateA`, `ICInfo` and the video window in tribegam.cpp),
+multiplayer (DirectPlay, scr_mp.cpp's registry and `WinExec`), WinHelp,
+and the CD and DirectX checks. So do pure helpers such as `SetRect` and
+`CharUpperA`, and the C runtime's file calls. Task 4 stubs or replaces
+those.
+
+- Settings: `TRegistry` (src/registry.cpp) keeps the game's settings in
+  `settings.ini` next to the executable (port/sdl/settings.cpp), in the
+  layout of a .reg file with `user\` and `machine\` sections and `dword:`,
+  `sz:` and `hex:` values. It returns what the registry calls returned. A
+  missing file or value means the game's default. Settings in the
+  registry are no longer read.
+- Strings: the string tables are read from the `RT_STRING` resources of
+  `language.dll` and `languagex.dll` directly (port/sdl/strings.cpp, a
+  small PE resource reader), US English first, converted to
+  Windows-1252. `LoadLibraryA` and `LoadStringA` are gone.
+- Palettes: GDI palettes are colour tables in gdi.cpp (create, get and set
+  entries, resize, nearest index, `GetObjectA` for the size, and a
+  halftone palette). Selecting and realizing a palette into a window's
+  context did something only on an 8-bit desktop. Now it does nothing,
+  and there is no system palette, as on a true-colour display (Dib.cpp's
+  identity palette then takes the static colours from its own table, as
+  it already did there). The window-DC calls around them are gone.
+- The game window (window.cpp): `surface_show_main_window`,
+  `surface_set_window_title` (the timing display), `surface_get_client_rect`,
+  `surface_def_window_proc`, and `surface_get_display_size` (the window
+  branches of drawarea.cpp). The game registers no window class. Its code
+  that resized the window outside fullscreen is gone: the game always draws
+  as if fullscreen.
+- Input during loading: the hidden `STATIC` window that took the mouse
+  capture is gone. `disable_input` turns the SDL layer's mouse messages off
+  (`surface_set_mouse_input`) and `enable_input` turns them back on.
+- Message boxes go through `SDL_ShowSimpleMessageBox`
+  (`surface_message_box`). The beep is `MessageBeep` on Windows and nothing
+  elsewhere. One copy at a time: `surface_claim_single_instance` (a named
+  mutex on Windows; a second copy brings the first to the front and
+  quits).
+- Gone: changing the system's screen saver and power settings while
+  running (SDL keeps the screen saver away), changing the system's window
+  colours for the old edit boxes, the IME calls, the colour-depth check.
+- Time: `timeGetTime` is `surface_time_get_time` (SDL's clock, offset by
+  the wall clock so the random seed still differs between runs). The
+  input panel's clipboard paste uses the SDL clipboard, and its caret
+  blinks at Windows' default 530 ms.
+- `RGE_Base_Game::setup_class`, `check_multi_copies`, `clear_window`,
+  `set_screen_size`, `handle_query_new_palette`; `TPanelSystem::setup`,
+  `DisableIME`, `EnableIME`, `restore_system_colors`;
+  `TEasy_Panel::set_system_colors`; `TDrawSystem::CheckAvailModes`,
+  `HandleQueryNewPalette`; and `CreateIdentityPalette` changed
+  accordingly.
+- Checked under Wine (settings.ini giving 1024x768): the menu text from
+  both language DLLs (® and © included) and the six scenario-editor tabs
+  are pixel-identical to the build before this change. A random-map game
+  loads, takes clicks (town centre selected, villager trained), opens the
+  F10 menu, and edits and sends a chat line. The Achievements summary and
+  timeline draw in the players' colours. A second copy of the game exits
+  while the first runs. Not checked: message boxes (no error was
+  provoked), the clipboard paste in the input panels, saving settings
+  from the options screen.
+
 ### Testing under Wine
 
 - The test setup (Xvfb without root, a separate Wine prefix with a fake CD

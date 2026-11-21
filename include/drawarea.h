@@ -14,11 +14,6 @@ class RGE_Color_Table;
 
 #undef WIN32_LEAN_AND_MEAN
 
-extern "C" __declspec(dllimport) int __stdcall GetClientRect(void*, RECT*);
-extern "C" __declspec(dllimport) unsigned int __stdcall GetPaletteEntries(void*, unsigned int, unsigned int, PALETTEENTRY*);
-extern "C" __declspec(dllimport) void* __stdcall SelectObject(void*, void*);
-extern "C" __declspec(dllimport) int __stdcall DeleteObject(void*);
-extern "C" __declspec(dllimport) int __stdcall DeleteDC(void*);
 extern "C" int __cdecl sprintf(char*, const char*, ...);
 
 typedef BITMAPINFO256 BitmapInfo;
