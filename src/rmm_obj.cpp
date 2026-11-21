@@ -421,7 +421,14 @@ void RGE_RMM_Object_Generator::place_land_objects(
     RGE_Player* player = this->world->players[player_id];
     RGE_Master_Static_Object* master = player->master_objects[object->obj_id];
     if (master != 0) {
-        RGE_Zone_Map* map_zone = this->map->map_zones->get_zone_map(this->world->terrains[master->terrain], 0x20, zone_index);
+        // The original passed the terrain table with 0x20 rules, more than
+        // the table holds (terrain_size), so the zone map copied whatever
+        // followed it. The rules past the table are zero here.
+        float rules[0x20];
+        memset(rules, 0, sizeof(rules));
+        long rules_num = this->world->terrain_size < 0x20 ? this->world->terrain_size : 0x20;
+        memcpy(rules, this->world->terrains[master->terrain], rules_num * sizeof(float));
+        RGE_Zone_Map* map_zone = this->map->map_zones->get_zone_map(rules, 0x20, zone_index);
         land_zone = map_zone->get_zone_info(map_x, map_y);
 
         long count = object->number_of_groups;

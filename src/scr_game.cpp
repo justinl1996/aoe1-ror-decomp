@@ -2471,7 +2471,7 @@ void TRIBE_Screen_Game::setup_buttons() {
                     continue;
                 }
 
-                rge_base_game->get_string(master->string_id, name + 4, 512);
+                rge_base_game->get_string(master->string_id, name + 4, sizeof(name) - 4);
                 this->calc_text_msg(
                     msg_str + 4, &this->bldg_list[item_index], TRIBE_UI_COMMAND_PLACE_BUILDING, master->string_id2
                 );
@@ -2802,7 +2802,7 @@ void TRIBE_Screen_Game::setup_buttons() {
                             }
 
                             if ((!queue_active) || (queued > 0)) {
-                                rge_base_game->get_string(master->string_id, name + 4, 512);
+                                rge_base_game->get_string(master->string_id, name + 4, sizeof(name) - 4);
                                 this->calc_text_msg(
                                     msg_str + 4, &this->make_list[make_index], TRIBE_UI_COMMAND_TRAIN, master->string_id2
                                 );
@@ -2869,7 +2869,7 @@ void TRIBE_Screen_Game::setup_buttons() {
                             for (int tech_index = 0; tech_index < tech_cnt; ++tech_index) {
                                 short item_id = this->tech_list[tech_index].id;
                                 short string_id = player->tech_tree->get_string_id(item_id);
-                                rge_base_game->get_string(string_id, name + 4, 512);
+                                rge_base_game->get_string(string_id, name + 4, sizeof(name) - 4);
                                 short string_id2 = player->tech_tree->get_string_id2(this->tech_list[tech_index].id);
                                 this->calc_text_msg(
                                     msg_str + 4, &this->tech_list[tech_index], TRIBE_UI_COMMAND_RESEARCH, string_id2

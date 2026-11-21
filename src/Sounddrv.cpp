@@ -356,7 +356,8 @@ int TDigital::load(char* file_name, long res_id) {
         this->unload();
     }
 
-    if (file_name != 0) {
+    // play() reloads with the buffer's own name: nothing to copy then.
+    if (file_name != 0 && file_name != this->sound_file) {
         strncpy(this->sound_file, file_name, 12);
         this->sound_file[12] = 0;
     }

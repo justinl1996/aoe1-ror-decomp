@@ -2723,7 +2723,7 @@ int TRIBE_Game::create_game(int not_used) {
     int player_index;
     int scenario_player;
     int humanity;
-    int position_used[8];
+    int position_used[9];  // the original had 8 and wrote 9 (below)
     unsigned char path_finding_val;
     T_Scenario* scenario_info;
     RGE_Player_Info player_info;
@@ -2873,7 +2873,8 @@ int TRIBE_Game::create_game(int not_used) {
         scenario_info = 0;
     }
 
-    // The original declares eight entries but initializes nine.
+    // The original declared eight entries and initialized nine; the ninth
+    // landed on whatever followed the array.
     for (i = 0; i < 9; ++i) {
         position_used[i] = -1;
     }

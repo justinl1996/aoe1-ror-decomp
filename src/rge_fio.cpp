@@ -175,7 +175,9 @@ void __cdecl rge_read(int handle, void* data, int size) {
                 int copy = 0x10000 - point;
                 memcpy(temp, ptr, copy);
 
-                temp_size = file_size;
+                // The input left after compression_point (the original passed
+                // the whole size, so the decoder read past the buffer's end).
+                temp_size = file_size - compression_point;
                 temp_max = 0x10000;
                 Inf32Decode(file_buffers, compression_point, &temp_size, buffers, 0, &temp_max, compression_buffers, 1);
                 compression_point += temp_size;

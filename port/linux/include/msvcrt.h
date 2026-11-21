@@ -128,6 +128,16 @@ void _splitpath(const char* path, char* drive, char* dir, char* name, char* ext)
 void _makepath(char* path, const char* drive, const char* dir, const char* name, const char* ext);
 extern char* _pgmptr;
 
+/* rand and srand: Microsoft's generator. The game assumes rand() < 0x8000
+   (glibc's goes to 2^31 - 1), and the same seed gives the same numbers as
+   on Windows. */
+int linux_msvc_rand(void);
+void linux_msvc_srand(unsigned int seed);
+#define rand linux_msvc_rand
+#define srand linux_msvc_srand
+#undef RAND_MAX
+#define RAND_MAX 0x7FFF
+
 /* Strings. */
 #define stricmp strcasecmp
 #define _stricmp strcasecmp

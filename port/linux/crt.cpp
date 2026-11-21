@@ -367,6 +367,20 @@ void _makepath(char* path, const char* drive, const char* dir, const char* name,
 }
 
 // ---------------------------------------------------------------------------
+// rand: the Microsoft C runtime's linear congruential generator.
+
+static unsigned int msvc_rand_state = 1;
+
+int linux_msvc_rand(void) {
+    msvc_rand_state = msvc_rand_state * 214013u + 2531011u;
+    return (int) ((msvc_rand_state >> 16) & 0x7FFF);
+}
+
+void linux_msvc_srand(unsigned int seed) {
+    msvc_rand_state = seed;
+}
+
+// ---------------------------------------------------------------------------
 // Strings
 
 char* _strupr(char* s) {

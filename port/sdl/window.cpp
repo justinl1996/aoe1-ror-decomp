@@ -581,6 +581,11 @@ static void translate_event(const SDL_Event* event) {
             input_post(msg, mouse_key_flags(), mouse_point(event->button.x, event->button.y));
             break;
         }
+        case SDL_QUIT:
+            // SIGTERM or SIGINT on Linux, or the system asking the program
+            // to end: as closing the window.
+            input_post(WM_CLOSE, 0, 0);
+            break;
         case SDL_WINDOWEVENT:
             switch (event->window.event) {
                 case SDL_WINDOWEVENT_FOCUS_GAINED:

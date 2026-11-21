@@ -14,6 +14,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <unistd.h>
+
+/* Winsock's gethostname and gethostbyname have glibc namesakes with another
+   calling convention. Under their own names the game's calls reach
+   port/linux/winsock.cpp, and libraries calling glibc's (libxcb does) are
+   not handed the Winsock ones. */
+#define gethostname aoe_winsock_gethostname
+#define gethostbyname aoe_winsock_gethostbyname
+
 /* Game headers forward-declare FILE as Microsoft's struct _iobuf. */
 #define _iobuf _IO_FILE
 
@@ -29,6 +38,12 @@ typedef FARPROC LOCALE_ENUMPROCEX;
 
 /* Wine's headers expect windows.h before any other Win32 header. */
 #include <windows.h>
+
+/* Wine's winsock.h leaves gethostname out on Unix. */
+#ifdef __cplusplus
+extern "C"
+#endif
+int WINAPI gethostname(char* name, int size);
 
 /* Struct tags the VC6 headers had and Wine's lack. */
 #define tagBITMAPINFOHEADER BITMAPINFOHEADER

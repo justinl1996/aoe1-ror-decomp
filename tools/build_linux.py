@@ -72,6 +72,7 @@ def main() -> int:
                              "pinned package. Env: AOE_WINE_INCLUDE.")
     parser.add_argument("--library-dir", action="append", default=[],
                         help="Extra folder with the 32-bit SDL2 and SDL2_ttf libraries.")
+    parser.add_argument("--sanitize", help="Build with a clang sanitizer, e.g. address (for debugging).")
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     args = parser.parse_args()
 
@@ -107,6 +108,8 @@ def main() -> int:
             + sdl_config["sources"] + linux_config["sources"])
 
     target = [*COMMON_FLAGS]
+    if args.sanitize:
+        target += ["-fsanitize=" + args.sanitize, "-fno-omit-frame-pointer"]
     if args.sysroot:
         target.append("--sysroot=" + str(Path(args.sysroot).resolve()))
     base = [args.clang, *target,

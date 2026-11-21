@@ -732,7 +732,8 @@ void RGE_RMM_Database_Controller::add_object_module() {
                 player = 0;
             if (player == 0) {
                 ++map_land_index;
-                if (map->land_info.land[map_land_index].by_player_flag != 0)
+                // The original also read the entry after the last land.
+                if (map_land_index < map->land_info.land_num && map->land_info.land[map_land_index].by_player_flag != 0)
                     player = 1;
             }
             ++index1;

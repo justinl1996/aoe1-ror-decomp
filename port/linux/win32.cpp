@@ -326,9 +326,11 @@ HLOCAL WINAPI LocalFree(HLOCAL block) {
     return 0;
 }
 
-BOOL WINAPI VirtualFree(LPVOID block, SIZE_T, DWORD) {
-    free(block);
-    return TRUE;
+// The game decommits pages of its mapped resource files when it is done
+// with a resource (RESFILE_Decommit_Mapped_Memory). Windows refuses that
+// for a mapped view and nothing is released; so here.
+BOOL WINAPI VirtualFree(LPVOID, SIZE_T, DWORD) {
+    return FALSE;
 }
 
 // The game refuses to start with too little memory; report what there is,
