@@ -371,9 +371,15 @@ uchar RGE_Random_Map_Module::check_stack(Map_Stack* stack) {
 void RGE_Random_Map_Module::randomize_stack(Map_Stack* stack) {
     int i;
     int j;
-    Map_Stack sub_stacks[100];
+    // The bucket index below is rand() * 100 / 0x7fff, which is 100 when
+    // rand() returns 0x7fff: one past the original 100 buckets. That wrote
+    // over whatever followed the array (the return address in the clang
+    // build, an intermittent crash while generating a map). The extra bucket
+    // takes those nodes, and is emptied back into the stack last, so no node
+    // keeps a pointer into this frame.
+    Map_Stack sub_stacks[101];
 
-    for (i = 0; i < 100; ++i) {
+    for (i = 0; i < 101; ++i) {
         this->init_stack(sub_stacks[i]);
     }
 
@@ -392,6 +398,9 @@ void RGE_Random_Map_Module::randomize_stack(Map_Stack* stack) {
                     this->add_stack_node(stack, sub_stacks[j + 1].next);
                 }
             }
+        }
+        while (sub_stacks[100].next != 0) {
+            this->add_stack_node(stack, sub_stacks[100].next);
         }
     }
 }
