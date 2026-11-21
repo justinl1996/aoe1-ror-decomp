@@ -2,6 +2,12 @@
 #include "../include/asm_draw.h"
 #include "../include/color.h"
 #include "../include/game_globals.h"
+#ifdef AOE_SDL
+// The SDL build draws into in-memory DirectDraw surfaces
+// (port/sdl/ddraw_memory.cpp); the calls below stay DirectDraw calls.
+#include "../include/surface.h"
+#define DirectDrawCreate surface_DirectDrawCreate
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

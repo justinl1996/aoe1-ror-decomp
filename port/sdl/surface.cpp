@@ -28,11 +28,13 @@ static WNDPROC surface_sdl_proc = 0;
 // SDL subclasses the window and forwards every message to the game's
 // procedure, but it validates the window before forwarding WM_PAINT (so
 // GetUpdateRect in RGE_Base_Game::check_paint always saw an empty region)
-// and swallows WM_ERASEBKGND. This procedure sits on top of SDL's and sends
-// those two straight to the game. SDL only turns them into events, which
-// surface_drop_events discards anyway.
+// and swallows WM_ERASEBKGND. It also answers WM_NCCALCSIZE for a borderless
+// window itself, which left the game's 800x600 popup with a 0x0 client area
+// whenever it did not cover the whole screen. This procedure sits on top of
+// SDL's and sends those three straight to the game. SDL only turns WM_PAINT
+// and WM_ERASEBKGND into events, which surface_drop_events discards anyway.
 static LRESULT CALLBACK surface_wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-    if (msg == WM_PAINT || msg == WM_ERASEBKGND)
+    if (msg == WM_PAINT || msg == WM_ERASEBKGND || msg == WM_NCCALCSIZE)
         return CallWindowProcA((FARPROC) surface_game_proc, wnd, msg, wparam, lparam);
     return CallWindowProcA((FARPROC) surface_sdl_proc, wnd, msg, wparam, lparam);
 }
@@ -62,6 +64,43 @@ int surface_attach_window(HWND wnd) {
     surface_hwnd = wnd;
     surface_sdl_proc = (WNDPROC) SetWindowLongA(wnd, GWL_WNDPROC, (LONG) surface_wnd_proc);
     return 1;
+}
+
+// ---------------------------------------------------------------------------
+// Presenting the primary surface.
+//
+// For now the changed rectangle is copied to the window with GDI, as soon as
+// it changes, which is what a real primary surface shows.
+
+static HWND present_wnd = 0;
+static int present_exclusive = 0;
+
+void surface_present_set_target(HWND wnd, int exclusive, long width, long height) {
+    present_wnd = wnd;
+    present_exclusive = exclusive;
+}
+
+void surface_present_palette(const PALETTEENTRY* entries) {
+    // The caller already updated the DIB color table used by GDI.
+}
+
+void surface_present_primary(const unsigned char* bits, long pitch, long width, long height, const RECT* rect, HDC dc) {
+    if (present_wnd == 0 || dc == 0)
+        return;
+    POINT origin;
+    origin.x = 0;
+    origin.y = 0;
+    // Outside exclusive mode the primary surface is the desktop.
+    if (present_exclusive == 0)
+        ClientToScreen(present_wnd, &origin);
+    HDC wdc = GetDC(present_wnd);
+    if (wdc == 0)
+        return;
+    BitBlt(
+        wdc, rect->left - origin.x, rect->top - origin.y, rect->right - rect->left, rect->bottom - rect->top, dc, rect->left,
+        rect->top, SRCCOPY
+    );
+    ReleaseDC(present_wnd, wdc);
 }
 
 void surface_detach_window(void) {

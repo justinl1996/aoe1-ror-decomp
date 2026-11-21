@@ -1,6 +1,6 @@
 # SDL2 port on Windows: task breakdown
 
-Status: written 2026-11-21. Done: Task 0 (see "Progress" at the end).
+Status: written 2026-11-21. Done: Tasks 0 and 1 (see "Progress" at the end).
 The rest is still a plan.
 
 Scope: **Windows only for now.** The target is the clang-cl PE build
@@ -30,12 +30,14 @@ DirectX layer, and leaves the rest of `src/` alone.
    `SDL_CreateWindowFrom(hwnd)` and only renders into it. Input, `WM_PAINT`,
    timers, edit boxes and the parity harness's injected messages stay as
    they are.
-2. **DirectDraw COM objects become an in-house surface class.** Its methods
-   use the same names and arguments as the subset the game calls (`Lock`,
-   `Unlock`, `Blt`, `BltFast`, `GetDC`, ...). The call sites barely change;
-   only the member types do. The `DDSURFACEDESC`, `DDBLTFX`, `RECT` and
-   `DDBLT_*` declarations still come from the VC98 `ddraw.h`, but nothing
-   links `ddraw.lib`.
+2. **DirectDraw is emulated in memory.** `port/sdl/ddraw_memory.cpp`
+   implements `IDirectDraw`, `IDirectDrawSurface`, `IDirectDrawPalette` and
+   `IDirectDrawClipper`, as the VC98 `ddraw.h` declares them, over plain
+   memory. Only `DirectDrawCreate` changes (to `surface_DirectDrawCreate`);
+   every other call site and member type stays as it is. Nothing links
+   `ddraw.lib`. (The first draft of this plan proposed a new `TSurface`
+   class with changed member types; emulating the interfaces needs no
+   changes to the callers, and the Linux plan wants the same emulation.)
 3. **The game always runs as if fullscreen** (`ScreenMode` 2). The
    "primary surface" is a memory buffer of game resolution, not the
    desktop. Whether it shows in a window or fills the screen is SDL's
@@ -53,7 +55,8 @@ Files this plan adds:
 
 | File | Holds |
 | --- | --- |
-| `include/surface.h`, `port/sdl/surface.cpp` | `TSurface`, `TSurfacePalette`, `TSurfaceClipper`, presenting (Tasks 1–4) |
+| `include/surface.h`, `port/sdl/surface.cpp` | attaching SDL to the window, presenting the primary surface (Tasks 0, 2–4) |
+| `port/sdl/ddraw_memory.cpp` | the in-memory DirectDraw (Task 1) |
 | `include/sdl_sound.h`, `port/sdl/sdl_sound.cpp` | `TSoundBuffer` and the SDL mixer (Task 5) |
 | `config/sdl.json` | SDL2 package pin, defines, sources and libraries for `--sdl` |
 | `tools/fetch_sdl2.py` | downloads the pinned SDL2 VC package into `build/third_party/` (never committed) |
@@ -110,96 +113,55 @@ the fixes, in order of preference:
 on DirectDraw), with SDL attached, and the message log matches a build
 without SDL.
 
-## Task 1: Replace the DirectDraw objects with `TSurface`
+## Task 1: Replace DirectDraw with in-memory surfaces
 
-### The class (`include/surface.h`)
+`port/sdl/ddraw_memory.cpp` implements the four DirectDraw interfaces the
+game uses. `src/drawarea.cpp` maps `DirectDrawCreate` to
+`surface_DirectDrawCreate` under `AOE_SDL`; nothing else in `src/`
+changes. `GetDXVersion` (getdxver.cpp) is untouched: it probes the system's
+own `DDRAW.DLL` and DirectPlay through `LoadLibraryA`, which still exist on
+Windows.
 
-```cpp
-class TSurfacePalette { PALETTEENTRY entries[256]; ... SetEntries(), GetEntries() };
-class TSurfaceClipper { RECT clip; ... };
-class TSurface {
-    // 8-bit pixels in a DIB section: HBITMAP dib; HDC dc; unsigned char* bits;
-    // long width, height, pitch; color key (has_key, key); TSurfacePalette* pal;
-    // TSurfaceClipper* clipper; bool is_primary;
-    long Lock(RECT*, DDSURFACEDESC*, DWORD, HANDLE);
-    long Unlock(void*);
-    long Blt(RECT* dst, TSurface* src, RECT* src_rect, DWORD flags, DDBLTFX*);
-    long BltFast(DWORD x, DWORD y, TSurface* src, RECT* src_rect, DWORD flags);
-    long GetDC(HDC*);  long ReleaseDC(HDC);
-    long IsLost();     long Restore();          // always DD_OK
-    long SetColorKey(DWORD, DDCOLORKEY*);
-    long GetSurfaceDesc(DDSURFACEDESC*);
-    long SetPalette(TSurfacePalette*);  long GetPalette(TSurfacePalette**);
-    long SetClipper(TSurfaceClipper*);  long GetClipper(TSurfaceClipper**);
-    long GetBltStatus(DWORD);           // always DD_OK
-    unsigned long Release();
-};
-```
+How the objects behave:
 
-How the methods behave:
+- **Pixels.** Each surface is an 8-bit top-down DIB section, with the pitch
+  rounded up to 4 bytes and selected into its own memory DC.
+- **`Lock` / `GetSurfaceDesc`.** These fill `DDSURFACEDESC`: `lpSurface`,
+  `lPitch`, size, 8-bit palettized `DDPIXELFORMAT`, and caps. Surfaces
+  created without `DDSCAPS_SYSTEMMEMORY` report video memory, as on real
+  hardware; the game's surfaces are system memory unless it runs with
+  `VIDEOMEMORY`.
+- **Blits.** `Blt` and `BltFast` copy, fill (`DDBLT_COLORFILL`) and honor
+  source color keys (`DDBLT_KEYSRC`, `DDBLTFAST_SRCCOLORKEY`). Copies
+  within one surface may overlap (the scrolling view does that in video
+  memory). Stretching is nearest-neighbour; no call site is known to
+  stretch.
+- **Clipping**, as in DirectDraw:
+  - `Blt` clips to the surface when a clipper is attached, and fails with
+    `DDERR_INVALIDRECT` without one;
+  - `BltFast` never clips, and fails with `DDERR_BLTFASTCANTCLIP` on a
+    surface with a clipper (`TMousePointer` already detaches it first).
+- **`GetDC`.** Returns the surface's memory DC, after setting its color table
+  from the surface's palette, or from the primary's palette when the
+  surface has none (as DirectDraw does). `Lock` and `ReleaseDC` call
+  `GdiFlush`.
+- **Display modes.** The display mode is never changed:
+  - `SetDisplayMode` only records an 8-bit mode;
+  - `EnumDisplayModes` reports 640x480, 800x600, 1024x768 and 1280x1024 in 8
+    and 16 bits;
+  - `GetDisplayMode` reports the recorded mode as 8 bits, so windowed
+    `ScreenMode` 1 no longer needs an 8-bit desktop.
+- **The primary surface.** It has the recorded mode's size in exclusive
+  mode, and the desktop's size otherwise (the game blits to it in screen
+  coordinates then).
+  - Every write to it (blit, `Unlock`, `ReleaseDC`, palette change) calls
+    `surface_present_primary`, which for now copies the changed rectangle
+    to the window with GDI `BitBlt`. That is what a real primary surface
+    shows. Task 2 replaces this with SDL.
+- **Never lost.** `IsLost`, `Restore` and `GetBltStatus` always succeed, so
+  the restore paths stay compiled but never run.
 
-- **Pixels.** `CreateDIBSection` with a 256-entry `BITMAPINFO`, top-down
-  (negative height), and pitch rounded up to 4 bytes.
-- **`Lock` / `GetSurfaceDesc`.** Fill `DDSURFACEDESC`: `lpSurface`,
-  `lPitch`, `dwWidth`, `dwHeight`, 8-bit palettized `DDPIXELFORMAT`, caps.
-- **Blit flags in use** (from grep):
-  - `DDBLT_WAIT` (23 uses) and `DDBLT_COLORFILL` (14), with
-    `ddbltfx.dwFillColor`;
-  - `DDBLT_KEYSRC` (1), `DDBLTFAST_SRCCOLORKEY` (2), `DDBLTFAST_WAIT` (2).
-- **Blit clipping.** Clip to the destination and its clipper. If any call
-  site passes rectangles of different sizes, implement nearest-neighbour
-  stretching. If none does, assert.
-- **The primary surface.** A `TSurface` of game resolution with
-  `is_primary` set. Every write to it (a blit, `Unlock`, `ReleaseDC`)
-  marks the frame dirty for Task 2.
-
-### Type changes
-
-| Header | Member | New type |
-| --- | --- | --- |
-| `include/drawarea.h` | `TDrawArea::DrawSurface` | `TSurface*` |
-| `include/drawarea.h` | `TDrawSystem::DirDraw` | removed, or `void*` kept as a flag |
-| `include/drawarea.h` | `TDrawSystem::PrimarySurface` | `TSurface*` |
-| `include/drawarea.h` | `TDrawSystem::Clipper` | `TSurfaceClipper*` |
-| `include/drawarea.h` | `TDrawSystem::DirDrawPal` | `TSurfacePalette*` |
-| `include/Mouseptr.h` | `restoreSurface`, `renderSurface`, `PrimarySurface` | `TSurface*` |
-| `include/game_types.h` | forward declarations | add `TSurface*` declarations next to the `IDirectDraw*` ones |
-
-Keep the old types under `#ifndef AOE_SDL` until Task 6.
-
-### Call sites
-
-They keep their syntax; check each against the class.
-
-| Function | Calls |
-| --- | --- |
-| `TDrawSystem::CheckAvailModes`, `CheckAvailModesCallback` (drawarea.cpp) | `DirectDrawCreate`, `EnumDisplayModes`. Replace with: set `ModeAvail640/800/1024` (and 1280 if the desktop is that large) and skip the enumeration. |
-| `TDrawSystem::Init` | `DirectDrawCreate`, `SetCooperativeLevel`, `GetDisplayMode`, `SetDisplayMode`, `GetCaps`, `CreatePalette`, `SetEntries`, `CreateClipper`, `SetHWnd`, `Blt`. Becomes: `SDL_Init(SDL_INIT_VIDEO)`, attach to `Wnd`, create the palette and primary. |
-| `TDrawSystem::SetDisplaySize` | `SetDisplayMode`, `Blt`, `Release`, `SendMessageA`. Becomes: resize the primary and the texture (Task 2). Keep the `SendMessageA`. |
-| `TDrawSystem::CreateSurfaces`, `DeleteSurfaces` | `CreateSurface`, `SetPalette`, `SetClipper`, `Blt`, `Release`, `GetClientRect` |
-| `TDrawSystem::CheckSurfaces`, `TDrawArea::CheckSurface` | `IsLost`, `Restore`, `GetDisplayMode`, `Blt`, `Release` (lost surfaces never happen; keep the code) |
-| `TDrawSystem::Paint` | `Blt` back buffer to primary, `GetClientRect`, `ClientToScreen`. Always use the `ScreenMode` 2 branch, then present (Task 2). |
-| `TDrawSystem::ModifyPalette`, `SetPalette` | `SetEntries`, `GetPaletteEntries` |
-| `TDrawSystem::~TDrawSystem` (drawarea.cpp:84–98) | `Release`, `RestoreDisplayMode` (no-op) |
-| `TDrawArea::SetSize` | `CreateSurface`, `GetSurfaceDesc`, `Blt`, `Release` |
-| `TDrawArea::Lock`, `Unlock` | `Lock`, `Unlock` |
-| `TDrawArea::GetDc`, `ReleaseDc` | `GetDC`, `ReleaseDC` (Task 3) |
-| `TDrawArea::SetTrans`, `SetOverlayTrans` | `SetColorKey` |
-| `TDrawArea::Copy`, `color_log` (colorlog.cpp) | `Blt` |
-| `TMousePointer::draw`, `erase`, `Poll`, `create_surfaces`, `delete_surfaces` (Mouseptr.cpp) | `Blt`, `BltFast`, `GetClipper`, `SetClipper`, `CreateSurface`, `Release` |
-| `RGE_View::ProcessQueuedBlit` (view.cpp) | `GetBltStatus`, `BltFast` |
-| `RGE_Base_Game::handle_paint` (basegame.cpp:2957) | `GetBltStatus` |
-| `GetDXVersion` (getdxver.cpp) | `DirectDrawCreate`, `QueryInterface`, `CreateSurface`, `SetCooperativeLevel`, `Release`. Under `AOE_SDL`, skip the DirectDraw probe and report DirectDraw as present. Keep the DirectPlay probe (`IsDPlay501a`): multiplayer still uses it on Windows. |
-
-The panels and screens that call `TDrawArea::Lock`/`Unlock` (Panel_ez,
-Pnl_inp, Pnl_pic, Pnl_scbr, Pnl_txt, diam_map, pnl_btn, pnl_edit, pnl_lst,
-scr_ach, scr_game, scr_sed, scr_vc, spnl_obj, stat_obj, tpnl_btn,
-tpnl_obj, tpnl_tml, view) need no change. Neither do color.cpp,
-scr_cred.cpp, tcommand.cpp, tribegam.cpp, Pnl_scr.cpp and spanlist.cpp,
-which call `TDrawArea::GetPalette`/`SetPalette`.
-
-**Done when:** the `--sdl` build creates no DirectDraw object and runs a
-game to completion (the screen may still be black). Parity cases pass.
+**Done when:** the import table has no `DDRAW.dll`, and a game plays.
 
 ## Task 2: Present the frame with SDL
 
@@ -218,7 +180,7 @@ In `port/sdl/surface.cpp`:
   iteration. At most once per game frame, and the pointer poll may add
   extra presents. Turn vsync off at first, so presenting never blocks the
   game loop.
-- **Palette sources, all into `TSurfacePalette`:**
+- **Palette sources.** They all reach the emulated `IDirectDrawPalette` (`surface_present_palette`):
   - `TDrawSystem::Init`, `ModifyPalette`, `SetPalette`;
   - `TDrawArea::SetPalette`, through the palette's `SetEntries`;
   - GDI `SetPaletteEntries` on `prog_palette` in `TRIBE_Game::setup` and
@@ -274,7 +236,7 @@ memory DC. What to get right:
 - **`PALETTEINDEX` colors.** If the game passes these (grep
   `PALETTEINDEX` and `0x01000000`), select the game's `HPALETTE`
   (`TDrawSystem::Pal`, `prog_palette`) into the memory DC and call
-  `RealizePalette` on it in `TSurface::GetDC`.
+  `RealizePalette` on it in `MemSurface::GetDC`.
 - **No drawing while locked.** `GetDC` while the surface is locked fails,
   as DirectDraw did (`TDrawArea::GetDc` already checks `Bits`).
   `ReleaseDC` calls `GdiFlush()` before the game locks the pixels again.
@@ -439,3 +401,34 @@ has to supply:
   pixel-identical to the plain clang build. That was also the first run of
   the clang build; it reaches the main menu like the retail executable.
 - Not run: the parity suite (`game.cmd test-parity`) needs Windows.
+
+### Task 1 — done 2026-11-21
+
+- `DDRAW.dll` is no longer imported by the `--sdl` build.
+- Checked under Wine (1024x768, see "Testing under Wine" below):
+  - main menu, single-player menu and back again are pixel-identical to
+    the plain clang build;
+  - the scenario editor renders correctly: generated random map,
+    scrolling, the Units tab's text list, and a minimap click. The editor's
+    random-map seed does not come from `RANDOMMAP`, so these screens were
+    inspected rather than compared pixel by pixel.
+- A Task 0 bug showed up at 800x600: SDL answers `WM_NCCALCSIZE` itself for
+  a borderless window, which left the game's popup with a 0x0 client area
+  whenever it did not cover the whole screen. `surface_wnd_proc` now sends
+  `WM_NCCALCSIZE` straight to the game too.
+- Not checked: a running game. See the next section.
+
+### Testing under Wine
+
+- The test setup (Xvfb without root, a separate Wine prefix with a fake CD
+  drive, screenshot and comparison scripts) lives under `build/sdl_test/`
+  and is not committed.
+- The plain clang build, the VC6 build and the `--sdl` build all stop on
+  "Starting a new game..." when a random-map game starts under Wine 10.
+  The main thread sits in the game's idle loop (sampled with `ptrace`: it
+  is in libc, not in game code). The retail executable cannot be compared
+  because it stops at its CD check. This predates the SDL work and is not
+  yet explained.
+- At 800x600 (the default `Screen Size`), Wine scales the plain build's
+  emulated display mode up to the whole screen, while the SDL build draws
+  an 800x600 window. Pixel comparisons therefore use 1024x768.

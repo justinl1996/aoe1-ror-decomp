@@ -11,8 +11,8 @@
     "directory": "build/third_party/SDL2-2.30.9"
   },
   "defines": ["AOE_SDL=1"],
-  "sources": ["port/sdl/surface.cpp"],
+  "sources": ["port/sdl/surface.cpp", "port/sdl/ddraw_memory.cpp"],
   "libraries": ["SDL2.lib"],
-  "drop_libraries": [],
+  "drop_libraries": ["ddraw.lib"],
   "runtime_files": ["lib/x86/SDL2.dll"]
 }
