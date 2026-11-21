@@ -23,13 +23,7 @@ class TSound_Driver {
     long start_volume;
     long volume;
     char path[260];
-    int mixer_open;
-    HMIXER mixer_handle;
-    MIXERLINEA mixer_line_info;
-    MIXERLINECONTROLSA mixer_line_controls;
-    MIXERCONTROLA mixer_volume_control;
-    MIXERCONTROLDETAILS mixer_volume_details;
-    MIXERCONTROLDETAILS_UNSIGNED mixer_volume_value;
+    int mixer_open;  // the SDL mixer's wave volume line (surface.h)
     TDigital* sound_play_list[256];
     int play_list_count;
 
@@ -90,7 +84,6 @@ class TDigital {
     int add_to_play_list();
 };
 
-typedef char sounddrv_tsound_driver_size_check[(sizeof(TSound_Driver) == 0x69C) ? 1 : -1];
 typedef char sounddrv_tdigital_size_check[(sizeof(TDigital) == 0x3C) ? 1 : -1];
 typedef char sounddrv_tsound_driver_main_wnd_offset_check[(offsetof(TSound_Driver, main_wnd) == 0x04) ? 1 : -1];
 typedef char sounddrv_tdigital_resource_id_offset_check[(offsetof(TDigital, resource_id) == 0x18) ? 1 : -1];

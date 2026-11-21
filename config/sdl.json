@@ -36,7 +36,9 @@
     "port/sdl/window.cpp",
     "port/sdl/gdi.cpp",
     "port/sdl/ddraw_memory.cpp",
-    "port/sdl/dsound_memory.cpp"
+    "port/sdl/dsound_memory.cpp",
+    "port/sdl/winmm.cpp",
+    "port/sdl/mci.cpp"
   ],
   "libraries": ["SDL2.lib", "SDL2_ttf.lib"],
   "drop_libraries": ["ddraw.lib", "dsound.lib"],

@@ -25,16 +25,8 @@
 #include <string.h>
 
 #include "../../include/surface.h"
+#include "sdl_internal.h"
 
-
-// The VC6 C runtime lacks _aligned_malloc, which clang's intrinsic headers
-// use. Nothing here needs SDL's intrinsics.
-#define SDL_DISABLE_IMMINTRIN_H
-#define SDL_DISABLE_MMINTRIN_H
-#define SDL_DISABLE_XMMINTRIN_H
-#define SDL_DISABLE_EMMINTRIN_H
-#define SDL_DISABLE_PMMINTRIN_H
-#include <SDL.h>
 
 enum {
     MIX_RATE = 44100,
@@ -154,6 +146,13 @@ static SDL_AudioDeviceID mix_device = 0;
 static MemSoundBuffer* mix_playing = 0;   // singly linked through next_playing
 static int mix_devices_open = 0;           // MemDirectSound objects alive
 
+// The two volume lines that stood in for the system mixer's wave-out and
+// CD/synthesizer lines: wave scales every DirectSound buffer, music scales
+// the music source (mci.cpp). Fixed-point gains, GAIN_ONE at full volume.
+static long mix_line_volume[2] = {0, 0};
+static long mix_line_gain[2] = {GAIN_ONE, GAIN_ONE};
+static MixMusicFill mix_music_fill = 0;
+
 static void mix_lock(void) {
     if (mix_device != 0)
         SDL_LockAudioDevice(mix_device);
@@ -225,6 +224,7 @@ static int mix_buffer(MemSoundBuffer* buffer, int* accum, int frames) {
 static void SDLCALL mix_callback(void*, Uint8* stream, int len) {
     int frames = len / 4;
     static int accum[MIX_SAMPLES * 2 * 4];
+    static short music[MIX_SAMPLES * 2 * 4];
     if (frames > MIX_SAMPLES * 4)
         frames = MIX_SAMPLES * 4;
     memset(accum, 0, frames * 2 * sizeof(int));
@@ -241,6 +241,17 @@ static void SDLCALL mix_callback(void*, Uint8* stream, int len) {
         } else {
             link = &buffer->next_playing;
         }
+    }
+
+    long wave_gain = mix_line_gain[SURFACE_SOUND_WAVE];
+    if (wave_gain != GAIN_ONE) {
+        for (int i = 0; i < frames * 2; ++i)
+            accum[i] = (int) (((long long) accum[i] * wave_gain) >> 16);
+    }
+    if (mix_music_fill != 0 && mix_music_fill(music, frames) != 0) {
+        long music_gain = mix_line_gain[SURFACE_SOUND_MUSIC];
+        for (int i = 0; i < frames * 2; ++i)
+            accum[i] += (int) (((long long) music[i] * music_gain) >> 16);
     }
 
     short* out = (short*) stream;
@@ -285,6 +296,46 @@ static void mix_close(void) {
     mix_playing = 0;
     if (SDL_WasInit(SDL_INIT_AUDIO) != 0)
         SDL_QuitSubSystem(SDL_INIT_AUDIO);
+}
+
+void mix_audio_lock(void) {
+    mix_lock();
+}
+
+void mix_audio_unlock(void) {
+    mix_unlock();
+}
+
+int mix_audio_open(void) {
+    return mix_device != 0;
+}
+
+void mix_set_music_source(MixMusicFill fill) {
+    mix_lock();
+    mix_music_fill = fill;
+    mix_unlock();
+}
+
+// Volume in the game's mixer units: -10000 (silent) to 0 (full), linear in
+// amplitude, as the system mixer's volume controls were.
+extern "C" long surface_sound_get_volume(int line) {
+    if (line < 0 || line > 1)
+        return 0;
+    return mix_line_volume[line];
+}
+
+extern "C" void surface_sound_set_volume(int line, long volume) {
+    if (line < 0 || line > 1)
+        return;
+    if (volume < -10000)
+        volume = -10000;
+    if (volume > 0)
+        volume = 0;
+    long gain = (long) (((long long) (volume + 10000) * GAIN_ONE) / 10000);
+    mix_lock();
+    mix_line_volume[line] = volume;
+    mix_line_gain[line] = gain;
+    mix_unlock();
 }
 
 // ---------------------------------------------------------------------------

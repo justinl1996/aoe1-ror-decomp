@@ -37,13 +37,7 @@ class TMusic_System {
     int fading_track;
     long fade_volume;
     unsigned long last_fade_time;
-    int mixer_open;
-    HMIXER mixer_handle;
-    MIXERLINEA mixer_line_info;
-    MIXERLINECONTROLSA mixer_line_controls;
-    MIXERCONTROLA mixer_volume_control;
-    MIXERCONTROLDETAILS mixer_volume_details;
-    MIXERCONTROLDETAILS_UNSIGNED mixer_volume_value;
+    int mixer_open;  // the SDL mixer's music volume line (surface.h)
     void* midi_window;
     unsigned long last_check_time;
 

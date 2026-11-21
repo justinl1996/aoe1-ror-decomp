@@ -739,6 +739,62 @@ use GDI, and text is drawn with SDL_ttf.
   overwrote the return address in the clang build, an intermittent crash
   while generating a map. Fixed in src/rmm_base.cpp.
 
+### Sound without WINMM — done 2026-11-21
+
+- Timer: Dsutil.c's stream refill timer (`timeSetEvent`, periodic, 50 ms)
+  runs on SDL's timer thread (`surface_time_set_event`,
+  `surface_time_kill_event` in port/sdl/winmm.cpp). `timeBeginPeriod` and
+  `timeEndPeriod` are gone; SDL's timer needs no resolution request.
+- WAV files: the `mmio*` calls in Dsutil.c go to `surface_mmio_*`
+  (port/sdl/winmm.cpp), a small buffered RIFF reader and writer over
+  stdio: open, read, write, seek, chunk descend (plain, `FINDCHUNK`,
+  `FINDRIFF`, `FINDLIST`), ascend (fixing the size of a chunk being
+  written), create, and the direct buffer access of
+  `mmioGetInfo`/`mmioAdvance`/`mmioSetInfo` that `WaveReadFile` uses.
+- Volume: the game set the system mixer's wave-out line (sound volume) and
+  its CD or synthesizer line (music volume). These are two volume lines in
+  the SDL mixer now (`surface_sound_set_volume`, dsound_memory.cpp): wave
+  scales every DirectSound buffer, music scales the music player. The
+  game's -10000..0 maps linearly to amplitude, as the mixer control did.
+  The game no longer changes the system's volume, so it has nothing to
+  restore on exit. The `mixer*` members of `TSound_Driver` and
+  `TMusic_System` are gone, with their size checks.
+- Music: `mciSendCommandA` in music.cpp and Cdaudio.cpp goes to
+  `surface_mci_send_command` (port/sdl/mci.cpp), which plays WAV files
+  through the SDL mixer:
+  - the `cdaudio` device plays CD tracks ripped to
+    `music/trackNN.wav` next to the executable (`track02.wav` is the
+    first music track). It opens when one exists. Without any, it fails,
+    and the game falls back to MIDI as it did without a music CD;
+  - the `sequencer` device plays a WAV rendering of the MIDI file, with
+    the same name and `.wav`, beside it or in `music/`. Without one, the
+    command goes to the system's MCI, so MIDI music works on Windows as
+    before;
+  - play (from/to, TMSF or milliseconds), seek, pause, resume, stop,
+    close, set time format, and status (track count, position, mode,
+    current track) behave as MCI's do. `MM_MCINOTIFY` is posted when a
+    play finishes, or (superseded or aborted) when a later command
+    interrupts it, so the game's count of pending notifications holds.
+  - WAV formats: PCM 8, 16 or 32-bit, and 32-bit float, any rate and
+    channel count (converted by `SDL_AudioStream`).
+- Fixed: with `STREAM_MUSIC`, music.cpp passed a full path that
+  `TSound_Driver::stream_file` prefixed with the sound folder again, so no
+  music played. It passes the name only now.
+- Remaining WINMM imports: `mciSendCommandA` and `mciGetErrorStringA` (the
+  system sequencer fallback, Windows only) and `timeGetTime` (Task 3 of
+  the Linux list).
+- Checked under Wine with SDL's `disk` audio driver, using test tones
+  for the music: with `music/track02.wav` and `track03.wav`, the menu
+  plays track 2 once at the music volume, and stops. With no CD tracks
+  but `sound/OPEN.wav`, `MUSIC1.wav` and `MUSIC2.wav` beside the MIDI
+  files, the menu plays OPEN's rendering. In a game, MUSIC1 and then
+  MUSIC2 play, moved on by the notification. MUSIC3, with no rendering,
+  goes to Wine's sequencer and stays silent. With `STREAM_MUSIC`, the
+  menu streams `open.wav` in full through the Dsutil stream (SDL timer and
+  mmio). Game sounds play as before. Not checked: on Windows, the
+  sequencer fallback with real MIDI; volume changes from the options
+  screen; saved-game music positions.
+
 ### Testing under Wine
 
 - The test setup (Xvfb without root, a separate Wine prefix with a fake CD

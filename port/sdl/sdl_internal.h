@@ -31,4 +31,14 @@ long map_game_height(void);
 void layout_toggle(void);
 int layout_is_windowed(void);
 
+// dsound_memory.cpp: the SDL audio device and its mixer. The music source
+// fills frames of 16-bit stereo at 44100 Hz from the audio thread and
+// returns 0 when it has nothing to play. Lock around state the source reads.
+typedef int (*MixMusicFill)(short* out, int frames);
+void mix_set_music_source(MixMusicFill fill);
+void mix_audio_lock(void);
+void mix_audio_unlock(void);
+int mix_audio_open(void);
+enum { MIX_OUTPUT_RATE = 44100 };
+
 #endif // SDL_INTERNAL_H

@@ -6,6 +6,7 @@
 // Everything here has C linkage, so Dsutil.c can use it too.
 
 #include <windows.h>
+#include <mmsystem.h>
 #include <ddraw.h>
 
 #ifdef __cplusplus
@@ -71,6 +72,39 @@ HRESULT WINAPI surface_DirectDrawCreate(GUID FAR* guid, LPDIRECTDRAW FAR* out, I
 // no audio device.
 HRESULT WINAPI surface_DirectSoundCreate(LPGUID guid, LPDIRECTSOUND* out, LPUNKNOWN outer);
 #endif
+
+// The volume lines of the SDL mixer (port/sdl/dsound_memory.cpp), standing
+// in for the system mixer's wave-out line (every DirectSound buffer) and
+// its CD or synthesizer line (music played by surface_mci_send_command).
+// Volumes run from -10000 (silent) to 0 (full), linear in amplitude, as the
+// game set them on the system mixer.
+enum { SURFACE_SOUND_WAVE = 0, SURFACE_SOUND_MUSIC = 1 };
+long surface_sound_get_volume(int line);
+void surface_sound_set_volume(int line, long volume);
+
+// Music (port/sdl/mci.cpp): mciSendCommandA for the cdaudio and sequencer
+// devices, playing WAV files through the SDL mixer: CD tracks ripped to
+// music/trackNN.wav, and WAV renderings of MIDI files. Anything else goes
+// to the system's MCI.
+MCIERROR WINAPI surface_mci_send_command(MCIDEVICEID id, UINT msg, DWORD flags, DWORD params);
+BOOL surface_mci_get_error_string(MCIERROR error, LPSTR text, UINT length);
+
+// WINMM stand-ins for the WAV stream (port/sdl/winmm.cpp): timeSetEvent on
+// SDL's timer thread, and the mmio RIFF file functions over stdio. They
+// take and return what their WINMM namesakes do.
+UINT surface_time_set_event(UINT delay, UINT resolution, LPTIMECALLBACK proc, DWORD user, UINT flags);
+MMRESULT surface_time_kill_event(UINT id);
+HMMIO surface_mmio_open(LPSTR name, LPMMIOINFO info, DWORD flags);
+MMRESULT surface_mmio_close(HMMIO mmio, UINT flags);
+LONG surface_mmio_read(HMMIO mmio, HPSTR data, LONG length);
+LONG surface_mmio_write(HMMIO mmio, const char* data, LONG length);
+LONG surface_mmio_seek(HMMIO mmio, LONG offset, int origin);
+MMRESULT surface_mmio_get_info(HMMIO mmio, LPMMIOINFO info, UINT flags);
+MMRESULT surface_mmio_set_info(HMMIO mmio, LPCMMIOINFO info, UINT flags);
+MMRESULT surface_mmio_advance(HMMIO mmio, LPMMIOINFO info, UINT flags);
+MMRESULT surface_mmio_descend(HMMIO mmio, LPMMCKINFO chunk, const MMCKINFO* parent, UINT flags);
+MMRESULT surface_mmio_ascend(HMMIO mmio, LPMMCKINFO chunk, UINT flags);
+MMRESULT surface_mmio_create_chunk(HMMIO mmio, LPMMCKINFO chunk, UINT flags);
 
 // Presenting the primary surface (port/sdl/surface.cpp).
 //

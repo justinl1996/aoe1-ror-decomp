@@ -343,12 +343,12 @@ int __cdecl WaveOpenFile(char* pszFileName, HMMIO* phmmioIn, LPWAVEFORMATEX* ppw
     err = 0;
     hmmioIn = 0;
 
-    if ((hmmioIn = mmioOpenA(pszFileName, 0, MMIO_ALLOCBUF)) == 0) {
+    if ((hmmioIn = surface_mmio_open(pszFileName, 0, MMIO_ALLOCBUF)) == 0) {
         err = 0xE100;
         goto error;
     }
 
-    if ((err = mmioDescend(hmmioIn, (LPMMCKINFO) pckInRIFF, 0, 0)) != 0) {
+    if ((err = surface_mmio_descend(hmmioIn, (LPMMCKINFO) pckInRIFF, 0, 0)) != 0) {
         goto error;
     }
 
@@ -358,7 +358,7 @@ int __cdecl WaveOpenFile(char* pszFileName, HMMIO* phmmioIn, LPWAVEFORMATEX* ppw
     }
 
     ckIn.ckid = mmioFOURCC('f', 'm', 't', ' ');
-    if ((err = mmioDescend(hmmioIn, (LPMMCKINFO) &ckIn, (LPMMCKINFO) pckInRIFF, MMIO_FINDCHUNK)) != 0) {
+    if ((err = surface_mmio_descend(hmmioIn, (LPMMCKINFO) &ckIn, (LPMMCKINFO) pckInRIFF, MMIO_FINDCHUNK)) != 0) {
         goto error;
     }
 
@@ -367,7 +367,7 @@ int __cdecl WaveOpenFile(char* pszFileName, HMMIO* phmmioIn, LPWAVEFORMATEX* ppw
         goto error;
     }
 
-    if (mmioRead(hmmioIn, (char*) &pcmWaveFormat, sizeof(pcmWaveFormat)) != sizeof(pcmWaveFormat)) {
+    if (surface_mmio_read(hmmioIn, (char*) &pcmWaveFormat, sizeof(pcmWaveFormat)) != sizeof(pcmWaveFormat)) {
         err = 0xE102;
         goto error;
     }
@@ -375,7 +375,7 @@ int __cdecl WaveOpenFile(char* pszFileName, HMMIO* phmmioIn, LPWAVEFORMATEX* ppw
     if (pcmWaveFormat.wf.wFormatTag == WAVE_FORMAT_PCM) {
         cbExtraAlloc = 0;
     } else {
-        if (mmioRead(hmmioIn, (char*) &cbExtraAlloc, sizeof(cbExtraAlloc)) != sizeof(cbExtraAlloc)) {
+        if (surface_mmio_read(hmmioIn, (char*) &cbExtraAlloc, sizeof(cbExtraAlloc)) != sizeof(cbExtraAlloc)) {
             err = 0xE102;
             goto error;
         }
@@ -390,13 +390,13 @@ int __cdecl WaveOpenFile(char* pszFileName, HMMIO* phmmioIn, LPWAVEFORMATEX* ppw
     (*ppwfxInfo)->cbSize = cbExtraAlloc;
 
     if (cbExtraAlloc != 0) {
-        if (mmioRead(hmmioIn, (char*) &(*ppwfxInfo)->cbSize + sizeof(cbExtraAlloc), cbExtraAlloc) != cbExtraAlloc) {
+        if (surface_mmio_read(hmmioIn, (char*) &(*ppwfxInfo)->cbSize + sizeof(cbExtraAlloc), cbExtraAlloc) != cbExtraAlloc) {
             err = 0xE101;
             goto error;
         }
     }
 
-    if ((err = mmioAscend(hmmioIn, (LPMMCKINFO) &ckIn, 0)) != 0) {
+    if ((err = surface_mmio_ascend(hmmioIn, (LPMMCKINFO) &ckIn, 0)) != 0) {
         goto error;
     }
     goto tempcleanup;
@@ -407,7 +407,7 @@ error:
         *ppwfxInfo = 0;
     }
     if (hmmioIn != 0) {
-        mmioClose(hmmioIn, 0);
+        surface_mmio_close(hmmioIn, 0);
         hmmioIn = 0;
     }
 
@@ -417,12 +417,12 @@ tempcleanup:
 }
 
 int __cdecl WaveStartDataRead(HMMIO* phmmioIn, MMCKINFO* pckIn, MMCKINFO* pckInRIFF) {
-    if (mmioSeek(*phmmioIn, pckInRIFF->dwDataOffset + 4, 0) == -1) {
+    if (surface_mmio_seek(*phmmioIn, pckInRIFF->dwDataOffset + 4, 0) == -1) {
         return 1;
     }
 
     pckIn->ckid = mmioFOURCC('d', 'a', 't', 'a');
-    return mmioDescend(*phmmioIn, (LPMMCKINFO) pckIn, (LPMMCKINFO) pckInRIFF, MMIO_FINDCHUNK);
+    return surface_mmio_descend(*phmmioIn, (LPMMCKINFO) pckIn, (LPMMCKINFO) pckInRIFF, MMIO_FINDCHUNK);
 }
 
 int __cdecl WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest, MMCKINFO* pckIn, UINT* cbActualRead) {
@@ -432,7 +432,7 @@ int __cdecl WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest, MMCKINFO* pck
     UINT cbDataIn;
     UINT cbDataToCopy;
 
-    if ((nError = (mmioGetInfo(hmmioIn, (LPMMIOINFO) &mmioinfoIn, 0) != 0))) {
+    if ((nError = (surface_mmio_get_info(hmmioIn, (LPMMIOINFO) &mmioinfoIn, 0) != 0))) {
         goto error;
     }
 
@@ -445,7 +445,7 @@ int __cdecl WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest, MMCKINFO* pck
 
     for (cT = 0; cT < cbDataIn;) {
         if (mmioinfoIn.pchNext == mmioinfoIn.pchEndRead) {
-            if ((nError = mmioAdvance(hmmioIn, (LPMMIOINFO) &mmioinfoIn, 0)) != 0) {
+            if ((nError = surface_mmio_advance(hmmioIn, (LPMMIOINFO) &mmioinfoIn, 0)) != 0) {
                 goto error;
             }
             if (mmioinfoIn.pchNext == mmioinfoIn.pchEndRead) {
@@ -464,7 +464,7 @@ int __cdecl WaveReadFile(HMMIO hmmioIn, UINT cbRead, BYTE* pbDest, MMCKINFO* pck
         mmioinfoIn.pchNext += cbDataToCopy;
     }
 
-    if ((nError = mmioSetInfo(hmmioIn, (LPMMIOINFO) &mmioinfoIn, 0)) != 0) {
+    if ((nError = surface_mmio_set_info(hmmioIn, (LPMMIOINFO) &mmioinfoIn, 0)) != 0) {
         goto error;
     }
 
@@ -483,7 +483,7 @@ int __cdecl WaveCloseReadFile(HMMIO* phmmio, HGLOBAL* ppwfxSrc) {
         *ppwfxSrc = 0;
     }
     if (*phmmio != 0) {
-        mmioClose(*phmmio, 0);
+        surface_mmio_close(*phmmio, 0);
         *phmmio = 0;
     }
     return 0;
@@ -497,7 +497,7 @@ int __cdecl WaveCreateFile(char* pszFileName, HMMIO* phmmioOut, WAVEFORMATEX* pw
     dwFactChunk = (DWORD) -1;
     err = 0;
 
-    *phmmioOut = mmioOpenA(pszFileName, 0, MMIO_ALLOCBUF | MMIO_CREATE | MMIO_READWRITE);
+    *phmmioOut = surface_mmio_open(pszFileName, 0, MMIO_ALLOCBUF | MMIO_CREATE | MMIO_READWRITE);
     if (*phmmioOut == 0) {
         err = 0xE104;
         goto done;
@@ -505,42 +505,42 @@ int __cdecl WaveCreateFile(char* pszFileName, HMMIO* phmmioOut, WAVEFORMATEX* pw
 
     pckOutRIFF->fccType = mmioFOURCC('W', 'A', 'V', 'E');
     pckOutRIFF->cksize = 0;
-    if ((err = mmioCreateChunk(*phmmioOut, (LPMMCKINFO) pckOutRIFF, MMIO_CREATERIFF)) != 0) {
+    if ((err = surface_mmio_create_chunk(*phmmioOut, (LPMMCKINFO) pckOutRIFF, MMIO_CREATERIFF)) != 0) {
         goto done;
     }
 
     pckOut->ckid = mmioFOURCC('f', 'm', 't', ' ');
     pckOut->cksize = 16;
-    if ((err = mmioCreateChunk(*phmmioOut, (LPMMCKINFO) pckOut, 0)) != 0) {
+    if ((err = surface_mmio_create_chunk(*phmmioOut, (LPMMCKINFO) pckOut, 0)) != 0) {
         goto done;
     }
 
     if (pwfxDest->wFormatTag == WAVE_FORMAT_PCM) {
-        if (mmioWrite(*phmmioOut, (const char*) pwfxDest, 16) != 16) {
+        if (surface_mmio_write(*phmmioOut, (const char*) pwfxDest, 16) != 16) {
             err = 0xE104;
             goto done;
         }
     } else {
-        if ((UINT) mmioWrite(*phmmioOut, (const char*) pwfxDest, 18 + pwfxDest->cbSize) != (18 + pwfxDest->cbSize)) {
+        if ((UINT) surface_mmio_write(*phmmioOut, (const char*) pwfxDest, 18 + pwfxDest->cbSize) != (18 + pwfxDest->cbSize)) {
             goto fail;
         }
     }
 
-    if ((err = mmioAscend(*phmmioOut, (LPMMCKINFO) pckOut, 0)) != 0) {
+    if ((err = surface_mmio_ascend(*phmmioOut, (LPMMCKINFO) pckOut, 0)) != 0) {
         goto done;
     }
 
     ckOut1.ckid = mmioFOURCC('f', 'a', 'c', 't');
     ckOut1.cksize = 0;
-    if ((err = mmioCreateChunk(*phmmioOut, (LPMMCKINFO) &ckOut1, 0)) != 0) {
+    if ((err = surface_mmio_create_chunk(*phmmioOut, (LPMMCKINFO) &ckOut1, 0)) != 0) {
         goto done;
     }
 
-    if (mmioWrite(*phmmioOut, (const char*) &dwFactChunk, sizeof(dwFactChunk)) != sizeof(dwFactChunk)) {
+    if (surface_mmio_write(*phmmioOut, (const char*) &dwFactChunk, sizeof(dwFactChunk)) != sizeof(dwFactChunk)) {
         goto fail;
     }
 
-    if ((err = mmioAscend(*phmmioOut, (LPMMCKINFO) &ckOut1, 0)) == 0) {
+    if ((err = surface_mmio_ascend(*phmmioOut, (LPMMCKINFO) &ckOut1, 0)) == 0) {
         goto done;
     }
 
@@ -556,11 +556,11 @@ MMRESULT __cdecl WaveStartDataWrite(void* phmmioOut, MMCKINFO* pckOut, MMIOINFO*
 
     pckOut->ckid = mmioFOURCC('d', 'a', 't', 'a');
     pckOut->cksize = 0;
-    result = mmioCreateChunk(*(HMMIO*) phmmioOut, (LPMMCKINFO) pckOut, 0);
+    result = surface_mmio_create_chunk(*(HMMIO*) phmmioOut, (LPMMCKINFO) pckOut, 0);
     if (result != 0) {
         return result;
     }
-    return mmioGetInfo(*(HMMIO*) phmmioOut, (LPMMIOINFO) pmmioinfoOut, 0);
+    return surface_mmio_get_info(*(HMMIO*) phmmioOut, (LPMMIOINFO) pmmioinfoOut, 0);
 }
 
 int __cdecl WaveWriteFile(
@@ -575,7 +575,7 @@ int __cdecl WaveWriteFile(
     do {
         if (pmmioinfoOut->pchNext == pmmioinfoOut->pchEndWrite) {
             pmmioinfoOut->dwFlags = pmmioinfoOut->dwFlags | MMIO_DIRTY;
-            result = mmioAdvance(hmmioOut, pmmioinfoOut, MMIO_WRITE);
+            result = surface_mmio_advance(hmmioOut, pmmioinfoOut, MMIO_WRITE);
             if (result != 0) {
                 return result;
             }
@@ -595,20 +595,20 @@ int __cdecl WaveCloseWriteFile(HMMIO* phmmioOut, MMCKINFO* pckOut, MMCKINFO* pck
     }
 
     pmmioinfoOut->dwFlags |= MMIO_DIRTY;
-    result = mmioSetInfo(*phmmioOut, (LPMMIOINFO) pmmioinfoOut, 0);
+    result = surface_mmio_set_info(*phmmioOut, (LPMMIOINFO) pmmioinfoOut, 0);
     if (result == 0) {
-        result = mmioAscend(*phmmioOut, (LPMMCKINFO) pckOut, 0);
+        result = surface_mmio_ascend(*phmmioOut, (LPMMCKINFO) pckOut, 0);
         if (result == 0) {
-            result = mmioAscend(*phmmioOut, (LPMMCKINFO) pckOutRIFF, 0);
+            result = surface_mmio_ascend(*phmmioOut, (LPMMCKINFO) pckOutRIFF, 0);
             if (result == 0) {
-                mmioSeek(*phmmioOut, 0, 0);
-                result = mmioDescend(*phmmioOut, (LPMMCKINFO) pckOutRIFF, 0, 0);
+                surface_mmio_seek(*phmmioOut, 0, 0);
+                result = surface_mmio_descend(*phmmioOut, (LPMMCKINFO) pckOutRIFF, 0, 0);
                 if (result == 0) {
                     pckOut->ckid = mmioFOURCC('f', 'a', 'c', 't');
-                    if ((result = mmioDescend(*phmmioOut, (LPMMCKINFO) pckOut, (LPMMCKINFO) pckOutRIFF, MMIO_FINDCHUNK)) == 0) {
-                        mmioWrite(*phmmioOut, (const char*) &cSamples, sizeof(DWORD));
-                        mmioAscend(*phmmioOut, (LPMMCKINFO) pckOut, result);
-                        result = mmioAscend(*phmmioOut, (LPMMCKINFO) pckOutRIFF, 0);
+                    if ((result = surface_mmio_descend(*phmmioOut, (LPMMCKINFO) pckOut, (LPMMCKINFO) pckOutRIFF, MMIO_FINDCHUNK)) == 0) {
+                        surface_mmio_write(*phmmioOut, (const char*) &cSamples, sizeof(DWORD));
+                        surface_mmio_ascend(*phmmioOut, (LPMMCKINFO) pckOut, result);
+                        result = surface_mmio_ascend(*phmmioOut, (LPMMCKINFO) pckOutRIFF, 0);
                     } else {
                         return 1;
                     }
@@ -618,7 +618,7 @@ int __cdecl WaveCloseWriteFile(HMMIO* phmmioOut, MMCKINFO* pckOut, MMCKINFO* pck
     }
 
     if (*phmmioOut != 0) {
-        mmioClose(*phmmioOut, 0);
+        surface_mmio_close(*phmmioOut, 0);
         *phmmioOut = 0;
     }
     return result;
@@ -627,11 +627,11 @@ int __cdecl WaveCloseWriteFile(HMMIO* phmmioOut, MMCKINFO* pckOut, MMCKINFO* pck
 int __cdecl WaveCopyUselessChunks(HMMIO* phmmioIn, MMCKINFO* pckIn, MMCKINFO* pckInRiff, HMMIO* phmmioOut) {
     int result;
 
-    if (mmioSeek(*phmmioIn, pckInRiff->dwDataOffset + 4, 0) == -1) {
+    if (surface_mmio_seek(*phmmioIn, pckInRiff->dwDataOffset + 4, 0) == -1) {
         result = 0xE102;
     } else {
         result = 0;
-        while (mmioDescend(*phmmioIn, (LPMMCKINFO) pckIn, (LPMMCKINFO) pckInRiff, 0) == 0) {
+        while (surface_mmio_descend(*phmmioIn, (LPMMCKINFO) pckIn, (LPMMCKINFO) pckInRiff, 0) == 0) {
             DWORD ckEnd = pckIn->cksize;
             DWORD parentEnd = pckInRiff->cksize;
             ckEnd += pckIn->dwDataOffset;
@@ -644,11 +644,11 @@ int __cdecl WaveCopyUselessChunks(HMMIO* phmmioIn, MMCKINFO* pckIn, MMCKINFO* pc
                     riffCopyChunk(*phmmioIn, *phmmioOut, pckIn);
                 }
             }
-            mmioAscend(*phmmioIn, (LPMMCKINFO) pckIn, 0);
+            surface_mmio_ascend(*phmmioIn, (LPMMCKINFO) pckIn, 0);
         }
     }
 
-    mmioSeek(*phmmioIn, pckInRiff->dwDataOffset + 4, 0);
+    surface_mmio_seek(*phmmioIn, pckInRiff->dwDataOffset + 4, 0);
     return result;
 }
 
@@ -668,16 +668,16 @@ int __cdecl riffCopyChunk(HMMIO hmmioSrc, HMMIO hmmioDst, MMCKINFO* pckIn) {
 
     ck.ckid = pckIn->ckid;
     ck.cksize = pckIn->cksize;
-    if (mmioCreateChunk(hmmioDst, (LPMMCKINFO) &ck, 0) != 0) {
+    if (surface_mmio_create_chunk(hmmioDst, (LPMMCKINFO) &ck, 0) != 0) {
         goto fail;
     }
-    if (mmioRead(hmmioSrc, data, pckIn->cksize) != (LONG) pckIn->cksize) {
+    if (surface_mmio_read(hmmioSrc, data, pckIn->cksize) != (LONG) pckIn->cksize) {
         goto fail;
     }
-    if (mmioWrite(hmmioDst, data, pckIn->cksize) != pckIn->cksize) {
+    if (surface_mmio_write(hmmioDst, data, pckIn->cksize) != pckIn->cksize) {
         goto fail;
     }
-    if (mmioAscend(hmmioDst, (LPMMCKINFO) &ck, 0) != 0) {
+    if (surface_mmio_ascend(hmmioDst, (LPMMCKINFO) &ck, 0) != 0) {
         goto fail;
     }
 
@@ -737,7 +737,7 @@ error:
 
 done:
     if (hmmio != 0) {
-        mmioClose(hmmio, 0);
+        surface_mmio_close(hmmio, 0);
     }
     return err;
 }
@@ -886,14 +886,8 @@ int __cdecl ds_stream_file(char* szName, int bLoop, long Volume) {
     IDirectSoundBuffer_SetVolume((LPDIRECTSOUNDBUFFER) _lpDSBStreamBuffer, Volume);
     IDirectSoundBuffer_Play((LPDIRECTSOUNDBUFFER) _lpDSBStreamBuffer, 0, 0, 1);
 
-    if (timeBeginPeriod(DS_STREAM_TIMER_PERIOD) != 0) {
-        IDirectSoundBuffer_Stop((LPDIRECTSOUNDBUFFER) _lpDSBStreamBuffer);
-        _bTimerInstalled = 0;
-        _bPlaying = 0;
-        return 0;
-    }
-
-    _uTimerID = timeSetEvent(DS_STREAM_TIMER_PERIOD, DS_STREAM_TIMER_RESOLUTION, ds_stream_time_func, 0, 1);
+    // timeBeginPeriod set the timer resolution; SDL's timer needs none.
+    _uTimerID = surface_time_set_event(DS_STREAM_TIMER_PERIOD, DS_STREAM_TIMER_RESOLUTION, ds_stream_time_func, 0, 1);
     if (_uTimerID != 0) {
         _bTimerInstalled = 1;
     }
@@ -927,8 +921,7 @@ int __cdecl ds_stream_stop(void) {
     ds_stream_stop_requested = 1;
     if (_bTimerInstalled != 0) {
         _bTimerInstalled = 0;
-        timeKillEvent(_uTimerID);
-        timeEndPeriod(DS_STREAM_TIMER_PERIOD);
+        surface_time_kill_event(_uTimerID);
     }
 
     if (_bPlaying != 0) {
