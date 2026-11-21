@@ -1,4 +1,5 @@
 #include "../include/panel_ez.h"
+#include "../include/surface.h"
 #include "../include/basegame.h"
 #include "../include/drawarea.h"
 #include "../include/Shape.h"
@@ -276,7 +277,7 @@ void TEasy_Panel::prepare_for_close() {
 
     if (this->brush != 0) {
         if (this->stock_brush == 0) {
-            DeleteObject(this->brush);
+            gdi_delete_object(this->brush);
         }
         this->brush = 0;
     }
@@ -576,7 +577,7 @@ void TEasy_Panel::set_background_colors(unsigned char color1, unsigned char colo
     this->set_color(color1);
     background_color1 = color1;
     background_color2 = color2;
-    this->brush = GetStockObject(BLACK_BRUSH);
+    this->brush = gdi_get_stock_object(BLACK_BRUSH);
     this->stock_brush = 1;
     brush_color = 0;
 }

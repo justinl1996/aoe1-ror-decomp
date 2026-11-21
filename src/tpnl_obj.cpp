@@ -1,5 +1,6 @@
 
 #include "../include/tpnl_obj.h"
+#include "../include/surface.h"
 #include "../include/asm_draw.h"
 #include "../include/Shape.h"
 #include "../include/com_hand.h"
@@ -217,10 +218,10 @@ void TRIBE_Panel_Object::draw() {
     }
 
     if (this->render_area->GetDc("tpnl_obj::draw") != 0) {
-        SetBkMode(this->render_area->DrawDc, TRANSPARENT);
-        SetTextColor(this->render_area->DrawDc, 0x00ffffff);
-        SelectClipRgn(this->render_area->DrawDc, (HRGN) this->clip_rgn);
-        HGDIOBJ old_font = SelectObject(this->render_area->DrawDc, (HGDIOBJ) this->font);
+        gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
+        gdi_set_text_color(this->render_area->DrawDc, 0x00ffffff);
+        gdi_select_clip_rgn(this->render_area->DrawDc, (HRGN) this->clip_rgn);
+        HGDIOBJ old_font = gdi_select_object(this->render_area->DrawDc, (HGDIOBJ) this->font);
 
         if (this->game_obj->owner->id != 0) {
             if (rge_base_game->campaignGame() == 0) {
@@ -233,7 +234,7 @@ void TRIBE_Panel_Object::draw() {
                 rge_base_game->get_string2(RGE_STRING_TYPE_CIVILIZATION, this->game_obj->owner->master_player_id, 0, name, 100);
             }
 
-            TextOutA(this->render_area->DrawDc, this->pnl_x + 3, this->pnl_y - 2, name, (int) strlen(name));
+            gdi_text_out(this->render_area->DrawDc, this->pnl_x + 3, this->pnl_y - 2, name, (int) strlen(name));
         }
 
         if (this->game_obj->master_obj->string_id < 1) {
@@ -250,15 +251,15 @@ void TRIBE_Panel_Object::draw() {
         else
             sprintf(name, "%s", str);
 
-        TextOutA(this->render_area->DrawDc, this->pnl_x + 3, this->pnl_y + 0x0d, name, (int) strlen(name));
+        gdi_text_out(this->render_area->DrawDc, this->pnl_x + 3, this->pnl_y + 0x0d, name, (int) strlen(name));
 
         if (this->game_obj->hp > 0.0f) {
             sprintf(str, "%d/%d", (int) this->game_obj->hp, (int) this->game_obj->master_obj->hp);
-            TextOutA(this->render_area->DrawDc, this->pnl_x + 3, this->pnl_y + 0x5c, str, (int) strlen(str));
+            gdi_text_out(this->render_area->DrawDc, this->pnl_x + 3, this->pnl_y + 0x5c, str, (int) strlen(str));
         }
 
-        SelectObject(this->render_area->DrawDc, old_font);
-        SelectClipRgn(this->render_area->DrawDc, 0);
+        gdi_select_object(this->render_area->DrawDc, old_font);
+        gdi_select_clip_rgn(this->render_area->DrawDc, 0);
         this->render_area->ReleaseDc("tpnl_obj::draw");
     }
 
@@ -601,9 +602,9 @@ void TRIBE_Panel_Object::draw_score() {
     this->render_area->Clear(&this->clip_rect, 0);
 
     if (this->render_area->GetDc("tpnl_obj::draw_score") != 0) {
-        SetBkMode(this->render_area->DrawDc, TRANSPARENT);
-        SetTextColor(this->render_area->DrawDc, 0xFFFFFF);
-        old_font = SelectObject(this->render_area->DrawDc, (HGDIOBJ) this->font);
+        gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
+        gdi_set_text_color(this->render_area->DrawDc, 0xFFFFFF);
+        old_font = gdi_select_object(this->render_area->DrawDc, (HGDIOBJ) this->font);
 
         x = (short) this->pnl_x + 3;
         x_val = (short) this->pnl_x + 90;
@@ -645,20 +646,20 @@ void TRIBE_Panel_Object::draw_score() {
                         color = 0xFFFFFF;
                         break;
                 }
-                SetTextColor(this->render_area->DrawDc, color);
+                gdi_set_text_color(this->render_area->DrawDc, color);
 
                 strcpy(str, comm->GetPlayerName(i));
-                TextOutA(this->render_area->DrawDc, x, y + y_pos, str, (int) strlen(str));
+                gdi_text_out(this->render_area->DrawDc, x, y + y_pos, str, (int) strlen(str));
 
                 sprintf(str, "%d", temp_player->victory_conditions->get_victory_points());
                 SetRect(&rect, x_val, y + y_pos, this->pnl_x + this->pnl_wid - 3, y + y_pos + 14);
-                DrawTextA(this->render_area->DrawDc, str, -1, &rect, DT_RIGHT | DT_SINGLELINE);
+                gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, DT_RIGHT | DT_SINGLELINE);
                 y_pos += 14;
             }
             ++i;
         } while (i < 9);
 
-        SelectObject(this->render_area->DrawDc, old_font);
+        gdi_select_object(this->render_area->DrawDc, old_font);
         this->render_area->ReleaseDc("tpnl_obj::draw_score");
     }
 
@@ -699,13 +700,13 @@ void TRIBE_Panel_Object::draw_item(int row, int pic_index, ValueType val_type, i
     if (val_str[0] != 0) {
         void* dc = this->render_area->GetDc("tpnl_obj::draw_item");
         if (dc != 0) {
-            SetBkMode(this->render_area->DrawDc, TRANSPARENT);
-            SetTextColor(this->render_area->DrawDc, 0xFFFFFF);
-            HGDIOBJ old_font = SelectObject(this->render_area->DrawDc, (HGDIOBJ) this->font);
+            gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
+            gdi_set_text_color(this->render_area->DrawDc, 0xFFFFFF);
+            HGDIOBJ old_font = gdi_select_object(this->render_area->DrawDc, (HGDIOBJ) this->font);
 
-            TextOutA(this->render_area->DrawDc, this->pnl_x + 88, this->pnl_y + row * 20 + 33, val_str, strlen(val_str));
+            gdi_text_out(this->render_area->DrawDc, this->pnl_x + 88, this->pnl_y + row * 20 + 33, val_str, strlen(val_str));
 
-            SelectObject(this->render_area->DrawDc, old_font);
+            gdi_select_object(this->render_area->DrawDc, old_font);
             this->render_area->ReleaseDc("tpnl_obj::draw_item");
         }
     }

@@ -1,4 +1,5 @@
 #include "../include/tpnl_pop.h"
+#include "../include/surface.h"
 #include "../include/resource_ids.h"
 #include "../include/tribegam.h"
 #include "../include/tplayer.h"
@@ -34,7 +35,7 @@ TRIBE_Panel_Pop::~TRIBE_Panel_Pop() {
     TDrawArea* buf;
 
     if (this->image_clip_region != 0) {
-        DeleteObject(this->image_clip_region);
+        gdi_delete_object(this->image_clip_region);
         this->image_clip_region = 0;
     }
     buf = this->ImageBuffer;
@@ -57,7 +58,7 @@ void TRIBE_Panel_Pop::set_rect(long x_in, long y_in, long wid_in, long hgt_in) {
 
 need_realloc: {
     if (this->image_clip_region != 0) {
-        DeleteObject(this->image_clip_region);
+        gdi_delete_object(this->image_clip_region);
         this->image_clip_region = 0;
     }
 
@@ -79,7 +80,7 @@ need_realloc: {
     this->ImageRect.right = this->pnl_wid - 1;
     this->ImageRect.bottom = this->pnl_hgt - 1;
 
-    this->image_clip_region = CreateRectRgn(0, 0, this->pnl_wid - 1, this->pnl_hgt - 1);
+    this->image_clip_region = gdi_create_rect_rgn(0, 0, this->pnl_wid - 1, this->pnl_hgt - 1);
 }
 
 skip_realloc:
@@ -179,12 +180,12 @@ void TRIBE_Panel_Pop::draw() {
     }
 
     if (this->render_area->GetDc("tpnl_tim::draw") != 0) {
-        SelectClipRgn(this->render_area->DrawDc, this->clip_rgn);
-        old_font = SelectObject(this->render_area->DrawDc, this->font);
-        SetBkMode(this->render_area->DrawDc, TRANSPARENT);
+        gdi_select_clip_rgn(this->render_area->DrawDc, this->clip_rgn);
+        old_font = gdi_select_object(this->render_area->DrawDc, this->font);
+        gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
         sprintf(str, "%s%ld/%ld", this->get_string(STRING_ID_POPULATION_PREFIX), this->pop, this->max_pop);
 
-        SetTextColor(this->render_area->DrawDc, this->color2);
+        gdi_set_text_color(this->render_area->DrawDc, this->color2);
 
         long left = this->render_rect.left;
         long top = this->render_rect.top;
@@ -195,25 +196,25 @@ void TRIBE_Panel_Pop::draw() {
         width -= 2;
         height -= 2;
         SetRect(&rect, left - 1, top - 1, width + left - 2, height + top - 2);
-        DrawTextA(this->render_area->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
+        gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
         SetRect(&rect, left - 1, top + 1, width + left - 2, height + top);
-        DrawTextA(this->render_area->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
+        gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
         SetRect(&rect, left + 1, top - 1, width + left, height + top - 2);
-        DrawTextA(this->render_area->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
+        gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
         SetRect(&rect, left + 1, top + 1, width + left, height + top);
-        DrawTextA(this->render_area->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
+        gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
 
         if (this->mode == 1) {
-            SetTextColor(this->ImageBuffer->DrawDc, this->color3);
+            gdi_set_text_color(this->ImageBuffer->DrawDc, this->color3);
         } else {
-            SetTextColor(this->render_area->DrawDc, this->color1);
+            gdi_set_text_color(this->render_area->DrawDc, this->color1);
         }
 
         SetRect(&rect, left, top, width + left - 1, height + top - 1);
-        DrawTextA(this->render_area->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
+        gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
 
-        SelectObject(this->render_area->DrawDc, old_font);
-        SelectClipRgn(this->render_area->DrawDc, 0);
+        gdi_select_object(this->render_area->DrawDc, old_font);
+        gdi_select_clip_rgn(this->render_area->DrawDc, 0);
         this->render_area->ReleaseDc("tpnl_tim::draw");
     }
 
@@ -249,38 +250,38 @@ int TRIBE_Panel_Pop::render_to_image_buffer() {
     }
 
     this->ImageBuffer->SetClipRect(&this->ImageRect);
-    SelectClipRgn(this->ImageBuffer->DrawDc, this->image_clip_region);
-    old_font = SelectObject(this->ImageBuffer->DrawDc, this->font);
-    SetBkMode(this->ImageBuffer->DrawDc, TRANSPARENT);
+    gdi_select_clip_rgn(this->ImageBuffer->DrawDc, this->image_clip_region);
+    old_font = gdi_select_object(this->ImageBuffer->DrawDc, this->font);
+    gdi_set_bk_mode(this->ImageBuffer->DrawDc, TRANSPARENT);
 
     sprintf(str, "%s%ld/%ld", this->get_string(STRING_ID_POPULATION_PREFIX), this->pop, this->max_pop);
-    SetTextColor(this->ImageBuffer->DrawDc, this->color2);
+    gdi_set_text_color(this->ImageBuffer->DrawDc, this->color2);
 
     {
         const int width = this->pnl_wid - 1;
         const int height = this->pnl_hgt - 1;
 
         SetRect(&rect, 0, 0, width - 2, height - 2);
-        DrawTextA(this->ImageBuffer->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
+        gdi_draw_text(this->ImageBuffer->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
         SetRect(&rect, 0, 2, width - 2, height);
-        DrawTextA(this->ImageBuffer->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
+        gdi_draw_text(this->ImageBuffer->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
         SetRect(&rect, 2, 0, width, height - 2);
-        DrawTextA(this->ImageBuffer->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
+        gdi_draw_text(this->ImageBuffer->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
         SetRect(&rect, 2, 2, width, height);
-        DrawTextA(this->ImageBuffer->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
+        gdi_draw_text(this->ImageBuffer->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
 
         if (this->mode == 1) {
-            SetTextColor(this->ImageBuffer->DrawDc, this->color3);
+            gdi_set_text_color(this->ImageBuffer->DrawDc, this->color3);
         } else {
-            SetTextColor(this->ImageBuffer->DrawDc, this->color1);
+            gdi_set_text_color(this->ImageBuffer->DrawDc, this->color1);
         }
 
         SetRect(&rect, 1, 1, width - 1, height - 1);
-        DrawTextA(this->ImageBuffer->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
+        gdi_draw_text(this->ImageBuffer->DrawDc, str, -1, &rect, DT_CENTER | DT_SINGLELINE);
     }
 
-    SelectObject(this->ImageBuffer->DrawDc, old_font);
-    SelectClipRgn(this->ImageBuffer->DrawDc, 0);
+    gdi_select_object(this->ImageBuffer->DrawDc, old_font);
+    gdi_select_clip_rgn(this->ImageBuffer->DrawDc, 0);
     this->ImageBuffer->ReleaseDc("tpnl_tim::render_to_image_buffer");
 
     int width = this->pnl_wid;

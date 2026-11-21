@@ -17,10 +17,10 @@ including the C++ ports in port/asm/ (config/executable.json port_sources), buil
 DirectPlay import library and the resources with the LLVM tools, and links
 with lld-link against VC6's import libraries and C runtime.
 
-Display and sound go through SDL2 (config/sdl.json,
-workflow/docs/sdl_port_tasks.md): it fetches the pinned SDL2 package, adds the
-SDL defines, sources and libraries in place of DirectDraw and DirectSound, and
-copies SDL2.dll next to the executable.
+The window, input, display, text and sound go through SDL2 and SDL2_ttf
+(config/sdl.json, workflow/docs/sdl_port_tasks.md): it fetches the pinned
+packages, adds the SDL sources and libraries in place of DirectDraw and
+DirectSound, and copies the DLLs and fallback fonts next to the executable.
 """
 from __future__ import annotations
 
@@ -164,7 +164,7 @@ def main() -> int:
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     args = parser.parse_args()
     sdl_config = json.loads((REPO_ROOT / "config/sdl.json").read_text())
-    sdl_dir = fetch_sdl2.fetch()
+    packages = fetch_sdl2.fetch_all()
 
     root = repo_path(args.output_dir).resolve()
     if not root.is_relative_to((REPO_ROOT / "build").resolve()):
@@ -186,7 +186,9 @@ def main() -> int:
     base = [args.clang_cl, *COMMON_FLAGS, "-imsvc", vc["include"], "-imsvc", vc["mfc_include"],
             "/I" + str(tree / "include")]
     plan += sdl_config["sources"]
-    base += ["/D" + d for d in sdl_config["defines"]] + ["-imsvc", str(sdl_dir / "include")]
+    base += ["/D" + d for d in sdl_config["defines"]]
+    for package, relative in sdl_config["include_dirs"]:
+        base += ["-imsvc", str(packages[package] / relative)]
     dropped = {name.lower() for name in sdl_config["drop_libraries"]}
     libraries = [name for name in config["libraries"] if name.lower() not in dropped] + sdl_config["libraries"]
 
@@ -239,7 +241,7 @@ def main() -> int:
                   "/OUT:" + str(exe), "/MAP:" + str(output / "empiresx.map"),
                   "/LIBPATH:" + str(vc["lib"]),
                   *["/LIBPATH:" + str(repo_path(p)) for p in config.get("library_dirs", [])],
-                  "/LIBPATH:" + str(sdl_dir / "lib/x86"),
+                  *["/LIBPATH:" + str(packages[package] / relative) for package, relative in sdl_config["library_dirs"]],
                   *[row["object"] for row in rows if row["compiled"]],
                   *libraries, str(dplayx), "libc.lib", "oldnames.lib"]
     if rc_result.returncode == 0:
@@ -252,8 +254,9 @@ def main() -> int:
                           errors=[l for l in (link.stdout + link.stderr).splitlines() if "error" in l][:40])
     report["linked"] = link.returncode == 0 and exe.is_file() and not failed
     if report["linked"]:
-        for name in sdl_config["runtime_files"]:
-            shutil.copy2(sdl_dir / name, output / Path(name).name)
+        for package, relative, folder in sdl_config["runtime_files"]:
+            (output / folder).mkdir(parents=True, exist_ok=True)
+            shutil.copy2(packages[package] / relative, output / folder / Path(relative).name)
     report["summary"] = dict(sources=len(rows), compiled=len(rows) - len(failed), patches=len(report["patches"]),
                              dplayx_ok=lib_result.returncode == 0, resources_ok=rc_result.returncode == 0,
                              linked=report["linked"])

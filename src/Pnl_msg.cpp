@@ -1,4 +1,5 @@
 #include "../include/pnl_msg.h"
+#include "../include/surface.h"
 #include "../include/Shape.h"
 #include "../include/basegame.h"
 #include "../include/rge_base_game_global.h"
@@ -20,7 +21,7 @@ TMessagePanel::TMessagePanel(void* font_in, long font_wid_in, long font_hgt_in) 
 
 TMessagePanel::~TMessagePanel(void) {
     if (this->image_clip_region != 0) {
-        DeleteObject(this->image_clip_region);
+        gdi_delete_object(this->image_clip_region);
         this->image_clip_region = 0;
     }
     TDrawArea* image_buffer = this->ImageBuffer;
@@ -36,7 +37,7 @@ void TMessagePanel::set_rect(long x_in, long y_in, long wid_in, long hgt_in) {
     if (this->pnl_wid > this->LastIBWidth || this->pnl_hgt > this->LastIBHeight
         || x_in + this->LastIBWidth >= this->render_area->Width) {
         if (this->image_clip_region != 0) {
-            DeleteObject(this->image_clip_region);
+            gdi_delete_object(this->image_clip_region);
             this->image_clip_region = 0;
         }
 
@@ -58,7 +59,7 @@ void TMessagePanel::set_rect(long x_in, long y_in, long wid_in, long hgt_in) {
         this->ImageRect.top = 0;
         this->ImageRect.right = right;
         this->ImageRect.bottom = bottom;
-        this->image_clip_region = CreateRectRgn(0, 0, right, bottom);
+        this->image_clip_region = gdi_create_rect_rgn(0, 0, right, bottom);
     }
 
     if (this->ImageBuffer != 0) {
@@ -222,8 +223,8 @@ void TMessagePanel::draw(void) {
         goto finish;
     }
 
-    SelectClipRgn(this->render_area->DrawDc, this->clip_rgn);
-    old_font = SelectObject(this->render_area->DrawDc, this->font);
+    gdi_select_clip_rgn(this->render_area->DrawDc, this->clip_rgn);
+    old_font = gdi_select_object(this->render_area->DrawDc, this->font);
 
     if (this->index_color != 0) {
         GetPaletteEntries(rge_base_game->draw_system->Pal, this->font_color, 1, &paletteColor);
@@ -236,10 +237,10 @@ void TMessagePanel::draw(void) {
     }
 
     if (this->message_type == DebugMessage) {
-        SetBkColor(this->render_area->DrawDc, 0);
-        SetBkMode(this->render_area->DrawDc, OPAQUE);
+        gdi_set_bk_color(this->render_area->DrawDc, 0);
+        gdi_set_bk_mode(this->render_area->DrawDc, OPAQUE);
     } else {
-        SetBkMode(this->render_area->DrawDc, TRANSPARENT);
+        gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
     }
 
     x = this->render_rect.left + 1;
@@ -247,14 +248,14 @@ void TMessagePanel::draw(void) {
     wid = this->pnl_wid - 2;
     hgt = this->pnl_hgt - 2;
 
-    GetTextExtentPoint32A(this->render_area->DrawDc, this->text, strlen(this->text), &ts);
+    gdi_get_text_extent_point32(this->render_area->DrawDc, this->text, strlen(this->text), &ts);
 
     if (this->message_type == BadMessage) {
         flags = DT_SINGLELINE | DT_CENTER;
     } else if (this->message_type == RightInfoMessage) {
         flags = DT_SINGLELINE | DT_RIGHT;
     } else {
-        GetTextExtentPoint32A(this->render_area->DrawDc, this->text, strlen(this->text), &ts);
+        gdi_get_text_extent_point32(this->render_area->DrawDc, this->text, strlen(this->text), &ts);
         if (this->word_wrap != 0 && ts.cx > wid) {
             flags = DT_WORDBREAK;
         } else {
@@ -274,21 +275,21 @@ void TMessagePanel::draw(void) {
         }
     }
 
-    SetTextColor(this->render_area->DrawDc, back_rgb);
+    gdi_set_text_color(this->render_area->DrawDc, back_rgb);
     SetRect(&rect, x - 1, y - 1, x + wid - 2, y + hgt - 2);
-    DrawTextA(this->render_area->DrawDc, this->text, -1, &rect, flags);
+    gdi_draw_text(this->render_area->DrawDc, this->text, -1, &rect, flags);
     SetRect(&rect, x - 1, y + 1, x + wid - 2, y + hgt);
-    DrawTextA(this->render_area->DrawDc, this->text, -1, &rect, flags);
+    gdi_draw_text(this->render_area->DrawDc, this->text, -1, &rect, flags);
     SetRect(&rect, x + 1, y - 1, x + wid, y + hgt - 2);
-    DrawTextA(this->render_area->DrawDc, this->text, -1, &rect, flags);
+    gdi_draw_text(this->render_area->DrawDc, this->text, -1, &rect, flags);
     SetRect(&rect, x + 1, y + 1, x + wid, y + hgt);
-    DrawTextA(this->render_area->DrawDc, this->text, -1, &rect, flags);
-    SetTextColor(this->render_area->DrawDc, font_rgb);
+    gdi_draw_text(this->render_area->DrawDc, this->text, -1, &rect, flags);
+    gdi_set_text_color(this->render_area->DrawDc, font_rgb);
     SetRect(&rect, x, y, x + wid - 1, y + hgt - 1);
-    DrawTextA(this->render_area->DrawDc, this->text, -1, &rect, flags);
+    gdi_draw_text(this->render_area->DrawDc, this->text, -1, &rect, flags);
 
-    SelectObject(this->render_area->DrawDc, old_font);
-    SelectClipRgn(this->render_area->DrawDc, 0);
+    gdi_select_object(this->render_area->DrawDc, old_font);
+    gdi_select_clip_rgn(this->render_area->DrawDc, 0);
     this->render_area->ReleaseDc("pnl_msg::draw");
 
 finish:
@@ -356,8 +357,8 @@ int TMessagePanel::render_to_image_buffer() {
     }
 
     this->ImageBuffer->SetClipRect(image_rect);
-    SelectClipRgn(this->ImageBuffer->DrawDc, this->image_clip_region);
-    old_font = SelectObject(this->ImageBuffer->DrawDc, this->font);
+    gdi_select_clip_rgn(this->ImageBuffer->DrawDc, this->image_clip_region);
+    old_font = gdi_select_object(this->ImageBuffer->DrawDc, this->font);
 
     if (this->index_color != 0) {
         GetPaletteEntries(rge_base_game->draw_system->Pal, this->font_color, 1, &paletteColor);
@@ -370,10 +371,10 @@ int TMessagePanel::render_to_image_buffer() {
     }
 
     if (this->message_type == DebugMessage) {
-        SetBkColor(this->ImageBuffer->DrawDc, 0);
-        SetBkMode(this->ImageBuffer->DrawDc, OPAQUE);
+        gdi_set_bk_color(this->ImageBuffer->DrawDc, 0);
+        gdi_set_bk_mode(this->ImageBuffer->DrawDc, OPAQUE);
     } else {
-        SetBkMode(this->ImageBuffer->DrawDc, TRANSPARENT);
+        gdi_set_bk_mode(this->ImageBuffer->DrawDc, TRANSPARENT);
     }
 
     wid = this->pnl_wid - 2;
@@ -381,7 +382,7 @@ int TMessagePanel::render_to_image_buffer() {
     y = this->ImageRect.top + 1;
     hgt = this->pnl_hgt - 2;
 
-    if (GetTextExtentPoint32A(this->ImageBuffer->DrawDc, this->text, strlen(this->text), &ts) == 0) {
+    if (gdi_get_text_extent_point32(this->ImageBuffer->DrawDc, this->text, strlen(this->text), &ts) == 0) {
         SetRect(&rect, x - 1, y - 1, x + wid - 2, y + hgt - 2);
         SetRect(&this->UsedImageRect, 0, 0, 1, 1);
         this->ImageTextActive = 0;
@@ -451,18 +452,18 @@ int TMessagePanel::render_to_image_buffer() {
         if (this->UsedImageRect.bottom > this->ImageRect.bottom)
             this->UsedImageRect.bottom = this->ImageRect.bottom;
 
-        SetTextColor(this->ImageBuffer->DrawDc, back_rgb);
+        gdi_set_text_color(this->ImageBuffer->DrawDc, back_rgb);
         SetRect(&rect, x - 1, y - 1, x + wid - 2, y + hgt - 2);
-        DrawTextA(this->ImageBuffer->DrawDc, this->text, -1, &rect, flags);
+        gdi_draw_text(this->ImageBuffer->DrawDc, this->text, -1, &rect, flags);
         SetRect(&rect, x - 1, y + 1, x + wid - 2, y + hgt);
-        DrawTextA(this->ImageBuffer->DrawDc, this->text, -1, &rect, flags);
+        gdi_draw_text(this->ImageBuffer->DrawDc, this->text, -1, &rect, flags);
         SetRect(&rect, x + 1, y - 1, x + wid, y + hgt - 2);
-        DrawTextA(this->ImageBuffer->DrawDc, this->text, -1, &rect, flags);
+        gdi_draw_text(this->ImageBuffer->DrawDc, this->text, -1, &rect, flags);
         SetRect(&rect, x + 1, y + 1, x + wid, y + hgt);
-        DrawTextA(this->ImageBuffer->DrawDc, this->text, -1, &rect, flags);
-        SetTextColor(this->ImageBuffer->DrawDc, font_rgb);
+        gdi_draw_text(this->ImageBuffer->DrawDc, this->text, -1, &rect, flags);
+        gdi_set_text_color(this->ImageBuffer->DrawDc, font_rgb);
         SetRect(&rect, x, y, x + wid - 1, y + hgt - 1);
-        DrawTextA(this->ImageBuffer->DrawDc, this->text, -1, &rect, flags);
+        gdi_draw_text(this->ImageBuffer->DrawDc, this->text, -1, &rect, flags);
 
         if (this->Icon1 != 0) {
             Shape_Info* info = this->Icon1->shape_info;
@@ -488,8 +489,8 @@ int TMessagePanel::render_to_image_buffer() {
         this->ImageTextActive = 1;
     }
 
-    SelectObject(this->ImageBuffer->DrawDc, old_font);
-    SelectClipRgn(this->ImageBuffer->DrawDc, 0);
+    gdi_select_object(this->ImageBuffer->DrawDc, old_font);
+    gdi_select_clip_rgn(this->ImageBuffer->DrawDc, 0);
     this->ImageBuffer->ReleaseDc("pnl_msg::render_to_image_buffer");
 
     this->UsedScreenRect.left = this->UsedImageRect.left + this->render_rect.left;

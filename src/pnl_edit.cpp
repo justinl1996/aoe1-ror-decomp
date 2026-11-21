@@ -115,14 +115,15 @@ long TEditPanel::setup(
     if (text_in != 0 && *text_in != 0) {
         this->set_text(text_in);
     }
-    this->brush = GetStockObject(BLACK_BRUSH);
+    this->brush = gdi_get_stock_object(BLACK_BRUSH);
     this->text_color1 = 0xFFFFFF;
     this->highlight_text_color1 = 0xFFFFFF;
     this->back_color = 0;
     this->text_color2 = 0;
     this->highlight_text_color2 = 0;
     if (this->font != 0) {
-        SendMessageA(this->edit_wnd, WM_SETFONT, (unsigned int) this->font, 0);
+        // The EDIT box is a real control: it needs the real GDI font.
+        SendMessageA(this->edit_wnd, WM_SETFONT, (unsigned int) gdi_win32_object(this->font), 0);
     }
     this->draw_format = 0x2000;
     if (this->format != TEditPanel::FormatMultiLine)
@@ -352,10 +353,10 @@ long TEditPanel::wnd_proc(void* hwnd, unsigned int msg, unsigned int wParam, lon
                 return TPanel::wnd_proc(hwnd, 7, wParam, lParam);
             case 0x133:
                 if (brush != 0 && (void*) (lParam & 0xFFFF) == edit_window) {
-                    SetBkColor((HDC) wParam, back_color);
-                    SetBkMode((HDC) wParam, OPAQUE);
-                    SetTextColor((HDC) wParam, highlight_text_color1);
-                    return (long) brush;
+                    gdi_set_bk_color((HDC) wParam, back_color);
+                    gdi_set_bk_mode((HDC) wParam, OPAQUE);
+                    gdi_set_text_color((HDC) wParam, highlight_text_color1);
+                    return (long) gdi_win32_object(brush);
                 }
                 break;
             case 0x111:
@@ -382,9 +383,9 @@ long TEditPanel::sub_wnd_proc(void* hwnd, unsigned int msg, unsigned int wParam,
             case 0x14:
                 if (this->brush != 0) {
                     RECT rect;
-                    SelectObject((HDC) wParam, this->brush);
+                    gdi_select_object((HDC) wParam, this->brush);
                     GetClientRect((HWND) hwnd, &rect);
-                    FillRect((HDC) wParam, &rect, this->brush);
+                    gdi_fill_rect((HDC) wParam, &rect, this->brush);
                     return 1;
                 }
                 break;
@@ -662,22 +663,22 @@ void TEditPanel::draw() {
 
             HDC dc = (HDC) this->render_area->GetDc("pnl_edit::draw");
             if (dc != 0) {
-                SelectClipRgn(dc, (HRGN) this->clip_rgn);
-                HGDIOBJ old_font = SelectObject(dc, this->font);
-                SetBkMode(dc, TRANSPARENT);
-                SetTextColor(dc, this->text_color2);
+                gdi_select_clip_rgn(dc, (HRGN) this->clip_rgn);
+                HGDIOBJ old_font = gdi_select_object(dc, this->font);
+                gdi_set_bk_mode(dc, TRANSPARENT);
+                gdi_set_text_color(dc, this->text_color2);
 
                 tagRECT r;
                 r.left = this->draw_rect.left - 1;
                 r.top = this->draw_rect.top + 1;
                 r.right = this->draw_rect.right - 1;
                 r.bottom = this->draw_rect.bottom + 1;
-                DrawTextExA(dc, this->text, -1, &r, this->draw_format, 0);
+                gdi_draw_text_ex(dc, this->text, -1, &r, this->draw_format, 0);
 
-                SetTextColor(dc, this->text_color1);
-                DrawTextExA(dc, this->text, -1, &this->draw_rect, this->draw_format, 0);
-                SelectObject(dc, old_font);
-                SelectClipRgn(dc, 0);
+                gdi_set_text_color(dc, this->text_color1);
+                gdi_draw_text_ex(dc, this->text, -1, &this->draw_rect, this->draw_format, 0);
+                gdi_select_object(dc, old_font);
+                gdi_select_clip_rgn(dc, 0);
                 this->render_area->ReleaseDc("pnl_edit::draw");
             }
         }

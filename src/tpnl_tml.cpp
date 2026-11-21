@@ -1,5 +1,6 @@
 
 #include "../include/tpnl_tml.h"
+#include "../include/surface.h"
 #include "../include/game_globals.h"
 #include "../include/pnl_lst.h"
 #include "../include/Shape.h"
@@ -660,14 +661,14 @@ void Time_Line_Panel::draw_axis() {
 
     this->render_area->Unlock(s_tpnl_tml_draw_axis);
     if (this->render_area->GetDc(s_tpnl_tml_draw_axis) != 0) {
-        SetBkMode(this->render_area->DrawDc, TRANSPARENT);
-        old_font = SelectObject(this->render_area->DrawDc, this->axis_font);
+        gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
+        old_font = gdi_select_object(this->render_area->DrawDc, this->axis_font);
 
         if (this->get_string(STRING_ID_WORLD_POPULATION, temp_str, 100) != 0) {
             int x = this->xPosition() + 8;
             int y = this->yPosition() + 5;
-            SetTextColor(this->render_area->DrawDc, 0xFFFFFF);
-            TextOutA(this->render_area->DrawDc, x, y, temp_str, strlen(temp_str));
+            gdi_set_text_color(this->render_area->DrawDc, 0xFFFFFF);
+            gdi_text_out(this->render_area->DrawDc, x, y, temp_str, strlen(temp_str));
         }
 
         if (this->get_string(STRING_ID_TIME_HOUR_MINUTE, temp_str, 100) != 0) {
@@ -677,11 +678,11 @@ void Time_Line_Panel::draw_axis() {
             int y = this->height();
             y += this->yPosition();
             y -= this->axis_font_hgt + 5;
-            SetTextColor(this->render_area->DrawDc, 0xFFFFFF);
-            TextOutA(this->render_area->DrawDc, x, y, temp_str, strlen(temp_str));
+            gdi_set_text_color(this->render_area->DrawDc, 0xFFFFFF);
+            gdi_text_out(this->render_area->DrawDc, x, y, temp_str, strlen(temp_str));
         }
 
-        SelectObject(this->render_area->DrawDc, old_font);
+        gdi_select_object(this->render_area->DrawDc, old_font);
         this->render_area->ReleaseDc(s_tpnl_tml_draw_axis);
     }
 }
@@ -730,34 +731,34 @@ void Time_Line_Panel::draw_special_events() {
 
         this->render_area->Unlock("tpnl_tml::draw_special_events");
         if (this->render_area->GetDc("tpnl_tml::draw_special_events") != 0) {
-            SetBkMode(this->render_area->DrawDc, TRANSPARENT);
-            old_font = SelectObject(this->render_area->DrawDc, this->body_font);
+            gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
+            old_font = gdi_select_object(this->render_area->DrawDc, this->body_font);
 
             for (event = this->time_slice_events; event != 0; event = event->next) {
                 switch (event->event) {
                     case 0:
-                        SetTextColor(this->render_area->DrawDc, 0);
-                        TextOutA(
+                        gdi_set_text_color(this->render_area->DrawDc, 0);
+                        gdi_text_out(
                             this->render_area->DrawDc, event->start_txt_x1, event->start_txt_y1, event->text1, event->text_length1
                         );
                         break;
                     case 1:
-                        SetTextColor(this->render_area->DrawDc, 0);
-                        TextOutA(
+                        gdi_set_text_color(this->render_area->DrawDc, 0);
+                        gdi_text_out(
                             this->render_area->DrawDc, event->start_txt_x1, event->start_txt_y1, event->text1, event->text_length1
                         );
                         break;
                     case 2:
-                        SetTextColor(this->render_area->DrawDc, 0);
-                        TextOutA(
+                        gdi_set_text_color(this->render_area->DrawDc, 0);
+                        gdi_text_out(
                             this->render_area->DrawDc, event->start_txt_x1, event->start_txt_y1, event->text1, event->text_length1
                         );
                         break;
                     case 3: {
                         int x_offset = (event->time_slice != 0) ? -2 : 2;
-                        SetTextColor(this->render_area->DrawDc, 0xFFFFFF);
+                        gdi_set_text_color(this->render_area->DrawDc, 0xFFFFFF);
 
-                        TextOutA(
+                        gdi_text_out(
                             this->render_area->DrawDc,
                             x_offset - (strlen(event->text1) >> 1) * this->axis_font_wid + event->X_line_pos,
                             this->yPosition() + 8 + this->axis_font_hgt, event->text1, strlen(event->text1)
@@ -765,7 +766,7 @@ void Time_Line_Panel::draw_special_events() {
                         size_t text_length2 = strlen(event->text2);
                         long text_y2 = this->yPosition();
                         text_y2 += this->height();
-                        TextOutA(
+                        gdi_text_out(
                             this->render_area->DrawDc,
                             x_offset - (strlen(event->text2) >> 1) * this->axis_font_wid + event->X_line_pos,
                             text_y2 - this->axis_font_hgt * 2 - 7, event->text2, text_length2
@@ -774,8 +775,8 @@ void Time_Line_Panel::draw_special_events() {
                     }
                     case 6:
                         if (event->icon_flag != 0) {
-                            SetTextColor(this->render_area->DrawDc, 0);
-                            TextOutA(
+                            gdi_set_text_color(this->render_area->DrawDc, 0);
+                            gdi_text_out(
                                 this->render_area->DrawDc, event->start_txt_x1, event->start_txt_y1, event->text1,
                                 event->text_length1
                             );
@@ -783,8 +784,8 @@ void Time_Line_Panel::draw_special_events() {
                         break;
                     case 8:
                         if (event->icon_flag != 0) {
-                            SetTextColor(this->render_area->DrawDc, 0);
-                            TextOutA(
+                            gdi_set_text_color(this->render_area->DrawDc, 0);
+                            gdi_text_out(
                                 this->render_area->DrawDc, event->start_txt_x1, event->start_txt_y1, event->text1,
                                 event->text_length1
                             );
@@ -793,7 +794,7 @@ void Time_Line_Panel::draw_special_events() {
                 }
             }
 
-            SelectObject(this->render_area->DrawDc, old_font);
+            gdi_select_object(this->render_area->DrawDc, old_font);
             this->render_area->ReleaseDc("tpnl_tml::draw_special_events");
         }
     }
@@ -882,10 +883,10 @@ void Time_Line_Panel::draw_civilization_names() {
     float pop_total;
 
     if (this->timeline_flag != 0) {
-        SetTextColor(this->render_area->DrawDc, 0);
+        gdi_set_text_color(this->render_area->DrawDc, 0);
         if (this->render_area->GetDc("tpnl_tml::draw_civilization_names") != 0) {
-            SetBkMode(this->render_area->DrawDc, TRANSPARENT);
-            old_font = SelectObject(this->render_area->DrawDc, this->body_font);
+            gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
+            old_font = gdi_select_object(this->render_area->DrawDc, this->body_font);
             pop_total = 0.0f;
             int player_index = 0;
             TRIBE_Player* player;
@@ -910,7 +911,7 @@ void Time_Line_Panel::draw_civilization_names() {
                         player = (TRIBE_Player*) rge_base_game->world->players[y_line_segment_length + 1];
                         strcpy(name_str, player->name);
                         sprintf(temp_str, "%s - %s", name_str, civ_str);
-                        TextOutA(
+                        gdi_text_out(
                             this->render_area->DrawDc, X_line_pos, Y_line_pos + (seg / 2 - this->body_font_hgt / 2), temp_str,
                             strlen(temp_str)
                         );
@@ -918,7 +919,7 @@ void Time_Line_Panel::draw_civilization_names() {
                         y_line_segment_length++;
                     } while (y_line_segment_length < rge_base_game->world->player_num - 1);
                 }
-                SelectObject(this->render_area->DrawDc, old_font);
+                gdi_select_object(this->render_area->DrawDc, old_font);
                 this->render_area->ReleaseDc("tpnl_tml::draw_civilization_names");
             }
         }

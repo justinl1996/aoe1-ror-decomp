@@ -1010,9 +1010,9 @@ TDrawArea::~TDrawArea() {
     } else if (this->DrawDc != 0) {
         if (this->Bitmap != 0) {
             if (this->OldBitmap != 0) {
-                SelectObject(this->DrawDc, this->OldBitmap);
+                gdi_select_object(this->DrawDc, this->OldBitmap);
             }
-            DeleteObject(this->Bitmap);
+            gdi_delete_object(this->Bitmap);
         }
         DeleteDC(this->DrawDc);
     }

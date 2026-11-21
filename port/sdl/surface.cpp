@@ -90,7 +90,7 @@ static void present_now(void) {
     present_last_ticks = SDL_GetTicks();
 }
 
-void surface_present_primary(const unsigned char* bits, long pitch, long width, long height, const RECT* rect, HDC dc) {
+void surface_present_primary(const unsigned char* bits, long pitch, long width, long height, const RECT* rect) {
     if (present_texture == 0)
         return;
 

@@ -1,4 +1,5 @@
 #include "../include/pnl_lst.h"
+#include "../include/surface.h"
 
 static char s_pnl_lst__draw[] = "pnl_lst::draw";
 static char s_pnl_lst__draw_highlight_bar[] = "pnl_lst::draw_highlight_bar";
@@ -346,9 +347,9 @@ void TListPanel::draw() {
 
     void* dc = this->render_area->GetDc(s_pnl_lst__draw);
     if (dc != 0) {
-        SelectClipRgn(dc, this->clip_rgn);
-        void* old_font = SelectObject(dc, this->font);
-        SetBkMode(dc, TRANSPARENT);
+        gdi_select_clip_rgn(dc, this->clip_rgn);
+        void* old_font = gdi_select_object(dc, this->font);
+        gdi_set_bk_mode(dc, TRANSPARENT);
 
         for (short line = this->top_line, line_index = 0; line <= this->bot_line; ++line, ++line_index) {
             if (this->drawHighlightBar != 0 && (this->have_focus != 0 || this->mouse_captured != 0)
@@ -359,8 +360,8 @@ void TListPanel::draw() {
             }
         }
 
-        SelectObject(dc, old_font);
-        SelectClipRgn(dc, 0);
+        gdi_select_object(dc, old_font);
+        gdi_select_clip_rgn(dc, 0);
         this->render_area->ReleaseDc(s_pnl_lst__draw);
     }
 

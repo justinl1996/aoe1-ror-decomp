@@ -1,4 +1,5 @@
 #include "../include/act_obj.h"
+#include "../include/surface.h"
 #include "../include/program_mode.h"
 #include "../include/asp_list.h"
 #include "../include/basegame.h"
@@ -834,11 +835,11 @@ void RGE_Static_Object::draw_frame_3d_square_back(TDrawArea* render_area, short 
     if (view != 0) {
         render_area->Unlock(stat_obj_square_back_tag);
         if (render_area->GetDc(stat_obj_square_back_tag) != 0) {
-            SelectClipRgn(render_area->DrawDc, view->clip_rgn);
+            gdi_select_clip_rgn(render_area->DrawDc, view->clip_rgn);
             if (startLoggingAI == 1 && this->groupCommanderValue == this->id && this->id >= 0) {
-                SelectObject(render_area->DrawDc, GetStockObject(BLACK_PEN));
+                gdi_select_object(render_area->DrawDc, gdi_get_stock_object(BLACK_PEN));
             } else {
-                SelectObject(render_area->DrawDc, GetStockObject(WHITE_PEN));
+                gdi_select_object(render_area->DrawDc, gdi_get_stock_object(WHITE_PEN));
             }
 
             x += this->screen_x_offset;
@@ -847,13 +848,13 @@ void RGE_Static_Object::draw_frame_3d_square_back(TDrawArea* render_area, short 
             negative_rx1 = -rx1;
             map->get_point(x2, y2, ry1, negative_rx1, 0.0f, x, y);
             map->get_point(x1, y1, ry1, rx1, 0.0f, x, y);
-            MoveToEx(render_area->DrawDc, x2, y2, 0);
-            LineTo(render_area->DrawDc, x1, y1);
+            gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+            gdi_line_to(render_area->DrawDc, x1, y1);
             map->get_point(x2, y2, ry1, negative_rx1, 0.0f, x, y);
             map->get_point(x1, y1, -ry1, negative_rx1, 0.0f, x, y);
-            MoveToEx(render_area->DrawDc, x2, y2, 0);
-            LineTo(render_area->DrawDc, x1, y1);
-            SelectClipRgn(render_area->DrawDc, 0);
+            gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+            gdi_line_to(render_area->DrawDc, x1, y1);
+            gdi_select_clip_rgn(render_area->DrawDc, 0);
             render_area->ReleaseDc(stat_obj_square_back_tag);
         }
         render_area->Lock(stat_obj_square_back_tag, 1);
@@ -882,23 +883,23 @@ void RGE_Static_Object::draw_frame_3d_square_front(TDrawArea* render_area, short
         x += this->screen_x_offset;
         y += this->screen_y_offset;
         if (render_area->GetDc(tag) != 0) {
-            SelectClipRgn(render_area->DrawDc, view_panel->clip_rgn);
+            gdi_select_clip_rgn(render_area->DrawDc, view_panel->clip_rgn);
             if (startLoggingAI == 1 && this->groupCommanderValue == this->id && this->id >= 0) {
-                SelectObject(render_area->DrawDc, GetStockObject(BLACK_PEN));
+                gdi_select_object(render_area->DrawDc, gdi_get_stock_object(BLACK_PEN));
             } else {
-                SelectObject(render_area->DrawDc, GetStockObject(WHITE_PEN));
+                gdi_select_object(render_area->DrawDc, gdi_get_stock_object(WHITE_PEN));
             }
 
             map->get_point(x1, y1, -ry1, -rz2, 0.0f, x, y);
             map->get_point(x2, y2, -ry1, rz2, 0.0f, x, y);
-            MoveToEx(render_area->DrawDc, x1, y1, 0);
-            LineTo(render_area->DrawDc, x2, y2);
+            gdi_move_to_ex(render_area->DrawDc, x1, y1, 0);
+            gdi_line_to(render_area->DrawDc, x2, y2);
 
             map->get_point(x1, y1, ry1, rz2, 0.0f, x, y);
             map->get_point(x2, y2, -ry1, rz2, 0.0f, x, y);
-            MoveToEx(render_area->DrawDc, x1, y1, 0);
-            LineTo(render_area->DrawDc, x2, y2);
-            SelectClipRgn(render_area->DrawDc, 0);
+            gdi_move_to_ex(render_area->DrawDc, x1, y1, 0);
+            gdi_line_to(render_area->DrawDc, x2, y2);
+            gdi_select_clip_rgn(render_area->DrawDc, 0);
             render_area->ReleaseDc(tag);
         }
 
@@ -943,11 +944,11 @@ void RGE_Static_Object::draw_frame_3d_cube_back(TDrawArea* render_area, short x,
         render_area->Unlock(0);
         void* dc = render_area->GetDc(0);
         if (dc != 0) {
-            SelectClipRgn(render_area->DrawDc, view->clip_rgn);
+            gdi_select_clip_rgn(render_area->DrawDc, view->clip_rgn);
             if (startLoggingAI == 1 && this->groupCommanderValue == this->id && this->id >= 0)
-                SelectObject(render_area->DrawDc, GetStockObject(BLACK_PEN));
+                gdi_select_object(render_area->DrawDc, gdi_get_stock_object(BLACK_PEN));
             else
-                SelectObject(render_area->DrawDc, GetStockObject(WHITE_PEN));
+                gdi_select_object(render_area->DrawDc, gdi_get_stock_object(WHITE_PEN));
 
             x += this->screen_x_offset;
             y += this->screen_y_offset;
@@ -955,30 +956,30 @@ void RGE_Static_Object::draw_frame_3d_cube_back(TDrawArea* render_area, short x,
 
             map->get_point(x2, y2, rx2, negative_ry, 0.0f, x, y);
             map->get_point(x1, y1, rx2, negative_ry, rz3, x, y);
-            MoveToEx(render_area->DrawDc, x2, y2, 0);
-            LineTo(render_area->DrawDc, x1, y1);
+            gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+            gdi_line_to(render_area->DrawDc, x1, y1);
             map->get_point(x2, y2, rx2, negative_ry, rz4, x, y);
             map->get_point(x1, y1, rx2, negative_ry, rx1, x, y);
-            MoveToEx(render_area->DrawDc, x2, y2, 0);
-            LineTo(render_area->DrawDc, x1, y1);
+            gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+            gdi_line_to(render_area->DrawDc, x1, y1);
             map->get_point(x2, y2, rx2, negative_ry, 0.0f, x, y);
             map->get_point(x1, y1, ry1, negative_ry, 0.0f, x, y);
-            MoveToEx(render_area->DrawDc, x2, y2, 0);
-            LineTo(render_area->DrawDc, x1, y1);
+            gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+            gdi_line_to(render_area->DrawDc, x1, y1);
             map->get_point(x2, y2, -rx2, negative_ry, 0.0f, x, y);
             map->get_point(x1, y1, -ry1, negative_ry, 0.0f, x, y);
-            MoveToEx(render_area->DrawDc, x2, y2, 0);
-            LineTo(render_area->DrawDc, x1, y1);
+            gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+            gdi_line_to(render_area->DrawDc, x1, y1);
             map->get_point(x2, y2, rx2, negative_ry, 0.0f, x, y);
             map->get_point(x1, y1, rx2, -rz2, 0.0f, x, y);
-            MoveToEx(render_area->DrawDc, x2, y2, 0);
-            LineTo(render_area->DrawDc, x1, y1);
+            gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+            gdi_line_to(render_area->DrawDc, x1, y1);
             map->get_point(x2, y2, rx2, ry2, 0.0f, x, y);
             map->get_point(x1, y1, rx2, rz2, 0.0f, x, y);
-            MoveToEx(render_area->DrawDc, x2, y2, 0);
-            LineTo(render_area->DrawDc, x1, y1);
+            gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+            gdi_line_to(render_area->DrawDc, x1, y1);
 
-            SelectClipRgn(render_area->DrawDc, 0);
+            gdi_select_clip_rgn(render_area->DrawDc, 0);
             render_area->ReleaseDc(0);
         }
         render_area->Lock(0, 1);
@@ -1006,11 +1007,11 @@ void RGE_Static_Object::draw_frame_3d_cube_front(TDrawArea* render_area, short x
 
     render_area->Unlock(0);
     if (render_area->GetDc(0) != 0) {
-        SelectClipRgn(render_area->DrawDc, view->clip_rgn);
+        gdi_select_clip_rgn(render_area->DrawDc, view->clip_rgn);
         if (startLoggingAI == 1 && this->groupCommanderValue == this->id && this->id >= 0) {
-            SelectObject(render_area->DrawDc, GetStockObject(BLACK_PEN));
+            gdi_select_object(render_area->DrawDc, gdi_get_stock_object(BLACK_PEN));
         } else {
-            SelectObject(render_area->DrawDc, GetStockObject(WHITE_PEN));
+            gdi_select_object(render_area->DrawDc, gdi_get_stock_object(WHITE_PEN));
         }
 
         // Update x before y and keep both incoming short homes.
@@ -1020,98 +1021,98 @@ void RGE_Static_Object::draw_frame_3d_cube_front(TDrawArea* render_area, short x
 
         map->get_point(x2, y2, ry2, negative_rz2, rx1, x, y);
         map->get_point(x1, y1, ry1, negative_rz2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         negative_ry2 = -ry2;
         map->get_point(x2, y2, negative_ry2, negative_rz2, rx1, x, y);
         // Delay this negation until the first projection ends.
         negative_ry1 = -ry1;
         map->get_point(x1, y1, negative_ry1, negative_rz2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, ry2, rz2, rx1, x, y);
         map->get_point(x1, y1, ry1, rz2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, negative_ry2, rz2, rx1, x, y);
         map->get_point(x1, y1, negative_ry1, rz2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, ry2, rz2, rx1, x, y);
         map->get_point(x1, y1, ry2, rx2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, ry2, negative_rz2, rx1, x, y);
         map->get_point(x1, y1, ry2, -rx2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, negative_ry2, rz2, rx1, x, y);
         map->get_point(x1, y1, negative_ry2, rx2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, negative_ry2, negative_rz2, rx1, x, y);
         map->get_point(x1, y1, negative_ry2, -rx2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, negative_ry2, negative_rz2, 0.0f, x, y);
         map->get_point(x1, y1, negative_ry2, -rx2, 0.0f, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, negative_ry2, rz2, 0.0f, x, y);
         map->get_point(x1, y1, negative_ry2, rx2, 0.0f, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, ry2, rz2, 0.0f, x, y);
         map->get_point(x1, y1, ry1, rz2, 0.0f, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, negative_ry2, rz2, 0.0f, x, y);
         map->get_point(x1, y1, negative_ry1, rz2, 0.0f, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, negative_ry2, rz2, 0.0f, x, y);
         map->get_point(x1, y1, negative_ry2, rz2, rz3, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, negative_ry2, rz2, rz4, x, y);
         map->get_point(x1, y1, negative_ry2, rz2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, negative_ry2, negative_rz2, 0.0f, x, y);
         map->get_point(x1, y1, negative_ry2, negative_rz2, rz3, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, negative_ry2, negative_rz2, rz4, x, y);
         map->get_point(x1, y1, negative_ry2, negative_rz2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, ry2, rz2, 0.0f, x, y);
         map->get_point(x1, y1, ry2, rz2, rz3, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
         map->get_point(x2, y2, ry2, rz2, rz4, x, y);
         map->get_point(x1, y1, ry2, rz2, rx1, x, y);
-        MoveToEx(render_area->DrawDc, x2, y2, 0);
-        LineTo(render_area->DrawDc, x1, y1);
+        gdi_move_to_ex(render_area->DrawDc, x2, y2, 0);
+        gdi_line_to(render_area->DrawDc, x1, y1);
 
-        SelectClipRgn(render_area->DrawDc, 0);
+        gdi_select_clip_rgn(render_area->DrawDc, 0);
         render_area->ReleaseDc(0);
     }
     render_area->Lock(0, 1);

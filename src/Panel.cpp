@@ -57,7 +57,7 @@ TPanelSystem::~TPanelSystem(void) {
         this->panel_list = 0;
     }
 
-    int(__stdcall * delete_object)(void*) = DeleteObject;
+    BOOL (*delete_object)(HGDIOBJ) = gdi_delete_object;
     for (int i = 0; i < 10; i++) {
         void** palette_entry = &this->palette[i];
         if (*palette_entry) {
@@ -395,7 +395,7 @@ void TPanelSystem::release_palette(void* pal) {
         if (palette[i] == pal) {
             palette_use_count[i]--;
             if (palette_use_count[i] == 0) {
-                DeleteObject(palette[i]);
+                gdi_delete_object(palette[i]);
                 palette[i] = 0;
                 palette_file[i][0] = 0;
             }
@@ -566,7 +566,7 @@ TPanel::~TPanel() {
     }
     first_child_node = 0;
     if (clip_rgn != 0) {
-        DeleteObject(clip_rgn);
+        gdi_delete_object(clip_rgn);
         clip_rgn = 0;
     }
     if (parent_panel != 0) {
@@ -727,13 +727,13 @@ void TPanel::set_rect(long x_in, long y_in, long wid_in, long hgt_in) {
     }
 
     if (clip_rgn != 0) {
-        DeleteObject(clip_rgn);
+        gdi_delete_object(clip_rgn);
         clip_rgn = 0;
     }
 
     if (clip_rect.right >= clip_rect.left && clip_rect.bottom >= clip_rect.top) {
         visible = 1;
-        clip_rgn = CreateRectRgn(clip_rect.left, clip_rect.top, clip_rect.right, clip_rect.bottom);
+        clip_rgn = gdi_create_rect_rgn(clip_rect.left, clip_rect.top, clip_rect.right, clip_rect.bottom);
     } else {
         visible = 0;
     }
@@ -941,7 +941,7 @@ void TPanel::draw_setup(int clear) {
 
     dc = render_area->DrawDc;
     if (dc != 0) {
-        SelectClipRgn(dc, clip_rgn);
+        gdi_select_clip_rgn(dc, clip_rgn);
     }
     rect = &clip_rect;
     render_area->SetClipRect(rect);
@@ -956,7 +956,7 @@ void TPanel::draw_finish(void) {
     need_redraw = 0;
     dc = render_area->DrawDc;
     if (dc != 0) {
-        SelectClipRgn(dc, 0);
+        gdi_select_clip_rgn(dc, 0);
     }
     render_area->SetClipRect(0);
     need_restore = 0;

@@ -1,5 +1,6 @@
 
 #include "../include/rpnl_tim.h"
+#include "../include/surface.h"
 #include "../include/basegame.h"
 #include "../include/resource_ids.h"
 #include "../include/rge_base_game_global.h"
@@ -30,21 +31,21 @@ void RGE_Panel_Time::draw() {
 
     HGDIOBJ old_font;
     if (render_area->GetDc("rpnl_tim::draw") != 0) {
-        SelectClipRgn(render_area->DrawDc, (HRGN) clip_rgn);
-        old_font = SelectObject(render_area->DrawDc, (HGDIOBJ) font);
+        gdi_select_clip_rgn(render_area->DrawDc, (HRGN) clip_rgn);
+        old_font = gdi_select_object(render_area->DrawDc, (HGDIOBJ) font);
 
         if (rge_base_game->get_paused()) {
-            SetBkColor(render_area->DrawDc, 0xFFFFFF);
-            SetBkMode(render_area->DrawDc, OPAQUE);
-            SetTextColor(render_area->DrawDc, 0xFF);
+            gdi_set_bk_color(render_area->DrawDc, 0xFFFFFF);
+            gdi_set_bk_mode(render_area->DrawDc, OPAQUE);
+            gdi_set_text_color(render_area->DrawDc, 0xFF);
             {
                 char str[100];
                 sprintf(str, "Paused");
-                TextOutA(render_area->DrawDc, render_rect.left, render_rect.top - 2, str, strlen(str));
+                gdi_text_out(render_area->DrawDc, render_rect.left, render_rect.top - 2, str, strlen(str));
             }
         } else {
-            SetBkMode(render_area->DrawDc, TRANSPARENT);
-            SetTextColor(render_area->DrawDc, 0xFFFFFF);
+            gdi_set_bk_mode(render_area->DrawDc, TRANSPARENT);
+            gdi_set_text_color(render_area->DrawDc, 0xFFFFFF);
 
             int t = game_time;
             int m = 0;
@@ -62,7 +63,7 @@ void RGE_Panel_Time::draw() {
             {
                 char str[100];
                 sprintf(str, "%02ld:%02ld:%02ld (%3.1f)", h, m, t, (double) rge_base_game->world->game_speed);
-                TextOutA(render_area->DrawDc, render_rect.left, render_rect.top - 2, str, strlen(str));
+                gdi_text_out(render_area->DrawDc, render_rect.left, render_rect.top - 2, str, strlen(str));
             }
 
             int pi = 1;
@@ -86,12 +87,12 @@ void RGE_Panel_Time::draw() {
                             (((paletteColor.peBlue & 0xFF) << 8 | (paletteColor.peGreen & 0xFF)) << 8
                              | (paletteColor.peRed & 0xFF));
 
-                        SetTextColor(render_area->DrawDc, color);
+                        gdi_set_text_color(render_area->DrawDc, color);
 
                         {
                             char str[100];
                             sprintf(str, get_string(STRING_ID_COUNTDOWN_YEARS_FORMAT), countdown_timer);
-                            TextOutA(render_area->DrawDc, render_rect.left, yo + render_rect.top, str, strlen(str));
+                            gdi_text_out(render_area->DrawDc, render_rect.left, yo + render_rect.top, str, strlen(str));
                         }
                         yo += 13;
                     }
@@ -100,8 +101,8 @@ void RGE_Panel_Time::draw() {
             }
         }
 
-        SelectObject(render_area->DrawDc, old_font);
-        SelectClipRgn(render_area->DrawDc, 0);
+        gdi_select_object(render_area->DrawDc, old_font);
+        gdi_select_clip_rgn(render_area->DrawDc, 0);
         render_area->ReleaseDc("rpnl_tim::draw");
     }
 

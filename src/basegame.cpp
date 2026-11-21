@@ -525,7 +525,7 @@ RGE_Base_Game::~RGE_Base_Game() {
         if (this->font_num > 0) {
             do {
                 if (this->fonts[i].font)
-                    DeleteObject(this->fonts[i].font);
+                    gdi_delete_object(this->fonts[i].font);
                 i++;
             } while (i < this->font_num);
         }
@@ -1906,13 +1906,13 @@ int RGE_Base_Game::setup_fonts() {
         }
 
         if (font != 0) {
-            HGDIOBJ old_font = SelectObject(dc, font);
+            HGDIOBJ old_font = gdi_select_object(dc, font);
             // The original keeps the array index outside the complete metrics object.
-            GetTextMetricsA(dc, &tm);
+            gdi_get_text_metrics(dc, &tm);
             this->fonts[i].font = font;
             this->fonts[i].font_wid = tm.tmAveCharWidth;
             this->fonts[i].font_hgt = tm.tmHeight + tm.tmExternalLeading;
-            SelectObject(dc, old_font);
+            gdi_select_object(dc, old_font);
         }
     }
 
@@ -2092,7 +2092,7 @@ HFONT RGE_Base_Game::make_font(HDC dc, char* face_name, int point_size, int wgt,
     logfont.lfQuality = 2;
     logfont.lfPitchAndFamily = 2;
     strcpy(logfont.lfFaceName, face_name);
-    return CreateFontIndirectA(&logfont);
+    return gdi_create_font_indirect(&logfont);
 }
 
 int RGE_Base_Game::check_for_cd(int num_players) {
@@ -2234,8 +2234,8 @@ void RGE_Base_Game::clear_window() {
     if (this->prog_window != 0) {
         dc = GetDC(this->prog_window);
         GetClientRect(this->prog_window, &rect);
-        brush = GetStockObject(BLACK_BRUSH);
-        FillRect(dc, &rect, brush);
+        brush = gdi_get_stock_object(BLACK_BRUSH);
+        gdi_fill_rect(dc, &rect, brush);
         ReleaseDC(this->prog_window, dc);
     }
 }

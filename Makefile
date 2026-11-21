@@ -49,7 +49,8 @@ play:
 	@test -n "$(LATEST_CLANG)" || { echo "No clang build yet: run make clang"; exit 1; }
 	@ls runtime | grep -qiv '^readme' || { echo "runtime/ has no game data: see runtime/README.md"; exit 1; }
 	@test -d $(PLAY_DIR) || cp -r runtime $(PLAY_DIR)
-	cp "$(LATEST_CLANG)empiresx.exe" "$(LATEST_CLANG)SDL2.dll" $(PLAY_DIR)/
+	cp "$(LATEST_CLANG)empiresx.exe" "$(LATEST_CLANG)"*.dll $(PLAY_DIR)/
+	cp -r "$(LATEST_CLANG)fonts" $(PLAY_DIR)/
 	cd $(PLAY_DIR) && $(WINE) empiresx.exe NOSTARTUP GAMECD
 
 clean:

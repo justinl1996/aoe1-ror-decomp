@@ -1,4 +1,5 @@
 #include "../include/Pnl_inp.h"
+#include "../include/surface.h"
 
 #include <mbstring.h>
 
@@ -376,14 +377,14 @@ void TInputPanel::draw() {
     this->draw_setup(0);
     void* dc = this->render_area->GetDc(pnl_inp_draw);
     if (dc != 0) {
-        void*(__stdcall * select_object)(void*, void*) = SelectObject;
-        void* old_font = select_object(dc, this->font);
+        HGDIOBJ (*select_object)(HDC, HGDIOBJ) = gdi_select_object;
+        void* old_font = select_object((HDC) dc, this->font);
         tagRECT line_rect;
         long cursor_x_offset;
         short cur = this->cur_line;
         short diff = cur - this->top_line;
         this->calc_line_pos(dc, diff, cur, &line_rect, &cursor_x_offset);
-        select_object(dc, old_font);
+        select_object((HDC) dc, old_font);
         this->render_area->ReleaseDc(pnl_inp_draw);
         unsigned char* locked = this->render_area->Lock(pnl_inp_draw, 1);
         if (locked != 0) {

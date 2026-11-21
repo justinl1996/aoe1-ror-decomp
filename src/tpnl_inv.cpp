@@ -1,5 +1,6 @@
 
 #include "../include/tpnl_inv.h"
+#include "../include/surface.h"
 #include "../include/program_mode.h"
 #include "../include/Shape.h"
 #include "../include/tplayer.h"
@@ -72,40 +73,40 @@ void TRIBE_Panel_Inven::draw() {
 
     this->draw_setup(0);
     if (this->render_area->GetDc(s_tpnl_inv_draw) != 0) {
-        void* old_font = SelectObject(this->render_area->DrawDc, this->font);
-        SetBkMode(this->render_area->DrawDc, TRANSPARENT);
+        void* old_font = gdi_select_object(this->render_area->DrawDc, this->font);
+        gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
 
         long x = this->pnl_x + 0x20;
         long y = this->pnl_y + 2;
 
         sprintf(str, s_fmt_ld, (long) this->player->attributes[RGE_RESOURCE_WOOD]);
-        SetTextColor(this->render_area->DrawDc, this->back_color);
-        TextOutA(this->render_area->DrawDc, x - 1, y + 1, str, strlen(str));
-        SetTextColor(this->render_area->DrawDc, this->font_color);
-        TextOutA(this->render_area->DrawDc, x, y, str, strlen(str));
+        gdi_set_text_color(this->render_area->DrawDc, this->back_color);
+        gdi_text_out(this->render_area->DrawDc, x - 1, y + 1, str, strlen(str));
+        gdi_set_text_color(this->render_area->DrawDc, this->font_color);
+        gdi_text_out(this->render_area->DrawDc, x, y, str, strlen(str));
 
         x = this->pnl_x + 0x63;
         sprintf(str, s_fmt_ld, (long) this->player->attributes[RGE_RESOURCE_FOOD]);
-        SetTextColor(this->render_area->DrawDc, this->back_color);
-        TextOutA(this->render_area->DrawDc, x - 1, y + 1, str, strlen(str));
-        SetTextColor(this->render_area->DrawDc, this->font_color);
-        TextOutA(this->render_area->DrawDc, x, y, str, strlen(str));
+        gdi_set_text_color(this->render_area->DrawDc, this->back_color);
+        gdi_text_out(this->render_area->DrawDc, x - 1, y + 1, str, strlen(str));
+        gdi_set_text_color(this->render_area->DrawDc, this->font_color);
+        gdi_text_out(this->render_area->DrawDc, x, y, str, strlen(str));
 
         x = this->pnl_x + 0xA6;
         sprintf(str, s_fmt_ld, (long) this->player->attributes[RGE_RESOURCE_GOLD]);
-        SetTextColor(this->render_area->DrawDc, this->back_color);
-        TextOutA(this->render_area->DrawDc, x - 1, y + 1, str, strlen(str));
-        SetTextColor(this->render_area->DrawDc, this->font_color);
-        TextOutA(this->render_area->DrawDc, x, y, str, strlen(str));
+        gdi_set_text_color(this->render_area->DrawDc, this->back_color);
+        gdi_text_out(this->render_area->DrawDc, x - 1, y + 1, str, strlen(str));
+        gdi_set_text_color(this->render_area->DrawDc, this->font_color);
+        gdi_text_out(this->render_area->DrawDc, x, y, str, strlen(str));
 
         x = this->pnl_x + 0xE9;
         sprintf(str, s_fmt_ld, (long) this->player->attributes[RGE_RESOURCE_STONE]);
-        SetTextColor(this->render_area->DrawDc, this->back_color);
-        TextOutA(this->render_area->DrawDc, x - 1, y + 1, str, strlen(str));
-        SetTextColor(this->render_area->DrawDc, this->font_color);
-        TextOutA(this->render_area->DrawDc, x, y, str, strlen(str));
+        gdi_set_text_color(this->render_area->DrawDc, this->back_color);
+        gdi_text_out(this->render_area->DrawDc, x - 1, y + 1, str, strlen(str));
+        gdi_set_text_color(this->render_area->DrawDc, this->font_color);
+        gdi_text_out(this->render_area->DrawDc, x, y, str, strlen(str));
 
-        SelectObject(this->render_area->DrawDc, old_font);
+        gdi_select_object(this->render_area->DrawDc, old_font);
         this->render_area->ReleaseDc(s_tpnl_inv_draw);
     }
     this->draw_finish();

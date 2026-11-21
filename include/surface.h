@@ -76,9 +76,8 @@ HRESULT WINAPI surface_DirectSoundCreate(LPGUID guid, LPDIRECTSOUND* out, LPUNKN
 void surface_present_set_target(HWND wnd, int exclusive, long width, long height);
 // The primary surface's palette changed.
 void surface_present_palette(const PALETTEENTRY* entries);
-// The primary surface's pixels inside rect changed. dc holds those pixels
-// as a DIB section with the current palette as its color table.
-void surface_present_primary(const unsigned char* bits, long pitch, long width, long height, const RECT* rect, HDC dc);
+// The primary surface's pixels inside rect changed.
+void surface_present_primary(const unsigned char* bits, long pitch, long width, long height, const RECT* rect);
 // Show a change that was held back because the last present was too recent.
 // Called once per iteration of the game's main loop.
 void surface_present_flush(void);
@@ -103,6 +102,38 @@ BOOL surface_screen_to_client(HWND wnd, POINT* point);
 BOOL surface_get_window_rect(HWND wnd, RECT* rect);
 // Place a child window (an edit box) given in game pixels.
 BOOL surface_move_child_window(HWND child, int x, int y, int width, int height, BOOL repaint);
+
+// GDI for the game's 8-bit surfaces (port/sdl/gdi.cpp), drawn with SDL_ttf.
+//
+// A device context from a surface (TDrawArea::GetDc) is one of gdi.cpp's;
+// on it these functions draw into the surface's pixels. On any other device
+// context they are the Win32 calls of the same name. Every GDI object the
+// game creates comes from here; gdi_win32_object gives the real GDI object
+// standing for one (for the EDIT boxes, which are real controls).
+HFONT gdi_create_font_indirect(const LOGFONTA* logfont);
+HPEN gdi_create_pen(int style, int width, COLORREF color);
+HRGN gdi_create_rect_rgn(int left, int top, int right, int bottom);
+HGDIOBJ gdi_get_stock_object(int index);
+HGDIOBJ gdi_win32_object(HGDIOBJ object);
+BOOL gdi_delete_object(HGDIOBJ object);
+HGDIOBJ gdi_select_object(HDC dc, HGDIOBJ object);
+int gdi_select_clip_rgn(HDC dc, HRGN region);
+COLORREF gdi_set_text_color(HDC dc, COLORREF color);
+COLORREF gdi_set_bk_color(HDC dc, COLORREF color);
+int gdi_set_bk_mode(HDC dc, int mode);
+BOOL gdi_text_out(HDC dc, int x, int y, LPCSTR text, int length);
+BOOL gdi_get_text_extent_point32(HDC dc, LPCSTR text, int length, SIZE* size);
+BOOL gdi_get_text_metrics(HDC dc, TEXTMETRICA* metrics);
+int gdi_draw_text(HDC dc, LPCSTR text, int length, RECT* rect, UINT format);
+int gdi_draw_text_ex(HDC dc, LPSTR text, int length, RECT* rect, UINT format, DRAWTEXTPARAMS* params);
+BOOL gdi_move_to_ex(HDC dc, int x, int y, POINT* previous);
+BOOL gdi_line_to(HDC dc, int x, int y);
+int gdi_fill_rect(HDC dc, const RECT* rect, HBRUSH brush);
+// Surface device contexts, for port/sdl/ddraw_memory.cpp.
+HDC gdi_create_surface_dc(void);
+void gdi_set_surface_dc_target(HDC dc, unsigned char* bits, long pitch, long width, long height,
+                               const PALETTEENTRY* palette);
+void gdi_delete_surface_dc(HDC dc);
 
 #ifdef __cplusplus
 }

@@ -454,9 +454,9 @@ void TButtonPanel::draw() {
     if (drawTypeValue == DrawText || drawTypeValue == DrawPictureAndText || drawTypeValue == DrawFillAndText) {
         void* dc = render_area->GetDc(s_pnl_btn_draw);
         if (dc != 0) {
-            SelectClipRgn(dc, clip_rgn);
-            old_font = SelectObject(dc, font);
-            SetBkMode(dc, TRANSPARENT);
+            gdi_select_clip_rgn(dc, clip_rgn);
+            old_font = gdi_select_object(dc, font);
+            gdi_set_bk_mode(dc, TRANSPARENT);
 
             calc_x = text_x;
             if (calc_x == -1) {
@@ -473,7 +473,7 @@ void TButtonPanel::draw() {
             }
             if (text != 0) {
                 text_length = (short) strlen(text);
-                GetTextExtentPoint32A(dc, text, text_length, &text_size);
+                gdi_get_text_extent_point32(dc, text, text_length, &text_size);
                 long text_x_pos = calc_x - text_size.cx / 2 + pnl_x;
                 long text_y_pos;
                 if (text2[cur_state] != 0) {
@@ -488,15 +488,15 @@ void TButtonPanel::draw() {
                 }
 
                 if (have_focus == 0) {
-                    SetTextColor(dc, text_color2[cur_state]);
-                    TextOutA(dc, text_x_pos - 1, text_y_pos + 1, text, text_length);
-                    SetTextColor(dc, text_color1[cur_state]);
-                    TextOutA(dc, text_x_pos, text_y_pos, text, text_length);
+                    gdi_set_text_color(dc, text_color2[cur_state]);
+                    gdi_text_out(dc, text_x_pos - 1, text_y_pos + 1, text, text_length);
+                    gdi_set_text_color(dc, text_color1[cur_state]);
+                    gdi_text_out(dc, text_x_pos, text_y_pos, text, text_length);
                 } else {
-                    SetTextColor(dc, highlight_text_color2[cur_state]);
-                    TextOutA(dc, text_x_pos - 1, text_y_pos + 1, text, text_length);
-                    SetTextColor(dc, highlight_text_color1[cur_state]);
-                    TextOutA(dc, text_x_pos, text_y_pos, text, text_length);
+                    gdi_set_text_color(dc, highlight_text_color2[cur_state]);
+                    gdi_text_out(dc, text_x_pos - 1, text_y_pos + 1, text, text_length);
+                    gdi_set_text_color(dc, highlight_text_color1[cur_state]);
+                    gdi_text_out(dc, text_x_pos, text_y_pos, text, text_length);
                 }
 
                 text = text2[cur_state];
@@ -505,7 +505,7 @@ void TButtonPanel::draw() {
                 }
                 if (text != 0) {
                     text_length = (short) strlen(text);
-                    GetTextExtentPoint32A(dc, text, text_length, &text_size);
+                    gdi_get_text_extent_point32(dc, text, text_length, &text_size);
                     text_x_pos = calc_x - text_size.cx / 2 + pnl_x;
                     text_y_pos = y + pnl_y;
 
@@ -515,21 +515,21 @@ void TButtonPanel::draw() {
                     }
 
                     if (have_focus == 0) {
-                        SetTextColor(dc, text_color2[cur_state]);
-                        TextOutA(dc, text_x_pos - 1, text_y_pos + 1, text, text_length);
-                        SetTextColor(dc, text_color1[cur_state]);
-                        TextOutA(dc, text_x_pos, text_y_pos, text, text_length);
+                        gdi_set_text_color(dc, text_color2[cur_state]);
+                        gdi_text_out(dc, text_x_pos - 1, text_y_pos + 1, text, text_length);
+                        gdi_set_text_color(dc, text_color1[cur_state]);
+                        gdi_text_out(dc, text_x_pos, text_y_pos, text, text_length);
                     } else {
-                        SetTextColor(dc, highlight_text_color2[cur_state]);
-                        TextOutA(dc, text_x_pos - 1, text_y_pos + 1, text, text_length);
-                        SetTextColor(dc, highlight_text_color1[cur_state]);
-                        TextOutA(dc, text_x_pos, text_y_pos, text, text_length);
+                        gdi_set_text_color(dc, highlight_text_color2[cur_state]);
+                        gdi_text_out(dc, text_x_pos - 1, text_y_pos + 1, text, text_length);
+                        gdi_set_text_color(dc, highlight_text_color1[cur_state]);
+                        gdi_text_out(dc, text_x_pos, text_y_pos, text, text_length);
                     }
                 }
             }
 
-            SelectObject(dc, old_font);
-            SelectClipRgn(dc, 0);
+            gdi_select_object(dc, old_font);
+            gdi_select_clip_rgn(dc, 0);
             render_area->ReleaseDc(s_pnl_btn_draw);
         }
     }

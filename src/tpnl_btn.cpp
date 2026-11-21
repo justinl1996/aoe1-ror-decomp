@@ -1,5 +1,6 @@
 
 #include "../include/scr_game.h"
+#include "../include/surface.h"
 #include "../include/tpnl_btn.h"
 #include "../include/asm_draw.h"
 
@@ -95,9 +96,9 @@ void TRIBE_Panel_Button::draw() {
     if ((tribe_button_type == 1 || tribe_button_type == 3) && text1[0] != 0) {
         HDC dc = (HDC) render_area->GetDc(s_tpnl_btn_draw);
         if (dc != 0) {
-            SelectClipRgn(dc, clip_rgn);
-            old_font = SelectObject(dc, (HGDIOBJ) font);
-            SetBkMode(dc, TRANSPARENT);
+            gdi_select_clip_rgn(dc, clip_rgn);
+            old_font = gdi_select_object(dc, (HGDIOBJ) font);
+            gdi_set_bk_mode(dc, TRANSPARENT);
 
             int center_x = pnl_wid / 2;
             calc_y = pnl_hgt / 2;
@@ -109,7 +110,7 @@ void TRIBE_Panel_Button::draw() {
 
             if (text != 0) {
                 text_length = (short) strlen(text);
-                GetTextExtentPoint32A(dc, text, text_length, &text_size);
+                gdi_get_text_extent_point32(dc, text, text_length, &text_size);
 
                 x = center_x - text_size.cx / 2 + pnl_x;
                 if (text2[cur_state] != 0)
@@ -122,10 +123,10 @@ void TRIBE_Panel_Button::draw() {
                     y++;
                 }
 
-                SetTextColor(dc, text_color2[cur_state]);
-                TextOutA(dc, x - 1, y + 1, text, text_length);
-                SetTextColor(dc, text_color1[cur_state]);
-                TextOutA(dc, x, y, text, text_length);
+                gdi_set_text_color(dc, text_color2[cur_state]);
+                gdi_text_out(dc, x - 1, y + 1, text, text_length);
+                gdi_set_text_color(dc, text_color1[cur_state]);
+                gdi_text_out(dc, x, y, text, text_length);
 
                 if (text2[cur_state] != 0)
                     text = text2[cur_state];
@@ -134,7 +135,7 @@ void TRIBE_Panel_Button::draw() {
 
                 if (text != 0) {
                     short second_length = (short) strlen(text);
-                    GetTextExtentPoint32A(dc, text, second_length, &text_size);
+                    gdi_get_text_extent_point32(dc, text, second_length, &text_size);
 
                     x = center_x - text_size.cx / 2 + pnl_x;
                     y = calc_y + pnl_y;
@@ -144,15 +145,15 @@ void TRIBE_Panel_Button::draw() {
                         y++;
                     }
 
-                    SetTextColor(dc, text_color2[cur_state]);
-                    TextOutA(dc, x - 1, y + 1, text, second_length);
-                    SetTextColor(dc, text_color1[cur_state]);
-                    TextOutA(dc, x, y, text, second_length);
+                    gdi_set_text_color(dc, text_color2[cur_state]);
+                    gdi_text_out(dc, x - 1, y + 1, text, second_length);
+                    gdi_set_text_color(dc, text_color1[cur_state]);
+                    gdi_text_out(dc, x, y, text, second_length);
                 }
             }
 
-            SelectObject(dc, old_font);
-            SelectClipRgn(dc, 0);
+            gdi_select_object(dc, old_font);
+            gdi_select_clip_rgn(dc, 0);
             render_area->ReleaseDc(s_tpnl_btn_draw);
         }
     } else if (pic[0] != 0 && pic_index[0] >= 0) {
@@ -208,11 +209,11 @@ void TRIBE_Panel_Button::draw() {
             char msg[10];
             sprintf(msg, "%d", garrsion_number);
 
-            SelectClipRgn(render_area->DrawDc, clip_rgn);
-            SetBkMode(render_area->DrawDc, TRANSPARENT);
-            SetTextColor(render_area->DrawDc, 0xCCCCCC);
-            TextOutA(render_area->DrawDc, pnl_x + 3 + (is_down != 0), pnl_y + 2 + (is_down != 0), msg, (int) strlen(msg));
-            SelectClipRgn(render_area->DrawDc, 0);
+            gdi_select_clip_rgn(render_area->DrawDc, clip_rgn);
+            gdi_set_bk_mode(render_area->DrawDc, TRANSPARENT);
+            gdi_set_text_color(render_area->DrawDc, 0xCCCCCC);
+            gdi_text_out(render_area->DrawDc, pnl_x + 3 + (is_down != 0), pnl_y + 2 + (is_down != 0), msg, (int) strlen(msg));
+            gdi_select_clip_rgn(render_area->DrawDc, 0);
             render_area->ReleaseDc(s_tpnl_inv_draw2);
         }
     }

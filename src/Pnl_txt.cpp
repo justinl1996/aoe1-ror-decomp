@@ -1,4 +1,5 @@
 #include "../include/pnl_lst.h"
+#include "../include/surface.h"
 #include "../include/Pnl_scbr.h"
 #include "../include/Pnl_txt.h"
 #include <new.h>
@@ -30,7 +31,7 @@ TTextPanel::TTextPanel() :
 TTextPanel::~TTextPanel() {
     this->free_text();
     if (this->clip_rgn2 != 0) {
-        DeleteObject(this->clip_rgn2);
+        gdi_delete_object(this->clip_rgn2);
         this->clip_rgn2 = 0;
     }
 }
@@ -128,7 +129,7 @@ void TTextPanel::set_rect(long x_in, long y_in, long wid_in, long hgt_in) {
 
     if (this->second_column_pos != 0) {
         if (this->clip_rgn2 != 0) {
-            DeleteObject(this->clip_rgn2);
+            gdi_delete_object(this->clip_rgn2);
             this->clip_rgn2 = 0;
         }
 
@@ -138,7 +139,7 @@ void TTextPanel::set_rect(long x_in, long y_in, long wid_in, long hgt_in) {
             if (clip_rect2.right > this->clip_rect.right) {
                 clip_rect2.right = this->clip_rect.right;
             }
-            this->clip_rgn2 = CreateRectRgn(clip_rect2.left, clip_rect2.top, clip_rect2.right, clip_rect2.bottom);
+            this->clip_rgn2 = gdi_create_rect_rgn(clip_rect2.left, clip_rect2.top, clip_rect2.right, clip_rect2.bottom);
         }
     }
 }
@@ -238,8 +239,8 @@ int TTextPanel::word_wrap_append(char* text_in) {
         return 0;
     }
 
-    old_font = SelectObject((HDC) dc, (HGDIOBJ) this->font);
-    GetTextMetricsA((HDC) dc, &tm);
+    old_font = gdi_select_object((HDC) dc, (HGDIOBJ) this->font);
+    gdi_get_text_metrics((HDC) dc, &tm);
     japanese = (tm.tmCharSet == 0x80);
 
     for (;;) {
@@ -257,7 +258,7 @@ int TTextPanel::word_wrap_append(char* text_in) {
         } else {
             chars = 1;
             len = _mbsinc((const unsigned char*) text) - (unsigned char*) text;
-            GetTextExtentPoint32A((HDC) dc, text, len, &text_size);
+            gdi_get_text_extent_point32((HDC) dc, text, len, &text_size);
             last_char = 0;
 
             while (chars <= (short) text_len) {
@@ -281,14 +282,14 @@ int TTextPanel::word_wrap_append(char* text_in) {
                 next_char = _mbsinc(next_char);
                 ++chars;
                 len = _mbsinc(next_char) - (unsigned char*) text;
-                GetTextExtentPoint32A((HDC) dc, text, len, &text_size);
+                gdi_get_text_extent_point32((HDC) dc, text, len, &text_size);
             }
         }
 
         if (!found_return) {
             len = strlen(text);
             chars = text_len;
-            GetTextExtentPoint32A((HDC) dc, text, len, &text_size);
+            gdi_get_text_extent_point32((HDC) dc, text, len, &text_size);
             if (text_size.cx <= max_wid) {
                 break;
             }
@@ -301,7 +302,7 @@ int TTextPanel::word_wrap_append(char* text_in) {
             while (chars < (short) text_len) {
                 // Measure ahead. Advance the cursor only after a successful fit.
                 len = _mbsinc(next_char) - (unsigned char*) text;
-                GetTextExtentPoint32A((HDC) dc, text, len, &text_size);
+                gdi_get_text_extent_point32((HDC) dc, text, len, &text_size);
                 if (text_size.cx > max_wid) {
                     break;
                 }
@@ -372,7 +373,7 @@ int TTextPanel::word_wrap_append(char* text_in) {
         }
     }
     this->append_line(text, 0);
-    SelectObject((HDC) dc, (HGDIOBJ) old_font);
+    gdi_select_object((HDC) dc, (HGDIOBJ) old_font);
     this->render_area->ReleaseDc(s_pnl_txt__word_wrap_append);
     return 1;
 }
@@ -720,9 +721,9 @@ void TTextPanel::draw() {
 
     void* dc = this->render_area->GetDc(s_pnl_txt__draw);
     if (dc != 0) {
-        SelectClipRgn(dc, this->clip_rgn);
-        void* old_font = SelectObject(dc, this->font);
-        SetBkMode(dc, TRANSPARENT);
+        gdi_select_clip_rgn(dc, this->clip_rgn);
+        void* old_font = gdi_select_object(dc, this->font);
+        gdi_set_bk_mode(dc, TRANSPARENT);
 
         for (short line = this->top_line, line_index = 0; line <= this->bot_line; ++line, ++line_index) {
             if ((this->tab_stop != 0 && this->have_focus != 0) || this->mouse_captured != 0) {
@@ -732,8 +733,8 @@ void TTextPanel::draw() {
             }
         }
 
-        SelectObject(dc, old_font);
-        SelectClipRgn(dc, 0);
+        gdi_select_object(dc, old_font);
+        gdi_select_clip_rgn(dc, 0);
         this->render_area->ReleaseDc(s_pnl_txt__draw);
     }
 
@@ -901,34 +902,34 @@ void TTextPanel::draw_line(void* dc, short draw_row, short text_line, unsigned l
     long text_y = line_rect.top;
 
     if (this->clip_rgn2 != 0) {
-        SelectClipRgn(dc, this->clip_rgn2);
+        gdi_select_clip_rgn(dc, this->clip_rgn2);
     }
 
     switch (this->text_style) {
         case 0:
-            SetTextColor(dc, color1);
+            gdi_set_text_color(dc, color1);
             if (text != 0) {
-                TextOutA(dc, text_x, text_y, text, (int) text_len);
+                gdi_text_out(dc, text_x, text_y, text, (int) text_len);
             }
             break;
         case 1:
-            SetTextColor(dc, color1);
+            gdi_set_text_color(dc, color1);
             if (text != 0) {
-                TextOutA(dc, text_x - 1, text_y + 1, text, (int) text_len);
+                gdi_text_out(dc, text_x - 1, text_y + 1, text, (int) text_len);
             }
-            SetTextColor(dc, color2);
+            gdi_set_text_color(dc, color2);
             if (text != 0) {
-                TextOutA(dc, text_x, text_y, text, (int) text_len);
+                gdi_text_out(dc, text_x, text_y, text, (int) text_len);
             }
             break;
         case 2:
-            SetTextColor(dc, color2);
+            gdi_set_text_color(dc, color2);
             if (text != 0) {
-                TextOutA(dc, text_x - 1, text_y + 1, text, (int) text_len);
+                gdi_text_out(dc, text_x - 1, text_y + 1, text, (int) text_len);
             }
-            SetTextColor(dc, color1);
+            gdi_set_text_color(dc, color1);
             if (text != 0) {
-                TextOutA(dc, text_x, text_y, text, (int) text_len);
+                gdi_text_out(dc, text_x, text_y, text, (int) text_len);
             }
             break;
         default:
@@ -940,25 +941,25 @@ void TTextPanel::draw_line(void* dc, short draw_row, short text_line, unsigned l
     }
 
     if (panel->clip_rgn2 != 0) {
-        SelectClipRgn(dc, panel->clip_rgn);
+        gdi_select_clip_rgn(dc, panel->clip_rgn);
     }
 
     switch (panel->text_style) {
         case 0:
-            SetTextColor(dc, color1);
-            TextOutA(dc, second_text_x, text_y, text2, (int) text2_len);
+            gdi_set_text_color(dc, color1);
+            gdi_text_out(dc, second_text_x, text_y, text2, (int) text2_len);
             return;
         case 1:
-            SetTextColor(dc, color1);
-            TextOutA(dc, second_text_x - 1, text_y + 1, text2, (int) text2_len);
-            SetTextColor(dc, color2);
-            TextOutA(dc, second_text_x, text_y, text2, (int) text2_len);
+            gdi_set_text_color(dc, color1);
+            gdi_text_out(dc, second_text_x - 1, text_y + 1, text2, (int) text2_len);
+            gdi_set_text_color(dc, color2);
+            gdi_text_out(dc, second_text_x, text_y, text2, (int) text2_len);
             return;
         case 2:
-            SetTextColor(dc, color2);
-            TextOutA(dc, second_text_x - 1, text_y + 1, text2, (int) text2_len);
-            SetTextColor(dc, color1);
-            TextOutA(dc, second_text_x, text_y, text2, (int) text2_len);
+            gdi_set_text_color(dc, color2);
+            gdi_text_out(dc, second_text_x - 1, text_y + 1, text2, (int) text2_len);
+            gdi_set_text_color(dc, color1);
+            gdi_text_out(dc, second_text_x, text_y, text2, (int) text2_len);
             return;
         default:
             return;
@@ -985,19 +986,19 @@ void TTextPanel::calc_line_pos(void* dc, short draw_row, short text_line, tagREC
             text_len = (short) _mbslen((const unsigned char*) text);
             if (this->cur_col > text_len) {
                 len = (short) strlen(text);
-                GetTextExtentPoint32A((HDC) dc, text, len, &text_size);
+                gdi_get_text_extent_point32((HDC) dc, text, len, &text_size);
             } else {
                 memset(temp_text2, 0, sizeof(temp_text2));
                 _mbsncpy(temp_text2, (const unsigned char*) text, this->cur_col);
                 len = (short) strlen((const char*) temp_text2);
-                GetTextExtentPoint32A((HDC) dc, text, len, &text_size);
+                gdi_get_text_extent_point32((HDC) dc, text, len, &text_size);
             }
             col_offset = text_size.cx;
         }
 
         text_len = (short) _mbslen((const unsigned char*) text);
         len = (short) strlen(text);
-        GetTextExtentPoint32A((HDC) dc, text, len, &text_size);
+        gdi_get_text_extent_point32((HDC) dc, text, len, &text_size);
         text_width = text_size.cx;
     } else {
         col_offset = 0;
@@ -1446,9 +1447,9 @@ void TTextPanel::set_second_column_pos(long val) {
 int TTextPanel::get_text_rect(RECT* rect) {
     void* dc = this->render_area->GetDc(s_pnl_txt__get_text_rect);
     if (dc != 0) {
-        void* old_font = SelectObject(dc, this->font);
+        void* old_font = gdi_select_object(dc, this->font);
         this->calc_line_pos(dc, 0, 0, rect, 0);
-        SelectObject(dc, old_font);
+        gdi_select_object(dc, old_font);
         this->render_area->ReleaseDc(s_pnl_txt__get_text_rect);
         return 1;
     }

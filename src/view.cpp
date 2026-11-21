@@ -169,7 +169,7 @@ RGE_View::~RGE_View() {
     this->delete_surfaces();
 
     if (this->red_pen != 0) {
-        DeleteObject(this->red_pen);
+        gdi_delete_object(this->red_pen);
         this->red_pen = 0;
     }
 
@@ -244,9 +244,9 @@ long RGE_View::setup(
     this->last_view_y = -9999.0f;
     this->function_mode = 0;
 
-    this->white_pen = GetStockObject(WHITE_PEN);
-    this->red_pen = CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
-    this->hollow_brush = GetStockObject(HOLLOW_BRUSH);
+    this->white_pen = gdi_get_stock_object(WHITE_PEN);
+    this->red_pen = gdi_create_pen(PS_SOLID, 1, RGB(255, 0, 0));
+    this->hollow_brush = gdi_get_stock_object(HOLLOW_BRUSH);
 
     sprintf(str, "%s.shp", border_line_file);
     this->border_line_shape = new TShape(str, -1);

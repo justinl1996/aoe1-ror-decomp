@@ -1,5 +1,6 @@
 
 #include "../include/spnl_obj.h"
+#include "../include/surface.h"
 #include "../include/program_mode.h"
 #include "../include/asm_draw.h"
 
@@ -111,16 +112,16 @@ void TRIBE_Scenario_Editor_Panel_Object::draw() {
     }
 
     if (render_area->GetDc(0)) {
-        SetBkMode(render_area->DrawDc, TRANSPARENT);
-        SetTextColor(render_area->DrawDc, 0xFFFFFF);
-        SelectClipRgn(render_area->DrawDc, (HRGN) clip_rgn);
-        HGDIOBJ old_font = SelectObject(render_area->DrawDc, (HGDIOBJ) font);
+        gdi_set_bk_mode(render_area->DrawDc, TRANSPARENT);
+        gdi_set_text_color(render_area->DrawDc, 0xFFFFFF);
+        gdi_select_clip_rgn(render_area->DrawDc, (HRGN) clip_rgn);
+        HGDIOBJ old_font = gdi_select_object(render_area->DrawDc, (HGDIOBJ) font);
 
         if (player != 0) {
             rge_base_game->get_string2(RGE_STRING_TYPE_CIVILIZATION, player->id, 0, name, 100);
             if (strcmp(name, "Unknown") == 0)
                 strcpy(name, "Gaia");
-            TextOutA(render_area->DrawDc, pnl_x + 2, pnl_y, name, strlen(name));
+            gdi_text_out(render_area->DrawDc, pnl_x + 2, pnl_y, name, strlen(name));
         }
 
         short string_id = master_game_obj->string_id;
@@ -131,13 +132,13 @@ void TRIBE_Scenario_Editor_Panel_Object::draw() {
         if (str[0] == 0)
             strcpy(str, master_game_obj->name);
         sprintf(name, "%s", str);
-        TextOutA(render_area->DrawDc, pnl_x + 2, pnl_y + 15, name, strlen(name));
+        gdi_text_out(render_area->DrawDc, pnl_x + 2, pnl_y + 15, name, strlen(name));
 
         if (text_flag != 0) {
             sprintf(str, "%d/%d", (int) master_game_obj->hp, (int) master_game_obj->hp);
-            TextOutA(render_area->DrawDc, pnl_x + 5, pnl_y + 85, str, strlen(str));
-            SelectObject(render_area->DrawDc, old_font);
-            SelectClipRgn(render_area->DrawDc, 0);
+            gdi_text_out(render_area->DrawDc, pnl_x + 5, pnl_y + 85, str, strlen(str));
+            gdi_select_object(render_area->DrawDc, old_font);
+            gdi_select_clip_rgn(render_area->DrawDc, 0);
         }
 
         render_area->ReleaseDc(0);
@@ -286,16 +287,16 @@ void TRIBE_Scenario_Editor_Panel_Object::draw_item(int row, int pic_index, Value
 
     if (val_str[0] != 0) {
         if (render_area->GetDc(0) != 0) {
-            SetBkMode(render_area->DrawDc, TRANSPARENT);
-            SetTextColor(render_area->DrawDc, 0xFFFFFF);
-            SelectClipRgn(render_area->DrawDc, (HRGN) clip_rgn);
-            HGDIOBJ old_font = SelectObject(render_area->DrawDc, (HGDIOBJ) font);
+            gdi_set_bk_mode(render_area->DrawDc, TRANSPARENT);
+            gdi_set_text_color(render_area->DrawDc, 0xFFFFFF);
+            gdi_select_clip_rgn(render_area->DrawDc, (HRGN) clip_rgn);
+            HGDIOBJ old_font = gdi_select_object(render_area->DrawDc, (HGDIOBJ) font);
             int length = strlen(val_str);
 
-            TextOutA(render_area->DrawDc, pnl_x + 100, pnl_y + row * 9 * 2 + 32, val_str, length);
+            gdi_text_out(render_area->DrawDc, pnl_x + 100, pnl_y + row * 9 * 2 + 32, val_str, length);
 
-            SelectObject(render_area->DrawDc, old_font);
-            SelectClipRgn(render_area->DrawDc, 0);
+            gdi_select_object(render_area->DrawDc, old_font);
+            gdi_select_clip_rgn(render_area->DrawDc, 0);
             render_area->ReleaseDc(0);
         }
     }

@@ -1,18 +1,52 @@
 {
-  "schema": 1,
+  "schema": 2,
   "notes": [
-    "The clang PE draws and plays sound through SDL2 (workflow/docs/sdl_port_tasks.md). tools/build_clang.py reads this file.",
-    "The SDL2 VC development package is downloaded by tools/fetch_sdl2.py into build/third_party/ and is never committed."
+    "The clang PE uses SDL2 for its window, input, display and sound, and SDL2_ttf for text (workflow/docs/sdl_port_tasks.md). tools/build_clang.py reads this file.",
+    "The packages are downloaded by tools/fetch_sdl2.py into build/third_party/, checked against their SHA-256, and never committed.",
+    "Liberation fonts (SIL Open Font License) stand in for Arial and Copperplate Gothic when Windows does not have them."
   ],
-  "sdl2": {
-    "version": "2.30.9",
-    "url": "https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-VC.zip",
-    "sha256": "8c91d91e5bcb997d062ec2b553c53832ebf95654d4aa35e8c02a954d4ce752ae",
-    "directory": "build/third_party/SDL2-2.30.9"
+  "packages": {
+    "sdl2": {
+      "version": "2.30.9",
+      "url": "https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-VC.zip",
+      "sha256": "8c91d91e5bcb997d062ec2b553c53832ebf95654d4aa35e8c02a954d4ce752ae",
+      "directory": "build/third_party/SDL2-2.30.9",
+      "probe": "include/SDL.h"
+    },
+    "sdl2_ttf": {
+      "version": "2.22.0",
+      "url": "https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.22.0/SDL2_ttf-devel-2.22.0-VC.zip",
+      "sha256": "94548d889a44b5301181a1d7b620cf5eab85ea657fcaa2ab4e8700916306eac2",
+      "directory": "build/third_party/SDL2_ttf-2.22.0",
+      "probe": "include/SDL_ttf.h"
+    },
+    "liberation": {
+      "version": "2.1.5",
+      "url": "https://github.com/liberationfonts/liberation-fonts/files/7261482/liberation-fonts-ttf-2.1.5.tar.gz",
+      "sha256": "7191c669bf38899f73a2094ed00f7b800553364f90e2637010a69c0e268f25d0",
+      "directory": "build/third_party/liberation-fonts-ttf-2.1.5",
+      "probe": "LiberationSans-Regular.ttf"
+    }
   },
   "defines": [],
-  "sources": ["port/sdl/surface.cpp", "port/sdl/window.cpp", "port/sdl/ddraw_memory.cpp", "port/sdl/dsound_memory.cpp"],
-  "libraries": ["SDL2.lib"],
+  "include_dirs": [["sdl2", "include"], ["sdl2_ttf", "include"]],
+  "library_dirs": [["sdl2", "lib/x86"], ["sdl2_ttf", "lib/x86"]],
+  "sources": [
+    "port/sdl/surface.cpp",
+    "port/sdl/window.cpp",
+    "port/sdl/gdi.cpp",
+    "port/sdl/ddraw_memory.cpp",
+    "port/sdl/dsound_memory.cpp"
+  ],
+  "libraries": ["SDL2.lib", "SDL2_ttf.lib"],
   "drop_libraries": ["ddraw.lib", "dsound.lib"],
-  "runtime_files": ["lib/x86/SDL2.dll"]
+  "runtime_files": [
+    ["sdl2", "lib/x86/SDL2.dll", ""],
+    ["sdl2_ttf", "lib/x86/SDL2_ttf.dll", ""],
+    ["liberation", "LiberationSans-Regular.ttf", "fonts"],
+    ["liberation", "LiberationSans-Bold.ttf", "fonts"],
+    ["liberation", "LiberationSerif-Regular.ttf", "fonts"],
+    ["liberation", "LiberationSerif-Bold.ttf", "fonts"],
+    ["liberation", "LICENSE", "fonts"]
+  ]
 }

@@ -8,22 +8,36 @@
 // the VC98 ddraw.h) over plain memory, so the game's call sites stay as they
 // are. Only surface_DirectDrawCreate replaces DirectDrawCreate.
 //
-// Every surface's pixels live in an 8-bit top-down DIB section, so GetDC
-// hands out a memory DC that draws straight into the pixels the game locks.
+// Every surface's pixels are plain 8-bit memory. GetDC hands out a device
+// context of port/sdl/gdi.cpp, whose text and line drawing writes straight
+// into the pixels the game locks.
 //
 // The display mode is never changed. SetDisplayMode only records the mode,
 // and the primary surface is a memory buffer of that size. Writes to the
 // primary surface are shown with surface_present_* (port/sdl/surface.cpp).
 
-#include <windows.h>
-#include <ddraw.h>
-#include <string.h>
-
 #include "../../include/surface.h"
+#include "sdl_internal.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 
 class MemDirectDraw;
 class MemSurface;
+
+// The desktop's size, which DirectDraw reports as the display mode until
+// the game sets one.
+static void desktop_size(long* width, long* height) {
+    SDL_DisplayMode mode;
+    if (SDL_GetDesktopDisplayMode(0, &mode) == 0) {
+        *width = mode.w;
+        *height = mode.h;
+    } else {
+        *width = 640;
+        *height = 480;
+    }
+}
 
 // Value-initializing helper: the VC6 headers predate ZeroMemory on structs
 // with constructors, and these are plain C structs.
@@ -110,9 +124,7 @@ class MemSurface : public IDirectDrawSurface {
     long height;
     long pitch;
     DWORD caps;
-    HBITMAP dib;
-    HDC dc;
-    HGDIOBJ old_bitmap;
+    HDC dc;  // gdi.cpp's, made on the first GetDC
     unsigned char* bits;
     int has_src_key;
     unsigned char src_key;
@@ -126,7 +138,7 @@ class MemSurface : public IDirectDrawSurface {
     int valid() const { return this->bits != 0; }
     int is_primary() const { return (this->caps & DDSCAPS_PRIMARYSURFACE) != 0; }
     void fill_desc(LPDDSURFACEDESC desc);
-    void refresh_color_table();
+    const PALETTEENTRY* color_table();
     void changed(const RECT* rect);
 
     STDMETHOD(QueryInterface)(REFIID, LPVOID FAR* out) {
@@ -211,8 +223,7 @@ class MemDirectDraw : public IDirectDraw {
     MemSurface* primary;
 
     MemDirectDraw() : refs(1), wnd(0), exclusive(0), primary(0) {
-        this->mode_width = GetSystemMetrics(SM_CXSCREEN);
-        this->mode_height = GetSystemMetrics(SM_CYSCREEN);
+        desktop_size(&this->mode_width, &this->mode_height);
     }
 
     void fill_mode_desc(LPDDSURFACEDESC desc, long width, long height, DWORD bits);
@@ -291,7 +302,6 @@ STDMETHODIMP MemPalette::SetEntries(DWORD, DWORD start, DWORD count, LPPALETTEEN
     // On a real 8-bit display a palette change recolors the screen at once.
     MemSurface* primary = this->owner != 0 ? this->owner->primary : 0;
     if (primary != 0 && primary->palette == this) {
-        primary->refresh_color_table();
         surface_present_palette(this->entries);
         primary->changed(0);
     }
@@ -302,32 +312,9 @@ STDMETHODIMP MemPalette::SetEntries(DWORD, DWORD start, DWORD count, LPPALETTEEN
 // Surface
 
 MemSurface::MemSurface(MemDirectDraw* owner_in, long width_in, long height_in, DWORD caps_in) :
-    refs(1), owner(owner_in), width(width_in), height(height_in), pitch((width_in + 3) & ~3), caps(caps_in), dib(0), dc(0),
-    old_bitmap(0), bits(0), has_src_key(0), src_key(0), locked(0), dc_out(0), palette(0), clipper(0) {
-    struct {
-        BITMAPINFOHEADER header;
-        RGBQUAD colors[256];
-    } info;
-    void* pixels = 0;
-
-    MEM_CLEAR(&info, sizeof(info));
-    info.header.biSize = sizeof(info.header);
-    info.header.biWidth = width_in;
-    info.header.biHeight = -height_in; // top-down, like a locked DirectDraw surface
-    info.header.biPlanes = 1;
-    info.header.biBitCount = 8;
-    info.header.biCompression = BI_RGB;
-    info.header.biClrUsed = 256;
-
-    this->dc = CreateCompatibleDC(0);
-    if (this->dc == 0)
-        return;
-    this->dib = CreateDIBSection(this->dc, (BITMAPINFO*) &info, DIB_RGB_COLORS, &pixels, 0, 0);
-    if (this->dib == 0 || pixels == 0)
-        return;
-    this->old_bitmap = SelectObject(this->dc, this->dib);
-    this->bits = (unsigned char*) pixels;
-    memset(this->bits, 0, this->pitch * this->height);
+    refs(1), owner(owner_in), width(width_in), height(height_in), pitch((width_in + 3) & ~3), caps(caps_in), dc(0),
+    bits(0), has_src_key(0), src_key(0), locked(0), dc_out(0), palette(0), clipper(0) {
+    this->bits = (unsigned char*) calloc(this->pitch, this->height);
 }
 
 MemSurface::~MemSurface() {
@@ -337,13 +324,9 @@ MemSurface::~MemSurface() {
         this->palette->Release();
     if (this->clipper != 0)
         this->clipper->Release();
-    if (this->dc != 0) {
-        if (this->old_bitmap != 0)
-            SelectObject(this->dc, this->old_bitmap);
-        DeleteDC(this->dc);
-    }
-    if (this->dib != 0)
-        DeleteObject(this->dib);
+    if (this->dc != 0)
+        gdi_delete_surface_dc(this->dc);
+    free(this->bits);
 }
 
 void MemSurface::fill_desc(LPDDSURFACEDESC desc) {
@@ -373,23 +356,13 @@ STDMETHODIMP MemSurface::GetPixelFormat(LPDDPIXELFORMAT format) {
     return DD_OK;
 }
 
-// GDI matches colors against the DIB color table. DirectDraw uses the
-// surface's palette, or the primary surface's palette when the surface has
-// none, so do the same.
-void MemSurface::refresh_color_table() {
-    RGBQUAD colors[256];
+// The palette text colours are matched against: the surface's own, or the
+// primary surface's when it has none, as DirectDraw's GetDC does.
+const PALETTEENTRY* MemSurface::color_table() {
     MemPalette* source = this->palette;
     if (source == 0 && this->owner != 0 && this->owner->primary != 0)
         source = this->owner->primary->palette;
-    if (source == 0 || this->dc == 0)
-        return;
-    for (int i = 0; i < 256; ++i) {
-        colors[i].rgbRed = source->entries[i].peRed;
-        colors[i].rgbGreen = source->entries[i].peGreen;
-        colors[i].rgbBlue = source->entries[i].peBlue;
-        colors[i].rgbReserved = 0;
-    }
-    SetDIBColorTable(this->dc, 0, 256, colors);
+    return source != 0 ? source->entries : 0;
 }
 
 // A write to the primary surface is visible at once on a real display.
@@ -404,7 +377,7 @@ void MemSurface::changed(const RECT* rect) {
         whole.bottom = this->height;
         rect = &whole;
     }
-    surface_present_primary(this->bits, this->pitch, this->width, this->height, rect, this->dc);
+    surface_present_primary(this->bits, this->pitch, this->width, this->height, rect);
 }
 
 STDMETHODIMP MemSurface::Lock(LPRECT rect, LPDDSURFACEDESC desc, DWORD, HANDLE) {
@@ -412,7 +385,6 @@ STDMETHODIMP MemSurface::Lock(LPRECT rect, LPDDSURFACEDESC desc, DWORD, HANDLE) 
         return DDERR_INVALIDPARAMS;
     if (this->dc_out != 0)
         return DDERR_SURFACEBUSY;
-    GdiFlush(); // finish any GDI drawing into the pixels first
     this->fill_desc(desc);
     desc->dwFlags |= DDSD_LPSURFACE;
     unsigned char* start = this->bits;
@@ -443,8 +415,10 @@ STDMETHODIMP MemSurface::GetDC(HDC FAR* out) {
     if (this->locked != 0)
         return DDERR_SURFACEBUSY;
     if (this->dc == 0)
+        this->dc = gdi_create_surface_dc();
+    if (this->dc == 0)
         return DDERR_CANTCREATEDC;
-    this->refresh_color_table();
+    gdi_set_surface_dc_target(this->dc, this->bits, this->pitch, this->width, this->height, this->color_table());
     this->dc_out = 1;
     *out = this->dc;
     return DD_OK;
@@ -453,7 +427,6 @@ STDMETHODIMP MemSurface::GetDC(HDC FAR* out) {
 STDMETHODIMP MemSurface::ReleaseDC(HDC) {
     if (this->dc_out == 0)
         return DDERR_GENERIC;
-    GdiFlush();
     this->dc_out = 0;
     this->changed(0);
     return DD_OK;
@@ -476,7 +449,6 @@ STDMETHODIMP MemSurface::SetPalette(LPDIRECTDRAWPALETTE palette_in) {
     if (this->palette != 0)
         this->palette->Release();
     this->palette = next;
-    this->refresh_color_table();
     if (this->is_primary() && next != 0) {
         surface_present_palette(next->entries);
         this->changed(0);
@@ -558,8 +530,6 @@ STDMETHODIMP MemSurface::Blt(LPRECT dest_rect, LPDIRECTDRAWSURFACE src_in, LPREC
     }
     if (d.left > d.right || d.top > d.bottom)
         return DDERR_INVALIDRECT;
-    if (this->dc_out != 0)
-        GdiFlush();
 
     if ((flags & DDBLT_COLORFILL) != 0) {
         if (fx == 0)
@@ -656,8 +626,6 @@ STDMETHODIMP MemSurface::BltFast(DWORD x, DWORD y, LPDIRECTDRAWSURFACE src_in, L
     d.bottom = d.top + (s.bottom - s.top);
     if (!mem_rect_inside(&s, src->width, src->height) || !mem_rect_inside(&d, this->width, this->height))
         return DDERR_INVALIDRECT;
-    if (this->dc_out != 0)
-        GdiFlush();
 
     int use_key = (trans & DDBLTFAST_SRCCOLORKEY) != 0 && src->has_src_key != 0;
     mem_copy_rect(this, &d, src, &s, use_key, src->src_key);
@@ -708,8 +676,7 @@ STDMETHODIMP MemDirectDraw::CreateSurface(LPDDSURFACEDESC desc, LPDIRECTDRAWSURF
             width = this->mode_width;
             height = this->mode_height;
         } else {
-            width = GetSystemMetrics(SM_CXSCREEN);
-            height = GetSystemMetrics(SM_CYSCREEN);
+            desktop_size(&width, &height);
         }
         caps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_VISIBLE | DDSCAPS_VIDEOMEMORY | DDSCAPS_LOCALVIDMEM;
     } else {

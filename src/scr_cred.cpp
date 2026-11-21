@@ -1,5 +1,6 @@
 
 #include "../include/scr_cred.h"
+#include "../include/surface.h"
 #include "../include/game_globals.h"
 #include "../include/music.h"
 #include "../include/scr_main.h"
@@ -316,14 +317,14 @@ void TScrollTextPanel::draw() {
         this->draw_setup(0);
         void* dc = this->render_area->GetDc(scr_cred_draw_context_name);
         if (dc != 0) {
-            SelectClipRgn(dc, this->clip_rgn);
-            void* old_font = SelectObject(dc, this->font);
-            SetBkMode(dc, TRANSPARENT);
+            gdi_select_clip_rgn(dc, this->clip_rgn);
+            void* old_font = gdi_select_object(dc, this->font);
+            gdi_set_bk_mode(dc, TRANSPARENT);
             for (short i = 0; i < this->num_lines; i++) {
                 this->draw_scrolled_line(dc, i, i, this->text_color1, this->text_color2);
             }
-            SelectObject(dc, old_font);
-            SelectClipRgn(dc, 0);
+            gdi_select_object(dc, old_font);
+            gdi_select_clip_rgn(dc, 0);
             this->render_area->ReleaseDc(scr_cred_draw_context_name);
         }
         this->draw_border();
@@ -367,34 +368,34 @@ void TScrollTextPanel::draw_scrolled_line(void* dc, short draw_row, short text_l
     }
 
     if (this->clip_rgn2 != 0) {
-        SelectClipRgn(dc, this->clip_rgn2);
+        gdi_select_clip_rgn(dc, this->clip_rgn2);
     }
 
     switch (this->text_style) {
         case 0:
-            SetTextColor(dc, color1);
+            gdi_set_text_color(dc, color1);
             if (text != 0) {
-                TextOutA(dc, x2, text_y, text, (int) text_len);
+                gdi_text_out(dc, x2, text_y, text, (int) text_len);
             }
             break;
         case 1:
-            SetTextColor(dc, color1);
+            gdi_set_text_color(dc, color1);
             if (text != 0) {
-                TextOutA(dc, x2 - 1, text_y + 1, text, (int) text_len);
+                gdi_text_out(dc, x2 - 1, text_y + 1, text, (int) text_len);
             }
-            SetTextColor(dc, color2);
+            gdi_set_text_color(dc, color2);
             if (text != 0) {
-                TextOutA(dc, x2, text_y, text, (int) text_len);
+                gdi_text_out(dc, x2, text_y, text, (int) text_len);
             }
             break;
         case 2:
-            SetTextColor(dc, color2);
+            gdi_set_text_color(dc, color2);
             if (text != 0) {
-                TextOutA(dc, x2 - 1, text_y + 1, text, (int) text_len);
+                gdi_text_out(dc, x2 - 1, text_y + 1, text, (int) text_len);
             }
-            SetTextColor(dc, color1);
+            gdi_set_text_color(dc, color1);
             if (text != 0) {
-                TextOutA(dc, x2, text_y, text, (int) text_len);
+                gdi_text_out(dc, x2, text_y, text, (int) text_len);
             }
             break;
         default:
@@ -405,25 +406,25 @@ void TScrollTextPanel::draw_scrolled_line(void* dc, short draw_row, short text_l
         return;
 
     if (this->clip_rgn2 != 0) {
-        SelectClipRgn(dc, this->clip_rgn);
+        gdi_select_clip_rgn(dc, this->clip_rgn);
     }
 
     switch (this->text_style) {
         case 0:
-            SetTextColor(dc, color1);
-            TextOutA(dc, second_text_x, text_y, temp_text2, (int) text2_len);
+            gdi_set_text_color(dc, color1);
+            gdi_text_out(dc, second_text_x, text_y, temp_text2, (int) text2_len);
             return;
         case 1:
-            SetTextColor(dc, color1);
-            TextOutA(dc, second_text_x - 1, text_y + 1, temp_text2, (int) text2_len);
-            SetTextColor(dc, color2);
-            TextOutA(dc, second_text_x, text_y, temp_text2, (int) text2_len);
+            gdi_set_text_color(dc, color1);
+            gdi_text_out(dc, second_text_x - 1, text_y + 1, temp_text2, (int) text2_len);
+            gdi_set_text_color(dc, color2);
+            gdi_text_out(dc, second_text_x, text_y, temp_text2, (int) text2_len);
             return;
         case 2:
-            SetTextColor(dc, color2);
-            TextOutA(dc, second_text_x - 1, text_y + 1, temp_text2, (int) text2_len);
-            SetTextColor(dc, color1);
-            TextOutA(dc, second_text_x, text_y, temp_text2, (int) text2_len);
+            gdi_set_text_color(dc, color2);
+            gdi_text_out(dc, second_text_x - 1, text_y + 1, temp_text2, (int) text2_len);
+            gdi_set_text_color(dc, color1);
+            gdi_text_out(dc, second_text_x, text_y, temp_text2, (int) text2_len);
             return;
         default:
             return;

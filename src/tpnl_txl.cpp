@@ -1,5 +1,6 @@
 
 #include "../include/tpnl_txl.h"
+#include "../include/surface.h"
 #include <string.h>
 
 static char s_tpnl_txl_draw[] = "tpnl_txl::draw";
@@ -42,15 +43,15 @@ void TRIBE_Panel_Text_Line::draw() {
     this->draw_setup(0);
 
     if (this->render_area->GetDc(s_tpnl_txl_draw)) {
-        HGDIOBJ old_font = SelectObject(this->render_area->DrawDc, (HGDIOBJ) this->font);
-        SetBkMode(this->render_area->DrawDc, TRANSPARENT);
-        SetTextColor(this->render_area->DrawDc, 0);
+        HGDIOBJ old_font = gdi_select_object(this->render_area->DrawDc, (HGDIOBJ) this->font);
+        gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
+        gdi_set_text_color(this->render_area->DrawDc, 0);
 
         if (this->text[0] != 0) {
-            TextOutA(this->render_area->DrawDc, this->pnl_x, this->pnl_y, this->text, strlen(this->text));
+            gdi_text_out(this->render_area->DrawDc, this->pnl_x, this->pnl_y, this->text, strlen(this->text));
         }
 
-        SelectObject(this->render_area->DrawDc, old_font);
+        gdi_select_object(this->render_area->DrawDc, old_font);
         this->render_area->ReleaseDc(s_tpnl_txl_draw);
     }
 

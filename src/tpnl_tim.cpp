@@ -1,4 +1,5 @@
 #include "../include/tpnl_tim.h"
+#include "../include/surface.h"
 #include "../include/color.h"
 #include "../include/resource_ids.h"
 #include "../include/tplayer.h"
@@ -34,7 +35,7 @@ TRIBE_Panel_Time::~TRIBE_Panel_Time() {
     TDrawArea* image_buffer;
 
     if (this->image_clip_region != 0) {
-        DeleteObject(this->image_clip_region);
+        gdi_delete_object(this->image_clip_region);
         this->image_clip_region = 0;
     }
 
@@ -59,7 +60,7 @@ void TRIBE_Panel_Time::set_rect(long x_in, long y_in, long wid_in, long hgt_in) 
     }
 
     if (this->image_clip_region != 0) {
-        DeleteObject(this->image_clip_region);
+        gdi_delete_object(this->image_clip_region);
         this->image_clip_region = 0;
     }
 
@@ -79,7 +80,7 @@ void TRIBE_Panel_Time::set_rect(long x_in, long y_in, long wid_in, long hgt_in) 
     this->ImageRect.top = 0;
     this->ImageRect.right = this->pnl_wid - 1;
     this->ImageRect.bottom = this->pnl_hgt - 1;
-    this->image_clip_region = CreateRectRgn(0, 0, this->pnl_wid - 1, this->pnl_hgt - 1);
+    this->image_clip_region = gdi_create_rect_rgn(0, 0, this->pnl_wid - 1, this->pnl_hgt - 1);
 
 skip_recreate:
     if (this->ImageBuffer != 0) {
@@ -232,9 +233,9 @@ void TRIBE_Panel_Time::draw() {
         goto finish;
     }
 
-    SelectClipRgn(this->render_area->DrawDc, this->clip_rgn);
-    old_font = SelectObject(this->render_area->DrawDc, this->font);
-    SetBkMode(this->render_area->DrawDc, TRANSPARENT);
+    gdi_select_clip_rgn(this->render_area->DrawDc, this->clip_rgn);
+    old_font = gdi_select_object(this->render_area->DrawDc, this->font);
+    gdi_set_bk_mode(this->render_area->DrawDc, TRANSPARENT);
 
     if (this->clock_format == 1) {
         int seconds = this->game_time;
@@ -272,7 +273,7 @@ void TRIBE_Panel_Time::draw() {
         text_flags = DT_SINGLELINE | DT_RIGHT;
     }
 
-    SetTextColor(this->render_area->DrawDc, this->color2);
+    gdi_set_text_color(this->render_area->DrawDc, this->color2);
 
     {
         int left = this->render_rect.left;
@@ -285,21 +286,21 @@ void TRIBE_Panel_Time::draw() {
         height -= 2;
 
         SetRect(&rect, left - 1, top - 1, width + left - 2, height + top - 2);
-        DrawTextA(this->render_area->DrawDc, str, -1, &rect, text_flags);
+        gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, text_flags);
         SetRect(&rect, left - 1, top + 1, width + left - 2, height + top);
-        DrawTextA(this->render_area->DrawDc, str, -1, &rect, text_flags);
+        gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, text_flags);
         SetRect(&rect, left + 1, top - 1, width + left, height + top - 2);
-        DrawTextA(this->render_area->DrawDc, str, -1, &rect, text_flags);
+        gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, text_flags);
         SetRect(&rect, left + 1, top + 1, width + left, height + top);
-        DrawTextA(this->render_area->DrawDc, str, -1, &rect, text_flags);
+        gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, text_flags);
 
-        SetTextColor(this->render_area->DrawDc, this->color1);
+        gdi_set_text_color(this->render_area->DrawDc, this->color1);
         SetRect(&rect, left, top, width + left - 1, height + top - 1);
-        DrawTextA(this->render_area->DrawDc, str, -1, &rect, text_flags);
+        gdi_draw_text(this->render_area->DrawDc, str, -1, &rect, text_flags);
     }
 
-    SelectObject(this->render_area->DrawDc, old_font);
-    SelectClipRgn(this->render_area->DrawDc, 0);
+    gdi_select_object(this->render_area->DrawDc, old_font);
+    gdi_select_clip_rgn(this->render_area->DrawDc, 0);
     this->render_area->ReleaseDc("tpnl_tim::draw");
 finish:
     this->draw_finish();
@@ -377,9 +378,9 @@ int TRIBE_Panel_Time::render_to_image_buffer() {
         return 0;
 
     this->ImageBuffer->SetClipRect(&this->ImageRect);
-    SelectClipRgn(this->ImageBuffer->DrawDc, this->image_clip_region);
-    old_font = SelectObject(this->ImageBuffer->DrawDc, this->font);
-    SetBkMode(this->ImageBuffer->DrawDc, TRANSPARENT);
+    gdi_select_clip_rgn(this->ImageBuffer->DrawDc, this->image_clip_region);
+    old_font = gdi_select_object(this->ImageBuffer->DrawDc, this->font);
+    gdi_set_bk_mode(this->ImageBuffer->DrawDc, TRANSPARENT);
 
     if (this->clock_format == 1) {
         int seconds = this->game_time;
@@ -417,27 +418,27 @@ int TRIBE_Panel_Time::render_to_image_buffer() {
         text_flags = DT_SINGLELINE | DT_RIGHT;
     }
 
-    SetTextColor(this->ImageBuffer->DrawDc, this->color2);
+    gdi_set_text_color(this->ImageBuffer->DrawDc, this->color2);
     {
         const int width = this->pnl_wid - 1;
         const int height = this->pnl_hgt - 1;
 
         SetRect(&rect, 0, 0, width - 2, height - 2);
-        DrawTextA(this->ImageBuffer->DrawDc, str, -1, &rect, text_flags);
+        gdi_draw_text(this->ImageBuffer->DrawDc, str, -1, &rect, text_flags);
         SetRect(&rect, 0, 2, width - 2, height);
-        DrawTextA(this->ImageBuffer->DrawDc, str, -1, &rect, text_flags);
+        gdi_draw_text(this->ImageBuffer->DrawDc, str, -1, &rect, text_flags);
         SetRect(&rect, 2, 0, width, height - 2);
-        DrawTextA(this->ImageBuffer->DrawDc, str, -1, &rect, text_flags);
+        gdi_draw_text(this->ImageBuffer->DrawDc, str, -1, &rect, text_flags);
         SetRect(&rect, 2, 2, width, height);
-        DrawTextA(this->ImageBuffer->DrawDc, str, -1, &rect, text_flags);
+        gdi_draw_text(this->ImageBuffer->DrawDc, str, -1, &rect, text_flags);
 
-        SetTextColor(this->ImageBuffer->DrawDc, this->color1);
+        gdi_set_text_color(this->ImageBuffer->DrawDc, this->color1);
         SetRect(&rect, 1, 1, width - 1, height - 1);
-        DrawTextA(this->ImageBuffer->DrawDc, str, -1, &rect, text_flags);
+        gdi_draw_text(this->ImageBuffer->DrawDc, str, -1, &rect, text_flags);
     }
 
-    SelectObject(this->ImageBuffer->DrawDc, old_font);
-    SelectClipRgn(this->ImageBuffer->DrawDc, 0);
+    gdi_select_object(this->ImageBuffer->DrawDc, old_font);
+    gdi_select_clip_rgn(this->ImageBuffer->DrawDc, 0);
     this->ImageBuffer->ReleaseDc("tpnl_tim::render_to_image_buffer");
 
     int width = this->pnl_wid;

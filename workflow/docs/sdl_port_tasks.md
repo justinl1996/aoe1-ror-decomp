@@ -656,6 +656,54 @@ no longer reaches the game from Windows' message queue.
   shows no text while typing: it is a Windows `EDIT` control whose colours
   come out black on black (also before this step).
 
+### Text without GDI — done 2026-11-21
+
+Item 2 of "What a Linux port still needs": the game's surfaces no longer
+use GDI, and text is drawn with SDL_ttf.
+
+- `port/sdl/gdi.cpp` (new) implements the GDI calls the game makes on a
+  surface's device context: fonts (`CreateFontIndirectA`), `TextOutA`,
+  `DrawTextA`/`DrawTextExA` (left, centre, right, vertical centre and
+  bottom for single lines, word wrap, `DT_CALCRECT`),
+  `GetTextExtentPoint32A`, `GetTextMetricsA`, text and background colours
+  and `OPAQUE`/`TRANSPARENT`, rectangular clip regions, pens with
+  `MoveToEx`/`LineTo`, brushes with `FillRect`, stock pens and brushes, and
+  `DeleteObject`. About 425 call sites in 25 files call the `gdi_*`
+  versions, which fall through to Win32 for other device contexts.
+- Drawing follows GDI on a palettized surface: SDL_ttf's non-anti-aliased
+  "solid" rendering with mono hinting and no kerning, colours matched to the
+  nearest palette entry (lowest index on a tie; `PALETTEINDEX` honoured),
+  `OPAQUE` filling the text cell, `LineTo` leaving out the end point.
+- Every GDI object the game creates is one of gdi.cpp's. On Windows it can
+  produce a real GDI twin (`gdi_win32_object`), which the EDIT boxes get
+  (their font, and the brush answering `WM_CTLCOLOREDIT`), as do real device
+  contexts handed one of these objects.
+- Fonts: the game asks for "Copperplate Gothic Light" (bold) and Arial (from
+  the language DLL). The real Windows font file is used when present
+  (`arial.ttf`, `COPRGTL.TTF`, ...); otherwise Liberation Sans or Serif,
+  shipped in `fonts/` next to the executable. A bold request without a bold
+  file uses SDL_ttf's synthetic bold. Font sizes follow `lfHeight` (the em
+  height in pixels for the negative heights the game uses).
+- Surfaces (`ddraw_memory.cpp`) are plain `calloc` memory now; the DIB
+  sections, `GdiFlush` and the colour-table updates are gone, and the
+  desktop size comes from `SDL_GetDesktopDisplayMode`.
+- Build: `config/sdl.json` (schema 2) pins three packages, fetched by
+  `tools/fetch_sdl2.py`: SDL2 2.30.9, SDL2_ttf 2.22.0 (VC package, with
+  FreeType and HarfBuzz inside `SDL2_ttf.dll`) and Liberation fonts 2.1.5
+  (SIL Open Font License). `make clang` copies `SDL2.dll`, `SDL2_ttf.dll` and
+  `fonts/` next to `empiresx.exe`; `make play` copies them too.
+- Still GDI, for Linux to replace: `Dib.cpp`'s palette and bitmap helpers
+  (`CreatePalette`, `GetPaletteEntries`, `GetNearestPaletteIndex`, ...), the
+  window device contexts in `clear_window`, `setup_graphics_system` and the
+  palette messages, `CreateICA`/`GetDeviceCaps` for the desktop size, and
+  the EDIT boxes' own drawing.
+- Checked under Wine (no Arial there, so Liberation Sans): the menus differ
+  from the GDI references only in their text pixels (about 1% of the
+  screen); text renders cleanly on the menus, the six scenario-editor tabs,
+  the in-game panels, resource bar and game menu; the selection outline
+  drawn with `LineTo` shows. Not checked: text on real Windows with the
+  real fonts.
+
 ### Testing under Wine
 
 - The test setup (Xvfb without root, a separate Wine prefix with a fake CD
