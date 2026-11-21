@@ -1100,7 +1100,8 @@ int TribeStrategyAIModule::loadRules(char* rName) {
     if (rName == 0) {
         return (int) rName;
     }
-    strncpy(this->ruleSetNameValue, rName, 255);
+    if (rName != this->ruleSetNameValue)  // a reload passes the stored name
+        strncpy(this->ruleSetNameValue, rName, 255);
     return this->vcRules.loadRules(this->ruleSetNameValue);
 }
 

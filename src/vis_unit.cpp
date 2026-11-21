@@ -125,7 +125,9 @@ void Visible_Unit_Manager::Update_Unit_Info(
     if (Category < this->Category_Count) {
         int r = 0;
         if (this->Player_Count > 0) {
-            int i = 0x194 - (int) ObjectPtrs;
+            // ObjectPtrs is &object->VUR_Ptrs[0] of the object being updated;
+            // other objects' records are found through their own VUR_Ptrs[r].
+            // (The original reached them through the MSVC offset 0x194.)
 
             do {
                 if (ChangedMask == 0) {
@@ -149,7 +151,7 @@ void Visible_Unit_Manager::Update_Unit_Info(
                             while (j < list->used) {
                                 RGE_Static_Object* object = VIS_UNIT_objectsValue[record->object_id];
                                 if (object != 0) {
-                                    *(VISIBLE_UNIT_REC**) ((int) object + i + (int) ObjectPtrs) = record;
+                                    ((RGE_Combat_Object*) object)->VUR_Ptrs[r] = record;
                                 }
                                 ++j;
                                 ++record;
@@ -174,7 +176,7 @@ void Visible_Unit_Manager::Update_Unit_Info(
 
                             RGE_Static_Object* object = VIS_UNIT_objectsValue[record->object_id];
                             if (object != 0) {
-                                *(VISIBLE_UNIT_REC**) ((int) object + i + (int) ObjectPtrs) = record;
+                                ((RGE_Combat_Object*) object)->VUR_Ptrs[r] = record;
                             }
                         }
 

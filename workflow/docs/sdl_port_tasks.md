@@ -860,6 +860,12 @@ those.
   provoked), the clipboard paste in the input panels, saving settings
   from the options screen.
 
+### The native Linux build — 2026-11-21
+
+`make linux` builds the game as a 32-bit Linux program with this SDL
+layer; see workflow/docs/linux_build.md for how it is put together, what
+it needs and what was checked.
+
 ### Testing under Wine
 
 - The test setup (Xvfb without root, a separate Wine prefix with a fake CD
