@@ -23,6 +23,13 @@ void surface_detach_window(void);
 // surface_present_* functions below.
 extern "C" HRESULT WINAPI surface_DirectDrawCreate(GUID FAR* guid, LPDIRECTDRAW FAR* out, IUnknown FAR* outer);
 
+#ifdef __DSOUND_INCLUDED__
+// In-memory DirectSound mixed by SDL (port/sdl/dsound_memory.cpp). Takes the
+// place of DirectSoundCreate. Fails, so the game runs silent, when SDL has
+// no audio device.
+extern "C" HRESULT WINAPI surface_DirectSoundCreate(LPGUID guid, LPDIRECTSOUND* out, LPUNKNOWN outer);
+#endif
+
 // Presenting the primary surface (port/sdl/surface.cpp).
 //
 // set_target: the primary surface was created for this window. In exclusive

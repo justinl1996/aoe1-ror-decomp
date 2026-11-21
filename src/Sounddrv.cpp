@@ -1,5 +1,11 @@
 #include "../include/sounddrv.h"
 #include "../include/Res_file.h"
+#ifdef AOE_SDL
+// The SDL build mixes sound itself (port/sdl/dsound_memory.cpp); the calls
+// below stay DirectSound calls.
+#include "../include/surface.h"
+#define DirectSoundCreate surface_DirectSoundCreate
+#endif
 
 #include <stdlib.h>
 #include <string.h>

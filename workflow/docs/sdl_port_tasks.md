@@ -1,6 +1,6 @@
 # SDL2 port on Windows: task breakdown
 
-Status: written 2026-11-21. Done: Tasks 0 to 4 (see "Progress" at the end).
+Status: written 2026-11-21. Done: Tasks 0 to 5 (see "Progress" at the end).
 The rest is still a plan.
 
 Scope: **Windows only for now.** The target is the clang-cl PE build
@@ -57,7 +57,7 @@ Files this plan adds:
 | --- | --- |
 | `include/surface.h`, `port/sdl/surface.cpp` | attaching SDL to the window, presenting the primary surface (Tasks 0, 2–4) |
 | `port/sdl/ddraw_memory.cpp` | the in-memory DirectDraw (Task 1) |
-| `include/sdl_sound.h`, `port/sdl/sdl_sound.cpp` | `TSoundBuffer` and the SDL mixer (Task 5) |
+| `port/sdl/dsound_memory.cpp` | the in-memory DirectSound and its SDL mixer (Task 5) |
 | `config/sdl.json` | SDL2 package pin, defines, sources and libraries for `--sdl` |
 | `tools/fetch_sdl2.py` | downloads the pinned SDL2 VC package into `build/third_party/` (never committed) |
 
