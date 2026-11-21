@@ -1,5 +1,6 @@
 
 #include "../include/basegame.h"
+#include "../include/surface.h"
 #include "../include/main.h"
 #include "../include/view.h"
 #include "../include/map.h"
@@ -67,8 +68,8 @@ int RGE_Main_View::do_auto_scroll() {
         && rge_base_game->get_paused() == 0 && rge_base_game->prog_info->auto_scroll != 0
         && GetForegroundWindow() == this->TPanel::render_area->Wnd && panel_system.modalPanel() == 0
         && (panel_system.mouseOwner() == 0 || panel_system.mouseOwner() == this) && this->key_scrolling == 0) {
-        GetWindowRect(this->TPanel::render_area->Wnd, &rect);
-        GetCursorPos(&point);
+        surface_get_window_rect(this->TPanel::render_area->Wnd, &rect);
+        surface_get_cursor_pos(&point);
 
         horz_scroll = 0;
         vert_scroll = 0;
@@ -298,9 +299,9 @@ long RGE_Main_View::mouse_left_down_action(long x, long y, int ctrl_key, int shi
                             point.x = pick_info.scr_x - frame.min_x;
                             point.y = pick_info.scr_y - frame.min_y;
                             if (this->TPanel::render_area->DrawSystem->ScreenMode == 1)
-                                ClientToScreen(this->TPanel::render_area->Wnd, &point);
+                                surface_client_to_screen(this->TPanel::render_area->Wnd, &point);
                             if (this->TPanel::render_area->DrawSystem->ScreenMode == 1)
-                                ScreenToClient(this->TPanel::render_area->Wnd, &point);
+                                surface_screen_to_client(this->TPanel::render_area->Wnd, &point);
                             this->start_scroll_view(4, point.x, point.y, ctrl_key, shift_key);
                         }
                     }
@@ -372,7 +373,7 @@ long RGE_Main_View::mouse_left_down_action(long x, long y, int ctrl_key, int shi
                                 point.x = pick_info.scr_x - frame.min_x;
                                 point.y = pick_info.scr_y - frame.min_y;
                                 if (this->TPanel::render_area->DrawSystem->ScreenMode == 1)
-                                    ClientToScreen(this->TPanel::render_area->Wnd, &point);
+                                    surface_client_to_screen(this->TPanel::render_area->Wnd, &point);
                             }
                             this->start_scroll_view(9, x, y, ctrl_key, shift_key);
                         }

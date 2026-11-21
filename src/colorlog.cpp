@@ -1,6 +1,7 @@
 // This file owns the module's handwritten definition.
 
 #include "../include/colorlog.h"
+#include "../include/surface.h"
 #include "../include/program_mode.h"
 #include "../include/basegame.h"
 #include "../include/drawarea.h"
@@ -36,7 +37,7 @@ void __cdecl color_log(unsigned char c1, unsigned char c2, int pos) {
     point.y = 0;
 
     if (sys->ScreenMode == 2) {
-        ClientToScreen(sys->Wnd, &point);
+        surface_client_to_screen(sys->Wnd, &point);
     }
 
     scr_dest.left = point.x;

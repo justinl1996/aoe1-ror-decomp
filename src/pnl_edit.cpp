@@ -1,4 +1,5 @@
 #include "../include/pnl_edit.h"
+#include "../include/surface.h"
 #include "../include/game_globals.h"
 #include <stdlib.h>
 #include <string.h>
@@ -262,7 +263,7 @@ void TEditPanel::set_rect(long x_in, long y_in, long wid_in, long hgt_in) {
         int top = this->pnl_y + bevel;
         int width = this->pnl_wid - bevel * 2 - 1;
         int height = this->pnl_hgt - bevel * 2 - 1;
-        MoveWindow(this->edit_wnd, left, top, width, height, redraw);
+        surface_move_child_window(this->edit_wnd, left, top, width, height, redraw);
     }
     int format = this->format;
     if (format == 7) {

@@ -1440,7 +1440,13 @@ int RGE_Base_Game::setup_cmd_options() {
     }
 
     if (strstr(cmd_line, "WINDOW")) {
+#ifdef AOE_SDL
+        // The SDL build always draws as if fullscreen; the window layout is
+        // the SDL layer's (port/sdl/surface.cpp).
+        surface_set_windowed(1);
+#else
         this->prog_info->full_screen = 0;
+#endif
     }
 
     if ((strstr(cmd_line, "FILEFIRST") != 0) || (strstr(cmd_line, "FILE FIRST") != 0) || (strstr(cmd_line, "FILE_FIRST") != 0)) {
@@ -2390,9 +2396,9 @@ void RGE_Base_Game::get_mouse_info(
 }
 
 void RGE_Base_Game::get_mouse_pos(tagPOINT& point) {
-    GetCursorPos(&point);
+    surface_get_cursor_pos(&point);
     if (this->prog_info->full_screen == 0) {
-        ScreenToClient(this->prog_window, &point);
+        surface_screen_to_client(this->prog_window, &point);
         if (point.x > 60000) {
             point.x += -0x10000;
         }

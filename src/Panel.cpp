@@ -1,4 +1,5 @@
 #include "../include/panel.h"
+#include "../include/surface.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -1518,9 +1519,9 @@ void TPanel::get_mouse_info(unsigned int wParam, long lParam, tagPOINT& point, i
 }
 
 void TPanel::get_mouse_pos(tagPOINT& point) {
-    GetCursorPos(&point);
+    surface_get_cursor_pos(&point);
     if (render_area->DrawSystem->ScreenMode != 2) {
-        ScreenToClient(render_area->Wnd, &point);
+        surface_screen_to_client(render_area->Wnd, &point);
         if (point.x > 60000) {
             point.x += -0x10000;
         }

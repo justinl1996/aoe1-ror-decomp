@@ -1,5 +1,6 @@
 
 #include "../include/Mouseptr.h"
+#include "../include/surface.h"
 
 extern unsigned long __cdecl debug_timeGetTime(char* file, int line);
 
@@ -335,9 +336,9 @@ int TMousePointer::update_mouse_position() {
     int in_game;
     if (this->custom_draw == 0)
         return 0;
-    GetCursorPos(&point);
+    surface_get_cursor_pos(&point);
     if (this->render_area->DrawSystem->ScreenMode == 1) {
-        ScreenToClient(this->render_area->Wnd, &point);
+        surface_screen_to_client(this->render_area->Wnd, &point);
         if (point.x > 0x8000)
             point.x -= 0x10000;
         if (point.y > 0x8000)
@@ -591,14 +592,14 @@ void TMousePointer::center() {
 
     if (draw_system->ScreenMode == 1) {
         RECT win_rect;
-        GetWindowRect(draw_system->Wnd, &win_rect);
+        surface_get_window_rect(draw_system->Wnd, &win_rect);
         x = (win_rect.right - win_rect.left) / 2 + win_rect.left;
         y = (win_rect.bottom - win_rect.top) / 2 + win_rect.top;
     } else {
         x = draw_system->ScreenWidth / 2;
         y = draw_system->ScreenHeight / 2;
     }
-    SetCursorPos(x, y);
+    surface_set_cursor_pos(x, y);
 }
 
 void TMousePointer::Poll() {

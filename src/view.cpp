@@ -1,4 +1,5 @@
 #include <windows.h>
+#include "../include/surface.h"
 #include "../include/program_mode.h"
 #include <ddraw.h>
 #include <stdio.h>
@@ -3032,10 +3033,10 @@ void RGE_View::draw_terrain_obstruction_map(int x, int y, TShape* shape, int ind
 }
 
 int RGE_View::Get_Cursor_Position(tagPOINT& Point, int adjustX, int adjustY) {
-    GetCursorPos(&Point);
+    surface_get_cursor_pos(&Point);
     TDrawSystem* draw_system = this->render_area->DrawSystem;
     if (draw_system->ScreenMode == 1) {
-        ScreenToClient(this->render_area->Wnd, &Point);
+        surface_screen_to_client(this->render_area->Wnd, &Point);
         if (Point.x > 0x7FFF)
             Point.x -= 0x10000;
         if (Point.y > 0x7FFF)
@@ -3843,8 +3844,8 @@ int RGE_View::handle_scroll_view(long x, long y) {
             } else {
                 point.x = this->mouse_down_x;
                 point.y = this->mouse_down_y;
-                ClientToScreen(this->render_area->Wnd, &point);
-                SetCursorPos(point.x, point.y);
+                surface_client_to_screen(this->render_area->Wnd, &point);
+                surface_set_cursor_pos(point.x, point.y);
                 this->mouse_last_x = this->mouse_down_x;
                 this->mouse_last_y = this->mouse_down_y;
             }
@@ -3870,8 +3871,8 @@ int RGE_View::handle_scroll_view(long x, long y) {
             } else {
                 point.x = this->mouse_down_x;
                 point.y = this->mouse_down_y;
-                ClientToScreen(this->render_area->Wnd, &point);
-                SetCursorPos(point.x, point.y);
+                surface_client_to_screen(this->render_area->Wnd, &point);
+                surface_set_cursor_pos(point.x, point.y);
                 this->mouse_last_x = this->mouse_down_x;
                 this->mouse_last_y = this->mouse_down_y;
             }
@@ -3917,8 +3918,8 @@ int RGE_View::handle_scroll_view(long x, long y) {
         if (abs(y - this->mouse_down_y) > 8 || abs(x - this->mouse_down_x) > 8) {
             point.x = this->mouse_down_x;
             point.y = this->mouse_down_y;
-            ClientToScreen(this->render_area->Wnd, &point);
-            SetCursorPos(point.x, point.y);
+            surface_client_to_screen(this->render_area->Wnd, &point);
+            surface_set_cursor_pos(point.x, point.y);
             this->mouse_last_x = this->mouse_down_x;
             this->mouse_last_y = this->mouse_down_y;
         }
@@ -3990,8 +3991,8 @@ void RGE_View::end_scroll_view() {
             tagPOINT point;
             point.x = this->mouse_down_x;
             point.y = this->mouse_down_y;
-            ClientToScreen(this->render_area->Wnd, &point);
-            SetCursorPos(point.x, point.y);
+            surface_client_to_screen(this->render_area->Wnd, &point);
+            surface_set_cursor_pos(point.x, point.y);
             break;
         }
 

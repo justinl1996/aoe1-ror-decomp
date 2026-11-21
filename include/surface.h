@@ -38,6 +38,39 @@ void surface_present_primary(const unsigned char* bits, long pitch, long width, 
 // Called once per iteration of the game's main loop.
 void surface_present_flush(void);
 
+// Window layout (Task 4). The game window is a borderless window covering
+// the screen (the default) or an ordinary resizable window; either way the
+// game's frame is scaled to fit, keeping its aspect ratio. Alt+Enter
+// switches between the two. Call before the primary surface exists to set
+// the starting layout.
+void surface_set_windowed(int windowed);
+
 #endif // AOE_SDL
+
+// Cursor and window coordinates as the game sees them.
+//
+// In the SDL build the window may be scaled, so the game works in a virtual
+// screen: its coordinates are game pixels, and the game window's client
+// area starts at its origin. Mouse messages are translated before the game
+// sees them; the game's direct cursor and window-rectangle calls go through
+// these functions. Without SDL they are the plain Win32 calls.
+#ifdef AOE_SDL
+BOOL surface_get_cursor_pos(POINT* point);
+BOOL surface_set_cursor_pos(int x, int y);
+BOOL surface_client_to_screen(HWND wnd, POINT* point);
+BOOL surface_screen_to_client(HWND wnd, POINT* point);
+BOOL surface_get_window_rect(HWND wnd, RECT* rect);
+// Place a child window (an edit box) given in game pixels.
+BOOL surface_move_child_window(HWND child, int x, int y, int width, int height, BOOL repaint);
+#else
+inline BOOL surface_get_cursor_pos(POINT* point) { return GetCursorPos(point); }
+inline BOOL surface_set_cursor_pos(int x, int y) { return SetCursorPos(x, y); }
+inline BOOL surface_client_to_screen(HWND wnd, POINT* point) { return ClientToScreen(wnd, point); }
+inline BOOL surface_screen_to_client(HWND wnd, POINT* point) { return ScreenToClient(wnd, point); }
+inline BOOL surface_get_window_rect(HWND wnd, RECT* rect) { return GetWindowRect(wnd, rect); }
+inline BOOL surface_move_child_window(HWND child, int x, int y, int width, int height, BOOL repaint) {
+    return MoveWindow(child, x, y, width, height, repaint);
+}
+#endif
 
 #endif // SURFACE_H
