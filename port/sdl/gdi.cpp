@@ -299,7 +299,11 @@ HRGN gdi_create_rect_rgn(int left, int top, int right, int bottom) {
 HGDIOBJ gdi_get_stock_object(int index) {
     static GdiObject* stock[DEFAULT_PALETTE + 1];
     if (index < 0 || index > DEFAULT_PALETTE)
+#ifdef _WIN32
         return GetStockObject(index);
+#else
+        return 0;
+#endif
     if (stock[index] == 0) {
         GdiObject* object = 0;
         switch (index) {
@@ -312,7 +316,11 @@ HGDIOBJ gdi_get_stock_object(int index) {
             case WHITE_PEN: object = (GdiObject*) make_pen(PS_SOLID, 1, RGB(255, 255, 255)); break;
             case BLACK_PEN: object = (GdiObject*) make_pen(PS_SOLID, 1, RGB(0, 0, 0)); break;
             case NULL_PEN: object = (GdiObject*) make_pen(PS_NULL, 1, 0); break;
+#ifdef _WIN32
             default: return GetStockObject(index); // fonts and palettes stay GDI's
+#else
+                        default: return 0;
+#endif
         }
         if (object == 0)
             return 0;
@@ -325,6 +333,9 @@ HGDIOBJ gdi_get_stock_object(int index) {
 // The real GDI object standing for one of ours (Windows only): for the EDIT
 // boxes, which are real controls, and for real device contexts.
 HGDIOBJ gdi_win32_object(HGDIOBJ handle) {
+#ifndef _WIN32
+    return handle;
+#else
     GdiObject* object = lookup(handle, 0);
     if (object == 0 || object->kind == GDI_DC)
         return handle;
@@ -349,12 +360,17 @@ HGDIOBJ gdi_win32_object(HGDIOBJ handle) {
         }
     }
     return object->win32;
+#endif
 }
 
 BOOL gdi_delete_object(HGDIOBJ handle) {
     GdiObject* object = lookup(handle, 0);
     if (object == 0)
+#ifdef _WIN32
         return DeleteObject(handle);
+#else
+        return FALSE;
+#endif
     if (object->stock != 0 || object->kind == GDI_DC)
         return TRUE;
     // A context still pointing at it falls back to its default.
@@ -370,10 +386,12 @@ BOOL gdi_delete_object(HGDIOBJ handle) {
             dc->brush = 0;
     }
     untrack(object);
+#ifdef _WIN32
     if (object->win32 != 0 && object->kind != GDI_BRUSH)
         DeleteObject(object->win32);
     else if (object->win32 != 0 && ((GdiBrush*) object)->style != BS_HOLLOW)
         DeleteObject(object->win32);
+#endif
     if (object->kind == GDI_FONT && ((GdiFont*) object)->ttf != 0)
         TTF_CloseFont(((GdiFont*) object)->ttf);
     if (object->kind == GDI_PALETTE)
@@ -701,7 +719,11 @@ static void draw_line_of_text(GdiDc* dc, int x, int y, const char* text, const R
 HGDIOBJ gdi_select_object(HDC handle, HGDIOBJ object) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return SelectObject(handle, gdi_win32_object(object));
+#else
+        return 0;
+#endif
     GdiObject* ours = lookup(object, 0);
     if (ours == 0)
         return 0;
@@ -730,7 +752,11 @@ HGDIOBJ gdi_select_object(HDC handle, HGDIOBJ object) {
 int gdi_select_clip_rgn(HDC handle, HRGN region) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return SelectClipRgn(handle, (HRGN) gdi_win32_object(region));
+#else
+        return ERROR;
+#endif
     GdiRegion* ours = (GdiRegion*) lookup(region, GDI_REGION);
     if (ours == 0) {
         dc->has_clip = 0;
@@ -744,7 +770,11 @@ int gdi_select_clip_rgn(HDC handle, HRGN region) {
 COLORREF gdi_set_text_color(HDC handle, COLORREF color) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return SetTextColor(handle, color);
+#else
+        return CLR_INVALID;
+#endif
     COLORREF previous = dc->text_color;
     dc->text_color = color;
     return previous;
@@ -753,7 +783,11 @@ COLORREF gdi_set_text_color(HDC handle, COLORREF color) {
 COLORREF gdi_set_bk_color(HDC handle, COLORREF color) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return SetBkColor(handle, color);
+#else
+        return CLR_INVALID;
+#endif
     COLORREF previous = dc->bk_color;
     dc->bk_color = color;
     return previous;
@@ -762,7 +796,11 @@ COLORREF gdi_set_bk_color(HDC handle, COLORREF color) {
 int gdi_set_bk_mode(HDC handle, int mode) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return SetBkMode(handle, mode);
+#else
+        return 0;
+#endif
     int previous = dc->bk_mode;
     dc->bk_mode = mode;
     return previous;
@@ -771,7 +809,11 @@ int gdi_set_bk_mode(HDC handle, int mode) {
 BOOL gdi_text_out(HDC handle, int x, int y, LPCSTR text, int length) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return TextOutA(handle, x, y, text, length);
+#else
+        return FALSE;
+#endif
     char* line = copy_text(text, length);
     if (line == 0)
         return FALSE;
@@ -784,7 +826,11 @@ BOOL gdi_text_out(HDC handle, int x, int y, LPCSTR text, int length) {
 BOOL gdi_get_text_extent_point32(HDC handle, LPCSTR text, int length, SIZE* size) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return GetTextExtentPoint32A(handle, text, length, size);
+#else
+        return FALSE;
+#endif
     char* line = copy_text(text, length);
     if (line == 0)
         return FALSE;
@@ -798,7 +844,11 @@ BOOL gdi_get_text_extent_point32(HDC handle, LPCSTR text, int length, SIZE* size
 BOOL gdi_get_text_metrics(HDC handle, TEXTMETRICA* metrics) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return GetTextMetricsA(handle, metrics);
+#else
+        return FALSE;
+#endif
     GdiFont* font = dc_font(dc);
     memset(metrics, 0, sizeof(*metrics));
     if (font == 0)
@@ -926,7 +976,11 @@ static void count_line(const char* line, void* context) {
 int gdi_draw_text(HDC handle, LPCSTR text, int length, RECT* rect, UINT format) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return DrawTextA(handle, text, length, rect, format);
+#else
+        return 0;
+#endif
     GdiFont* font = dc_font(dc);
     char* copy = copy_text(text, length);
     if (copy == 0 || font == 0) {
@@ -971,14 +1025,22 @@ int gdi_draw_text(HDC handle, LPCSTR text, int length, RECT* rect, UINT format) 
 
 int gdi_draw_text_ex(HDC handle, LPSTR text, int length, RECT* rect, UINT format, DRAWTEXTPARAMS* params) {
     if (our_dc(handle) == 0)
+#ifdef _WIN32
         return DrawTextExA(handle, text, length, rect, format, params);
+#else
+        return 0;
+#endif
     return gdi_draw_text(handle, text, length, rect, format);
 }
 
 BOOL gdi_move_to_ex(HDC handle, int x, int y, POINT* previous) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return MoveToEx(handle, x, y, previous);
+#else
+        return FALSE;
+#endif
     if (previous != 0)
         *previous = dc->position;
     dc->position.x = x;
@@ -990,7 +1052,11 @@ BOOL gdi_move_to_ex(HDC handle, int x, int y, POINT* previous) {
 BOOL gdi_line_to(HDC handle, int x, int y) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return LineTo(handle, x, y);
+#else
+        return FALSE;
+#endif
     GdiPen* pen = dc->pen;
     int x0 = dc->position.x;
     int y0 = dc->position.y;
@@ -1024,7 +1090,11 @@ BOOL gdi_line_to(HDC handle, int x, int y) {
 int gdi_fill_rect(HDC handle, const RECT* rect, HBRUSH brush) {
     GdiDc* dc = our_dc(handle);
     if (dc == 0)
+#ifdef _WIN32
         return FillRect(handle, rect, (HBRUSH) gdi_win32_object(brush));
+#else
+        return 0;
+#endif
     GdiBrush* ours = (GdiBrush*) lookup(brush, GDI_BRUSH);
     if (ours == 0 || ours->style == BS_HOLLOW || dc->bits == 0)
         return TRUE;

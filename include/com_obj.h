@@ -96,7 +96,11 @@ class RGE_Combat_Object : public RGE_Action_Object {
     uchar capture_flag;
 };
 
+// The Linux build's C++ ABI (Itanium) places a derived class's first members in its
+// base class's tail padding; MSVC does not. These layout checks are MSVC's.
+#ifndef AOE_LINUX
 typedef char rge_combat_object_vur_offset_check[(offsetof(RGE_Combat_Object, VUR_Ptrs) == 0x194) ? 1 : -1];
 typedef char rge_combat_object_size_check[(sizeof(RGE_Combat_Object) == 0x1C4) ? 1 : -1];
+#endif
 
 #endif // AOE1_COM_OBJ_H

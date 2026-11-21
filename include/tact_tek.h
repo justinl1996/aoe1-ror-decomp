@@ -24,6 +24,10 @@ class TRIBE_Action_Make_Tech : public RGE_Action {
     virtual void set_state(unsigned char new_state);
 };
 
+// The Linux build's C++ ABI (Itanium) places a derived class's first members in its
+// base class's tail padding; MSVC does not. These layout checks are MSVC's.
+#ifndef AOE_LINUX
 typedef char tribe_action_make_tech_size_check[(sizeof(TRIBE_Action_Make_Tech) == 0x48) ? 1 : -1];
+#endif
 
 #endif // AOE1_TACT_TEK_H

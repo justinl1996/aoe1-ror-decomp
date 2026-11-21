@@ -2657,7 +2657,6 @@ RGE_Check_List* RGE_Static_Object::make_object_bounds_list(float delta) {
 // The owned body is [004C6AA0, 004C6B41); later bytes are padding.
 // Keep the narrow sprite facet-count read at sprite + 0x60.
 
-extern "C" double __cdecl atan2(double, double);
 
 int RGE_Static_Object::boundToFacet(float tX, float tY, int numberBindingFacets) {
     int best = -1;
@@ -2778,8 +2777,6 @@ int RGE_Static_Object::removeFromObstructionMap(int obMapCode) {
     return 1;
 }
 
-extern "C" double __cdecl floor(double);
-extern "C" double __cdecl ceil(double);
 
 void RGE_Static_Object::changeInfluenceMap(InfluenceMap* iMap, int increment, int usePercentCoverage, int useLOS) {
     int minYTile;

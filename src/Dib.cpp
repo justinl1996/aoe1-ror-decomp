@@ -17,12 +17,8 @@
 // The target reserves 0x1400 bytes from SrcXTbl to the next global.
 static long SrcXTbl[0x500];
 
-extern "C" char* __cdecl strtok(char*, const char*);
-extern "C" long __cdecl atol(const char*);
-extern "C" int __cdecl atoi(const char*);
 
 #pragma function(memcpy)
-extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
 
 void __cdecl DibBlt(
     BITMAPINFO256* DestInfo, uchar* DestBits, RECT* ClipRect, long DestX, long DestY, long DestWid, long DestHgt,

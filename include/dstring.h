@@ -43,11 +43,14 @@ class DString {
     void change(char o, char n);
 };
 
+// VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
+#ifndef AOE_LINUX
 class istream;
 class ostream;
 
 ostream& __cdecl operator<<(ostream& out, const DString& d);
 istream& __cdecl operator>>(istream& in, DString& d);
+#endif
 
 int __cdecl operator==(const DString& one, const DString& two);
 int __cdecl operator==(const DString& one, const char* two);

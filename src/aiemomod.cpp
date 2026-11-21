@@ -1,7 +1,7 @@
 #include "../include/game_globals.h"
+#include <string.h>
 #include "../include/aiemomod.h"
 
-char* __cdecl strcpy(char* dest, const char* src);
 void __cdecl rge_read(int handle, void* buf, int size);
 void __cdecl rge_write(int file, void* data, int size);
 

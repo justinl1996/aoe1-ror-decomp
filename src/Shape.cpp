@@ -1,5 +1,7 @@
 
 #include "../include/Shape.h"
+#include <io.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include "../include/asm_draw.h"
 #include "../include/view.h"
@@ -31,13 +33,6 @@ struct vc5_phase_18;
 #pragma function(memcpy)
 #pragma function(memset)
 
-extern "C" int __cdecl open(const char*, int);
-extern "C" int __cdecl lseek(int, int, int);
-extern "C" int __cdecl tell(int);
-extern "C" void* __cdecl malloc(unsigned int);
-extern "C" int __cdecl read(int, void*, unsigned int);
-extern "C" int __cdecl close(int);
-extern "C" void __cdecl free(void*);
 extern void __cdecl addstring(char**, char*, char*);
 extern int shape_version_110;
 

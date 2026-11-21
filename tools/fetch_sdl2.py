@@ -22,6 +22,23 @@ from common import REPO_ROOT, repo_path
 CONFIG = REPO_ROOT / "config/sdl.json"
 
 
+def debian_data(archive: Path, scratch: Path) -> Path:
+    """Extract the data.tar.* member of a .deb (an ar archive)."""
+    blob = archive.read_bytes()
+    offset = 8
+    while offset + 60 <= len(blob):
+        header = blob[offset:offset + 60]
+        name = header[:16].decode().strip().rstrip("/")
+        size = int(header[48:58].decode().strip())
+        start = offset + 60
+        if name.startswith("data.tar"):
+            out = scratch / name
+            out.write_bytes(blob[start:start + size])
+            return out
+        offset = start + size + (size & 1)
+    raise SystemExit(f"{archive} has no data.tar member")
+
+
 def fetch_package(package: dict, force: bool = False) -> Path:
     target = repo_path(package["directory"])
     if (target / package["probe"]).is_file() and not force:
@@ -30,13 +47,20 @@ def fetch_package(package: dict, force: bool = False) -> Path:
         raise SystemExit(f"{target} is not under build/")
     with tempfile.TemporaryDirectory() as scratch:
         archive = Path(scratch) / "package"
-        with urllib.request.urlopen(package["url"]) as response, archive.open("wb") as out:
+        # Some mirrors refuse Python's default User-Agent.
+        request = urllib.request.Request(package["url"], headers={"User-Agent": "aoe-build-fetch/1"})
+        with urllib.request.urlopen(request) as response, archive.open("wb") as out:
             shutil.copyfileobj(response, out)
         digest = hashlib.sha256(archive.read_bytes()).hexdigest()
         if digest != package["sha256"]:
             raise SystemExit(f"SHA-256 mismatch for {package['url']}: {digest}")
         unpacked = Path(scratch) / "unpacked"
-        if zipfile.is_zipfile(archive):
+        if archive.read_bytes()[:8] == b"!<arch>\n":
+            # A Debian package: an ar archive whose data.tar.* holds the files.
+            data = debian_data(archive, Path(scratch))
+            with tarfile.open(data) as bundle:
+                bundle.extractall(unpacked, filter="data")
+        elif zipfile.is_zipfile(archive):
             with zipfile.ZipFile(archive) as bundle:
                 bundle.extractall(unpacked)
         else:
@@ -52,8 +76,8 @@ def fetch_package(package: dict, force: bool = False) -> Path:
     return target
 
 
-def fetch_all(force: bool = False) -> dict[str, Path]:
-    packages = json.loads(CONFIG.read_text())["packages"]
+def fetch_all(force: bool = False, config: Path = CONFIG) -> dict[str, Path]:
+    packages = json.loads(config.read_text())["packages"]
     return {name: fetch_package(package, force) for name, package in packages.items()}
 
 

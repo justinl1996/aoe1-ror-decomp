@@ -1,4 +1,6 @@
 #include "../include/victory.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include "../include/rge_fio.h"
 #include "../include/player.h"
 #include "../include/stat_obj.h"
@@ -22,9 +24,7 @@ struct vc5_phase_10;
 struct vc5_phase_11;
 
 extern "C" void* calloc(unsigned int count, unsigned int size);
-extern "C" int __cdecl sprintf(char* buffer, const char* format, ...);
 extern void __cdecl getstring(char** destination, char* source);
-extern "C" void __cdecl free(void* block);
 
 RGE_Victory_Conditions::RGE_Victory_Conditions(
     RGE_Player* in_player, int infile, long* player_id_hash, unsigned char version_control

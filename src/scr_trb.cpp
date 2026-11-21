@@ -1,5 +1,6 @@
 
 #include <string.h>
+#include <stdlib.h>
 #include "../include/scr_trb.h"
 #include "../include/pnl_btn.h"
 #include "../include/pnl_lst.h"
@@ -148,7 +149,6 @@ TribeSelectTribeScreen::TribeSelectTribeScreen() : TScreenPanel("Select Tribe Sc
     this->TPanel::set_tab_order(tabList, 10);
 }
 
-extern void __cdecl free(void* ptr);
 
 TribeSelectTribeScreen::~TribeSelectTribeScreen() {
     delete title;

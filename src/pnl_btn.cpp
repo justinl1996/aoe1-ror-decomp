@@ -34,7 +34,6 @@ TButtonPanel::TButtonPanel() :
 }
 
 // 00472030_TButtonPanel.cpp
-extern "C" void __cdecl free(void* ptr);
 
 TButtonPanel::~TButtonPanel() {
     int i;
@@ -179,7 +178,6 @@ void TButtonPanel::set_picture(short state_in, TShape* pic_in, short pic_index_i
 
 #include <string.h>
 
-extern "C" void* __cdecl calloc(unsigned int count, unsigned int size);
 
 void TButtonPanel::set_text(short state_in, char* text_in) {
     if (text1[state_in] != 0) {
@@ -393,11 +391,6 @@ void TButtonPanel::get_text_color(short state_in, unsigned long* color1, unsigne
 #include <string.h>
 
 extern "C" {
-__declspec(dllimport) void* __stdcall SelectObject(void* hdc, void* object);
-__declspec(dllimport) int __stdcall SelectClipRgn(void* hdc, void* rgn);
-__declspec(dllimport) int __stdcall SetBkMode(void* hdc, int mode);
-__declspec(dllimport) unsigned long __stdcall SetTextColor(void* hdc, unsigned long color);
-__declspec(dllimport) int __stdcall TextOutA(void* hdc, int x, int y, const char* s, int len);
 }
 
 void TButtonPanel::draw() {

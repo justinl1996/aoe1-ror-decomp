@@ -259,7 +259,11 @@ void map_game_to_client(POINT* point, int center) {
 
 BOOL surface_get_cursor_pos(POINT* point) {
     if (sdl_window == 0)
+#ifdef _WIN32
         return GetCursorPos(point);
+#else
+        return FALSE;
+#endif
     int global_x;
     int global_y;
     int window_x;
@@ -275,7 +279,11 @@ BOOL surface_get_cursor_pos(POINT* point) {
 
 BOOL surface_set_cursor_pos(int x, int y) {
     if (sdl_window == 0)
+#ifdef _WIN32
         return SetCursorPos(x, y);
+#else
+        return FALSE;
+#endif
     POINT point;
     point.x = x;
     point.y = y;
@@ -288,13 +296,21 @@ BOOL surface_set_cursor_pos(int x, int y) {
 BOOL surface_client_to_screen(HWND wnd, POINT* point) {
     if (map_active() && wnd == sdl_hwnd)
         return TRUE;
+#ifdef _WIN32
     return ClientToScreen(wnd, point);
+#else
+    return FALSE;
+#endif
 }
 
 BOOL surface_screen_to_client(HWND wnd, POINT* point) {
     if (map_active() && wnd == sdl_hwnd)
         return TRUE;
+#ifdef _WIN32
     return ScreenToClient(wnd, point);
+#else
+    return FALSE;
+#endif
 }
 
 BOOL surface_get_window_rect(HWND wnd, RECT* rect) {
@@ -305,5 +321,9 @@ BOOL surface_get_window_rect(HWND wnd, RECT* rect) {
         rect->bottom = present_height;
         return TRUE;
     }
+#ifdef _WIN32
     return GetWindowRect(wnd, rect);
+#else
+    return FALSE;
+#endif
 }

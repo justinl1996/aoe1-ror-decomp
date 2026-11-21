@@ -1,6 +1,9 @@
 #include "../include/dstring.h"
 
+// VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
+#ifndef AOE_LINUX
 #include <iostream.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -64,12 +67,15 @@ DString::~DString() {
     }
 }
 
+// VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
+#ifndef AOE_LINUX
 ostream& __cdecl operator<<(ostream& out, const DString& d) {
     if (d.stringValue != 0) {
         out << d.stringValue;
     }
     return out;
 }
+#endif
 
 DString& DString::operator=(const char* s) {
     if (this->stringValue != 0) {
@@ -288,6 +294,8 @@ DString DString::word(int num) {
     return DString("");
 }
 
+// VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
+#ifndef AOE_LINUX
 istream& __cdecl operator>>(istream& in, DString& d) {
     char buffer[256];
 
@@ -295,6 +303,7 @@ istream& __cdecl operator>>(istream& in, DString& d) {
     d = buffer;
     return in;
 }
+#endif
 
 DString DString::nextWord(int incIndex) {
     int i;

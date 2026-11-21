@@ -246,7 +246,6 @@ void RGE_RMM_Object_Generator::remove_area_from_lists(long x, long y, long spaci
     }
 }
 
-extern "C" void* __cdecl memset(void*, int, unsigned int);
 
 void RGE_RMM_Object_Generator::place_avoid_objects(RGE_Object_Info_Line& info_line, long inner_radius) {
     long y;

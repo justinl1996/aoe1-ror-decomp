@@ -1,10 +1,10 @@
 
 #include "../include/aiconmod.h"
+#include <io.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "../include/rge_fio.h"
-extern "C" int __cdecl _unlink(const char*);
 
 union IntFloat {
     int i;

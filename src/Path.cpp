@@ -1,6 +1,9 @@
 #include "../include/path.h"
 #include "../include/game_globals.h"
+// VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
+#ifndef AOE_LINUX
 #include <iostream.h>
+#endif
 #include <math.h>
 
 Path::Path(int v) {
@@ -42,6 +45,8 @@ Path::~Path() {
     }
 }
 
+// VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
+#ifndef AOE_LINUX
 ostream& __cdecl operator<<(ostream& out, const Path& p) {
     for (int i = 0; i < p.currentSizeValue; i++) {
         ostream* stream = &out;
@@ -59,6 +64,7 @@ ostream& __cdecl operator<<(ostream& out, const Path& p) {
     }
     return out;
 }
+#endif
 
 Path Path::operator+(const Path& p) const {
     Path newPath(maxSizeValue + p.maxSizeValue);

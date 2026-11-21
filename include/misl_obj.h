@@ -34,7 +34,11 @@ class RGE_Missile_Object : public RGE_Combat_Object {
     float max_range;
 };
 
+// The Linux build's C++ ABI (Itanium) places a derived class's first members in its
+// base class's tail padding; MSVC does not. These layout checks are MSVC's.
+#ifndef AOE_LINUX
 typedef char rge_missile_object_max_range_offset_check[(offsetof(RGE_Missile_Object, max_range) == 0x1C4) ? 1 : -1];
 typedef char rge_missile_object_size_check[(sizeof(RGE_Missile_Object) == 0x1C8) ? 1 : -1];
+#endif
 
 #endif // AOE1_MISL_OBJ_H

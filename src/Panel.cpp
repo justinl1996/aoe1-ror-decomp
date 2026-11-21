@@ -418,15 +418,14 @@ int TPanelSystem::IsIMEEnabled() {
 }
 
 void TPanelSystem::TurnIMEOn(void) {
+    // No IME: see DisableIME.
     if (ImeOn == 0 && ImeEnabled != 0 && Imc != 0) {
-        ImmSetOpenStatus(Imc, 1);
         ImeOn = 1;
     }
 }
 
 void TPanelSystem::TurnIMEOff(void) {
     if (ImeOn != 0 && ImeEnabled != 0 && Imc != 0) {
-        ImmSetOpenStatus(Imc, 0);
         ImeOn = 0;
     }
 }

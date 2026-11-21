@@ -1,5 +1,6 @@
 
 #include "../include/scenario.h"
+#include <io.h>
 #include "../include/Picture.h"
 #include "../include/basegame.h"
 #include "../include/main.h"
@@ -15,16 +16,6 @@
 #include <time.h>
 
 extern "C" {
-int __cdecl sprintf(char* buffer, const char* format, ...);
-int __cdecl _open(const char* filename, int oflag, ...);
-int __cdecl _write(int fd, const void* buffer, unsigned int count);
-int __cdecl _close(int fd);
-int __cdecl lseek(int fd, long offset, int origin);
-long __cdecl _tell(int fd);
-int __cdecl read(int fd, void* buffer, unsigned int count);
-int __cdecl close(int fd);
-int __cdecl strcmp(const char* left, const char* right);
-char* __cdecl strcpy(char* destination, const char* source);
 }
 
 void __cdecl rge_read_uncompressed(int fd, void* buffer, int count);

@@ -1,5 +1,7 @@
 
 #include "../include/taistrmd.h"
+#include <io.h>
+#include <stdio.h>
 #include "../include/game_globals.h"
 #include "../include/taimdmd.h"
 #include "../include/basegame.h"
@@ -243,15 +245,6 @@ VictoryConditionRuleSystem::VictoryConditionRuleSystem() {
 VictoryConditionRuleSystem::~VictoryConditionRuleSystem() {
 }
 
-extern "C" int __cdecl strcmp(const char* left, const char* right);
-extern "C" unsigned int __cdecl strlen(const char* text);
-extern "C" int __cdecl sprintf(char* buffer, const char* format, ...);
-extern "C" FILE* __cdecl fopen(const char* filename, const char* mode);
-extern "C" char* __cdecl fgets(char* buffer, int count, FILE* stream);
-extern "C" int __cdecl sscanf(const char* buffer, const char* format, ...);
-extern "C" int __cdecl fclose(FILE* stream);
-extern "C" char* __cdecl strstr(const char* text, const char* search);
-extern "C" int __cdecl _unlink(const char* filename);
 
 #pragma intrinsic(strcmp)
 #pragma intrinsic(strlen)
@@ -862,7 +855,6 @@ void VictoryConditionRuleSystem::modifyForDifficultyLevel(int dL) {
     }
 }
 
-extern "C" char* __cdecl strcpy(char* destination, const char* source);
 
 TribeStrategyAIModule::TribeStrategyAIModule(void* pW, int playerID) :
     StrategyAIModule(pW, playerID), md(0), currentVictoryConditionValue(-1), targetIDValue(-1), targetTypeValue(-1),

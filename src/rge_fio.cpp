@@ -1,15 +1,9 @@
 
 #include "../include/rge_fio.h"
+#include <io.h>
+#include <stdlib.h>
+#include <string.h>
 
-extern "C" int __cdecl open(const char* path, int mode, ...);
-extern "C" int __cdecl lseek(int file, int offset, int origin);
-extern "C" int __cdecl tell(int file);
-extern "C" int __cdecl read(int file, void* buffer, unsigned int size);
-extern "C" int __cdecl write(int file, const void* buffer, unsigned int size);
-extern "C" int __cdecl close(int file);
-extern "C" void* __cdecl calloc(unsigned int count, unsigned int size);
-extern "C" void __cdecl free(void* pointer);
-extern "C" void* __cdecl memcpy(void* destination, const void* source, unsigned int size);
 #pragma intrinsic(memcpy)
 
 extern "C" int __cdecl Inf32BufSize();

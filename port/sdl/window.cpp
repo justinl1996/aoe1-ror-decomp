@@ -25,7 +25,9 @@
 #include "../../include/surface.h"
 #include "sdl_internal.h"
 
+#ifdef _WIN32
 #include <SDL_syswm.h>
+#endif
 #include <string.h>
 
 SDL_Window* sdl_window = 0;
@@ -111,7 +113,11 @@ static Uint32 SDLCALL timer_callback(Uint32 interval, void* param) {
 
 UINT surface_set_timer(HWND wnd, UINT id, UINT elapse) {
     if (wnd != sdl_hwnd || sdl_hwnd == 0)
+#ifdef _WIN32
         return SetTimer(wnd, id, elapse, 0);
+#else
+        return 0;
+#endif
     for (int i = 0; i < MAX_TIMERS; ++i) {
         if (window_timers[i].sdl_id != 0 && window_timers[i].id == id) {
             SDL_RemoveTimer(window_timers[i].sdl_id);
@@ -131,7 +137,11 @@ UINT surface_set_timer(HWND wnd, UINT id, UINT elapse) {
 
 BOOL surface_kill_timer(HWND wnd, UINT id) {
     if (wnd != sdl_hwnd || sdl_hwnd == 0)
+#ifdef _WIN32
         return KillTimer(wnd, id);
+#else
+        return FALSE;
+#endif
     for (int i = 0; i < MAX_TIMERS; ++i) {
         if (window_timers[i].sdl_id != 0 && window_timers[i].id == id) {
             SDL_RemoveTimer(window_timers[i].sdl_id);
@@ -166,7 +176,11 @@ void window_invalidate_all(void) {
 
 BOOL surface_invalidate_rect(HWND wnd, const RECT* rect, BOOL erase) {
     if (wnd != sdl_hwnd || sdl_hwnd == 0)
+#ifdef _WIN32
         return InvalidateRect(wnd, rect, erase);
+#else
+        return FALSE;
+#endif
     RECT add;
     if (rect != 0)
         add = *rect;
@@ -192,7 +206,11 @@ BOOL surface_invalidate_rect(HWND wnd, const RECT* rect, BOOL erase) {
 
 BOOL surface_validate_rect(HWND wnd, const RECT* rect) {
     if (wnd != sdl_hwnd || sdl_hwnd == 0)
+#ifdef _WIN32
         return ValidateRect(wnd, rect);
+#else
+        return FALSE;
+#endif
     if (paint_invalid == 0)
         return TRUE;
     if (rect == 0) {
@@ -220,7 +238,11 @@ BOOL surface_validate_rect(HWND wnd, const RECT* rect) {
 
 BOOL surface_get_update_rect(HWND wnd, RECT* rect, BOOL erase) {
     if (wnd != sdl_hwnd || sdl_hwnd == 0)
+#ifdef _WIN32
         return GetUpdateRect(wnd, rect, erase);
+#else
+        return FALSE;
+#endif
     if (paint_invalid == 0) {
         if (rect != 0)
             SetRectEmpty(rect);
@@ -233,9 +255,13 @@ BOOL surface_get_update_rect(HWND wnd, RECT* rect, BOOL erase) {
 
 BOOL surface_update_window(HWND wnd) {
     if (wnd != sdl_hwnd || sdl_hwnd == 0)
+#ifdef _WIN32
         return UpdateWindow(wnd);
+#else
+        return FALSE;
+#endif
     if (paint_invalid != 0 && window_game_proc != 0)
-        CallWindowProcA((FARPROC) window_game_proc, sdl_hwnd, WM_PAINT, 0, 0);
+        window_game_proc(sdl_hwnd, WM_PAINT, 0, 0);
     return TRUE;
 }
 
@@ -355,7 +381,11 @@ static unsigned char mouse_button_state(int vk) {
 
 SHORT surface_get_key_state(int vk) {
     if (sdl_window == 0)
+#ifdef _WIN32
         return GetKeyState(vk);
+#else
+        return 0;
+#endif
     vk &= 0xFF;
     unsigned char state = key_state[vk] | mouse_button_state(vk);
     return (SHORT) (((state & 0x80) != 0 ? 0x8000 : 0) | (state & 0x01));
@@ -363,7 +393,11 @@ SHORT surface_get_key_state(int vk) {
 
 SHORT surface_get_async_key_state(int vk) {
     if (sdl_window == 0)
+#ifdef _WIN32
         return GetAsyncKeyState(vk);
+#else
+        return 0;
+#endif
     vk &= 0xFF;
     unsigned char state = key_state[vk] | mouse_button_state(vk);
     return (SHORT) ((state & 0x80) != 0 ? 0x8000 : 0);
@@ -371,7 +405,11 @@ SHORT surface_get_async_key_state(int vk) {
 
 BOOL surface_get_keyboard_state(BYTE* state) {
     if (sdl_window == 0)
+#ifdef _WIN32
         return GetKeyboardState(state);
+#else
+        return FALSE;
+#endif
     memcpy(state, key_state, sizeof(key_state));
     state[VK_LBUTTON] |= mouse_button_state(VK_LBUTTON);
     state[VK_RBUTTON] |= mouse_button_state(VK_RBUTTON);
@@ -637,15 +675,23 @@ BOOL surface_get_message(MSG* msg) {
 
 LRESULT surface_dispatch_message(const MSG* msg) {
     if (msg->hwnd == sdl_hwnd && window_game_proc != 0)
-        return CallWindowProcA((FARPROC) window_game_proc, msg->hwnd, msg->message, msg->wParam, msg->lParam);
+        return window_game_proc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
     if (msg->hwnd != 0)
+#ifdef _WIN32
         return DispatchMessageA(msg);
+#else
+        return 0;
+#endif
     return 0;
 }
 
 BOOL surface_post_message(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     if (wnd != sdl_hwnd || sdl_hwnd == 0 || queue_lock == 0)
+#ifdef _WIN32
         return PostMessageA(wnd, msg, wparam, lparam);
+#else
+        return FALSE;
+#endif
     SDL_LockMutex(queue_lock);
     int posted = queue_push(&queue_posted, wnd, msg, wparam, lparam);
     SDL_UnlockMutex(queue_lock);
@@ -655,8 +701,12 @@ BOOL surface_post_message(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
 LRESULT surface_send_message(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     if (wnd != sdl_hwnd || sdl_hwnd == 0 || window_game_proc == 0)
+#ifdef _WIN32
         return SendMessageA(wnd, msg, wparam, lparam);
-    return CallWindowProcA((FARPROC) window_game_proc, wnd, msg, wparam, lparam);
+#else
+        return 0;
+#endif
+    return window_game_proc(wnd, msg, wparam, lparam);
 }
 
 void surface_post_quit_message(int exit_code) {
@@ -676,7 +726,11 @@ static HWND capture_wnd = 0;
 // arrow or the hourglass otherwise.
 void surface_set_cursor(HCURSOR cursor) {
     if (sdl_window == 0) {
+#ifdef _WIN32
         SetCursor(cursor);
+#else
+        ;
+#endif
         return;
     }
     if (cursor == 0) {
@@ -694,7 +748,11 @@ void surface_set_cursor(HCURSOR cursor) {
 HWND surface_get_capture(void) {
     if (capture_wnd != 0)
         return capture_wnd;
+#ifdef _WIN32
     return GetCapture();
+#else
+    return 0;
+#endif
 }
 
 HWND surface_set_capture(HWND wnd) {
@@ -704,7 +762,11 @@ HWND surface_set_capture(HWND wnd) {
         capture_wnd = wnd;
         return previous;
     }
+#ifdef _WIN32
     SetCapture(wnd);
+#else
+    ;
+#endif
     return previous;
 }
 
@@ -713,18 +775,30 @@ BOOL surface_release_capture(void) {
         SDL_CaptureMouse(SDL_FALSE);
         capture_wnd = 0;
     }
+#ifdef _WIN32
     return ReleaseCapture();
+#else
+    return TRUE;
+#endif
 }
 
 HWND surface_get_foreground_window(void) {
     if (sdl_window == 0)
+#ifdef _WIN32
         return GetForegroundWindow();
+#else
+        return 0;
+#endif
     return window_app_active != 0 ? sdl_hwnd : 0;
 }
 
 BOOL surface_is_iconic(HWND wnd) {
     if (wnd != sdl_hwnd || sdl_window == 0)
+#ifdef _WIN32
         return IsIconic(wnd);
+#else
+        return FALSE;
+#endif
     return (SDL_GetWindowFlags(sdl_window) & SDL_WINDOW_MINIMIZED) != 0;
 }
 
@@ -792,6 +866,7 @@ void surface_set_clipboard_text(const char* text, int length) {
     SDL_free(utf8);
 }
 
+#ifdef _WIN32
 // ---------------------------------------------------------------------------
 // The Windows bridge
 
@@ -821,15 +896,16 @@ static LRESULT CALLBACK bridge_wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPARA
         case WM_PALETTECHANGED:
         case WM_POWERBROADCAST:
         case MM_MCINOTIFY:
-            return CallWindowProcA((FARPROC) window_game_proc, wnd, msg, wparam, lparam);
+            return window_game_proc(wnd, msg, wparam, lparam);
         case WM_DESTROY:
-            CallWindowProcA((FARPROC) window_game_proc, wnd, msg, wparam, lparam);
+            window_game_proc(wnd, msg, wparam, lparam);
             return CallWindowProcA((FARPROC) window_sdl_proc, wnd, msg, wparam, lparam);
     }
     if (msg >= WM_USER)
-        return CallWindowProcA((FARPROC) window_game_proc, wnd, msg, wparam, lparam);
+        return window_game_proc(wnd, msg, wparam, lparam);
     return CallWindowProcA((FARPROC) window_sdl_proc, wnd, msg, wparam, lparam);
 }
+#endif
 
 // ---------------------------------------------------------------------------
 // The game window as a whole
@@ -864,7 +940,11 @@ BOOL surface_get_client_rect(HWND wnd, RECT* rect) {
         rect->bottom = height;
         return TRUE;
     }
+#ifdef _WIN32
     return GetClientRect(wnd, rect);
+#else
+    return FALSE;
+#endif
 }
 
 void surface_get_display_size(long* width, long* height) {
@@ -964,6 +1044,7 @@ HWND surface_create_main_window(const char* title, int width, int height, WNDPRO
         return 0;
     }
 
+#ifdef _WIN32
     SDL_SysWMinfo info;
     SDL_VERSION(&info.version);
     if (SDL_GetWindowWMInfo(sdl_window, &info) == SDL_FALSE) {
@@ -973,11 +1054,19 @@ HWND surface_create_main_window(const char* title, int width, int height, WNDPRO
         return 0;
     }
     sdl_hwnd = info.info.win.window;
+#else
+    // There is no Windows window: the game knows its window by this handle,
+    // and only the functions here look at it.
+    static int game_window_token;
+    sdl_hwnd = (HWND) &game_window_token;
+#endif
 
     queue_lock = SDL_CreateMutex();
     window_wake_event = SDL_RegisterEvents(1);
     window_game_proc = game_proc;
+#ifdef _WIN32
     window_sdl_proc = (WNDPROC) SetWindowLongA(sdl_hwnd, GWL_WNDPROC, (LONG) bridge_wnd_proc);
+#endif
 
     if ((SDL_GetWindowFlags(sdl_window) & SDL_WINDOW_INPUT_FOCUS) != 0)
         activate(1);
@@ -994,8 +1083,10 @@ void surface_destroy_main_window(void) {
         }
     }
     if (sdl_window != 0) {
+#ifdef _WIN32
         if (IsWindow(sdl_hwnd))
             SetWindowLongA(sdl_hwnd, GWL_WNDPROC, (LONG) window_sdl_proc);
+#endif
         SDL_DestroyWindow(sdl_window);
         sdl_window = 0;
     }

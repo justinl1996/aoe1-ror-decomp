@@ -540,7 +540,6 @@ void TRIBE_Command::do_command_queue(TRIBE_Command_Queue* order) {
 }
 
 extern TDebuggingLog* L;
-extern "C" void* __cdecl calloc(size_t num, size_t size);
 
 void TRIBE_Command::command_make(RGE_Static_Object* unit, short obj_id) {
     if (unit) {
@@ -875,7 +874,6 @@ void TRIBE_Command::command_attack_ground(RGE_Static_Object** unit, short list_n
     }
 }
 
-extern "C" void* __cdecl calloc(size_t, size_t);
 
 void TRIBE_Command::command_cheat(short player, short cheat_code) {
     TRIBE_Command_Game* buf = (TRIBE_Command_Game*) calloc(1, sizeof(TRIBE_Command_Game));
@@ -926,7 +924,6 @@ void TRIBE_Command::command_trade_attribute(RGE_Static_Object** unit, short list
     }
 }
 
-extern void* __cdecl calloc(unsigned int, unsigned int);
 
 void TRIBE_Command::command_trade_attribute(int unitID, int playerID, long attribute) {
     TRIBE_Command_Trade_Attribute* buf =
@@ -943,7 +940,6 @@ void TRIBE_Command::command_trade_attribute(int unitID, int playerID, long attri
     }
 }
 
-extern "C" void* __cdecl calloc(size_t count, size_t size);
 
 void TRIBE_Command::command_repair(RGE_Static_Object** unit, short unit_count, RGE_Static_Object* target) {
     int object_count = (int) unit_count;

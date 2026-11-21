@@ -9,9 +9,6 @@
 #include "../include/player.h"
 #include "../include/rge_base_game_global.h"
 
-extern "C" __declspec(dllimport) int __stdcall CompareStringA(
-    unsigned long locale, unsigned long flags, const char* string1, int length1, const char* string2, int length2
-);
 
 RGE_Dialog_List::RGE_Dialog_List(char* name) : TListDialog(name) {
 }

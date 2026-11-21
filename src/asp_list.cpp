@@ -1,11 +1,10 @@
 
 #include "../include/asp_list.h"
+#include <stdlib.h>
 #include "../include/sprite.h"
 #include "../include/stat_obj.h"
 
 #include "../include/rge_fio.h"
-extern "C" void* __cdecl calloc(unsigned int count, unsigned int size);
-extern "C" void __cdecl free(void* block);
 
 RGE_Active_Sprite_List::RGE_Active_Sprite_List(RGE_Static_Object* owner_in) {
     this->list = 0;
@@ -27,7 +26,7 @@ void RGE_Active_Sprite_List::load(int infile, RGE_Sprite** sprites) {
     do {
         // Preserve the original sprite-array pointer while reading the type byte.
         rge_read(infile, &sprites, 1);
-        type = this->load_node(infile, (unsigned char) sprites, sprites_copy);
+        type = this->load_node(infile, (unsigned char) (unsigned long) sprites, sprites_copy);
     } while (type != 0);
 
     reversed_list = 0;

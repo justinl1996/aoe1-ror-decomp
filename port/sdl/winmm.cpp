@@ -237,7 +237,7 @@ MMRESULT surface_mmio_get_info(HMMIO handle, LPMMIOINFO info, UINT) {
 
 // Takes the buffer back from the caller; the logical position follows its
 // pchNext. Anything written into it goes out now.
-MMRESULT surface_mmio_set_info(HMMIO handle, LPCMMIOINFO info, UINT) {
+MMRESULT surface_mmio_set_info(HMMIO handle, const MMIOINFO* info, UINT) {
     MmioFile* mmio = mmio_file(handle);
     if (mmio == 0 || info == 0)
         return MMSYSERR_INVALPARAM;

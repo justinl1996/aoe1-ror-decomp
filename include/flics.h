@@ -2,14 +2,9 @@
 #define AOE1_FLICS_H
 
 #include "drawarea.h"
+#include <io.h>
+#include <stdlib.h>
 
-extern "C" int __cdecl open(const char* path, int access);
-extern "C" int __cdecl lseek(int handle, long offset, int origin);
-extern "C" int __cdecl tell(int handle);
-extern "C" int __cdecl read(int handle, void* buffer, unsigned int size);
-extern "C" int __cdecl close(int handle);
-extern "C" void* __cdecl calloc(unsigned int count, unsigned int size);
-extern "C" void __cdecl free(void* block);
 
 class FlicHead {
   public:

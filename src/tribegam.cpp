@@ -95,13 +95,7 @@ void encrypt_codes(char* source, char* dest, int maxlen) {
 struct _iobuf;
 
 extern "C" {
-_iobuf* __cdecl fopen(const char* path, const char* mode);
-int __cdecl fclose(_iobuf* file);
-int __cdecl fprintf(_iobuf* file, const char* fmt, ...);
-long __cdecl time(long* t);
 char* __cdecl ctime(const long* t);
-char* __cdecl strncpy(char* dest, const char* src, unsigned int count);
-void* __cdecl memset(void* dest, int value, unsigned int count);
 }
 
 extern int do_run_log;       // 0x62C4F4
@@ -495,11 +489,6 @@ int TRIBE_Game::setup() {
 #include <string.h>
 
 extern "C" {
-__declspec(dllimport) char* __stdcall CharUpperA(char* string);
-char* __cdecl strncpy(char* destination, const char* source, unsigned int count);
-long __cdecl atol(const char* string);
-char* __cdecl strstr(const char* string, const char* substring);
-char* __cdecl strchr(const char* string, int character);
 }
 
 void encrypt_codes(char* source, char* destination, int maxlen);
@@ -631,7 +620,6 @@ int TRIBE_Game::setup_palette() {
     return 1;
 }
 
-extern "C" void* __cdecl calloc(unsigned int num, unsigned int size);
 extern void* operator new(unsigned int size);
 
 int TRIBE_Game::setup_sounds() {
@@ -1087,7 +1075,6 @@ void TRIBE_Game::close_status_message() {
 #include <string.h>
 #include <windows.h>
 
-extern "C" int __cdecl _open(const char* path, int flags, ...);
 extern "C" void* __cdecl MCIWndCreateA(void* parent, void* instance, unsigned long style, const char* file);
 
 // These MCIWnd values match the VC5 VFW.H definitions.
@@ -1368,7 +1355,6 @@ int TRIBE_Game::start_menu() {
     return 1;
 }
 
-extern "C" int __cdecl sprintf(char* buffer, const char* format, ...);
 extern int do_debug_random;
 extern void debug_random_write();
 extern void dump_vismap_log();
@@ -1541,8 +1527,6 @@ int TRIBE_Game::load_game_data() {
     return 1;
 }
 
-extern "C" char* __cdecl strcpy(char* destination, const char* source);
-extern "C" char* __cdecl strchr(const char* source, int character);
 
 extern int ENABLE_COMPRESSION; // 00585A6C
 
@@ -3113,10 +3097,6 @@ create_game_screen_failed:
     return 0;
 }
 
-extern "C" char* __cdecl strcpy(char*, const char*);
-extern "C" char* __cdecl strstr(const char*, const char*);
-extern "C" int __cdecl strcmp(const char*, const char*);
-extern "C" int __cdecl sscanf(const char*, const char*, ...);
 
 extern void __cdecl encrypt_codes(char* source, char* dest, int maxlen);
 
@@ -3937,7 +3917,6 @@ int TRIBE_Game::handle_activate(void* wnd, unsigned int msg, unsigned int wparam
     return 1;
 }
 
-extern "C" int __cdecl sprintf(char*, const char*, ...);
 
 int TRIBE_Game::action_user_command(unsigned long val1, unsigned long val2) {
     char msg[256];
@@ -4166,7 +4145,6 @@ void TRIBE_Game::resetRandomComputerName() {
     }
 }
 
-extern "C" __declspec(dllimport) void* __stdcall SetCursor(void* cursor);
 
 long TRIBE_Game::video_wnd_proc(void* hwnd, unsigned int msg, unsigned int wParam, long lParam) {
     switch (msg) {

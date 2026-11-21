@@ -1,4 +1,5 @@
 #include "../include/drawarea.h"
+#include <io.h>
 #include "../include/asm_draw.h"
 #include "../include/color.h"
 #include "../include/game_globals.h"
@@ -25,12 +26,6 @@ extern void __cdecl DibBlt(
     BITMAPINFO256*, unsigned char*, RECT*, long, long, long, long, BITMAPINFO256*, unsigned char*, long, long, long, long, int,
     int, int
 );
-extern "C" int __cdecl _open(const char*, int, ...);
-extern "C" int __cdecl write(int, void*, int);
-extern "C" int __cdecl close(int);
-extern "C" void* __cdecl malloc(unsigned int);
-extern "C" void __cdecl free(void*);
-extern void* __cdecl calloc(unsigned int, unsigned int);
 extern void* __cdecl operator new(unsigned int);
 #pragma function(memset)
 

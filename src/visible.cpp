@@ -1,5 +1,6 @@
 
 #include "../include/visible.h"
+#include <stdlib.h>
 #include "../include/map.h"
 #include "../include/player.h"
 #include "../include/world.h"
@@ -144,8 +145,6 @@ LOSTBL* SquareLOS[17] = { Edge_Offsets_T0,  Edge_Offsets_T1,  Edge_Offsets_T2,  
 
 #pragma intrinsic(_rotl)
 
-extern "C" void* __cdecl calloc(unsigned int count, unsigned int size);
-extern "C" void __cdecl free(void* block);
 void __cdecl rge_write(int handle, void* buffer, int count);
 void __cdecl rge_read(int handle, void* buffer, int count);
 

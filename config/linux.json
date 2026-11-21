@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "notes": [
+    "The native Linux build (tools/build_linux.py, workflow/docs/linux_build.md): a 32-bit (i686) ELF with the same SDL layer as the Windows build.",
+    "The Win32 declarations come from Wine's headers (libwine-dev), used at build time only; nothing of Wine is linked. A system libwine-dev is used when present, otherwise the pinned package below.",
+    "SDL2 and SDL2_ttf: their headers come from config/sdl.json's packages; the program links against the system's 32-bit runtime libraries (libsdl2-2.0-0:i386, libsdl2-ttf-2.0-0:i386)."
+  ],
+  "packages": {
+    "wine_headers": {
+      "version": "10.0~repack-12ubuntu1",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/universe/w/wine/libwine-dev_10.0%7erepack-12ubuntu1_amd64.deb",
+      "sha256": "f5e401c986e55ab256249ce3fd90bd73ef2be16c6f31c8c3dd7f91d5b7af27c0",
+      "directory": "build/third_party/libwine-dev-10.0",
+      "probe": "include/wine/wine/windows/windows.h"
+    }
+  },
+  "system_wine_include": "/usr/include/wine/wine/windows",
+  "wine_include": ["wine_headers", "include/wine/wine/windows"],
+  "sources": [
+    "port/linux/crt.cpp",
+    "port/linux/win32.cpp",
+    "port/linux/winsock.cpp",
+    "port/linux/main.cpp"
+  ],
+  "defines": ["NO_STRICT"],
+  "libraries": ["-l:libSDL2-2.0.so.0", "-l:libSDL2_ttf-2.0.so.0", "-lm", "-lpthread"]
+}

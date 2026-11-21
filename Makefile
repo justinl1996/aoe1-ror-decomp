@@ -19,12 +19,13 @@ VC6_WIN   = Z:$(subst /,\,$(VC6_DIR))
 WINE_ENV  = VC5_DIR='$(VC6_WIN)' AOE_TOOLCHAIN=$(VC6_TOOLCHAIN) AOE_ASSEMBLER=$(ASSEMBLER)
 LATEST_CLANG = $$(ls -d build/clang/2*/ 2>/dev/null | tail -1)
 
-.PHONY: all help clang vc6 harness test play clean
+.PHONY: all help clang linux vc6 harness test play clean
 
 all: clang
 
 help:
 	@echo "make clang      native clang-cl/lld-link build with SDL2 (default) -> build/clang/<time>/empiresx.exe + SDL2.dll"
+	@echo "make linux      native 32-bit Linux build with SDL2        -> build/linux/<time>/empiresx"
 	@echo "make vc6      VC6 under Wine                               -> build/executable/vc6/<time>/"
 	@echo "make harness    check the C++ ports against the assembly (VC6 + ml.exe under Wine)"
 	@echo "make test       tool tests for the port harness and build scripts"
@@ -34,6 +35,9 @@ help:
 
 clang:
 	VC6_DIR=$(VC6_DIR) $(PYTHON) tools/build_clang.py
+
+linux:
+	$(PYTHON) tools/build_linux.py
 
 vc6:
 	$(WINE_ENV) $(PYTHON) tools/build_executable.py --output-dir build/executable/vc6 --no-icon
@@ -54,4 +58,4 @@ play:
 	cd $(PLAY_DIR) && $(WINE) empiresx.exe NOSTARTUP GAMECD
 
 clean:
-	rm -rf build/clang build/asm_port
+	rm -rf build/clang build/linux build/asm_port

@@ -2,6 +2,7 @@
 #define AOE1_DIB_H
 
 #include <windows.h>
+#include <string.h>
 #include "bitmap_info.h"
 #include "picture_types.h"
 
@@ -64,6 +65,5 @@ void __cdecl DibFree(BITMAPINFOHEADER* pdib);
 
 void __cdecl DibMapToPalette(BITMAPINFOHEADER* pdib, void* hpal, int TransLogic, int ZeroIsTrans);
 
-extern "C" void* __cdecl memmove(void*, const void*, unsigned int);
 
 #endif

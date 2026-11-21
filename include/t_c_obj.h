@@ -77,7 +77,11 @@ class TRIBE_Combat_Object : public RGE_Combat_Object {
     unsigned char own_master;
 };
 
+// The Linux build's C++ ABI (Itanium) places a derived class's first members in its
+// base class's tail padding; MSVC does not. These layout checks are MSVC's.
+#ifndef AOE_LINUX
 typedef char tribe_combat_object_own_master_offset_check[(offsetof(TRIBE_Combat_Object, own_master) == 0x1C4) ? 1 : -1];
 typedef char tribe_combat_object_size_check[(sizeof(TRIBE_Combat_Object) == 0x1C8) ? 1 : -1];
+#endif
 
 #endif // AOE1_T_C_OBJ_H

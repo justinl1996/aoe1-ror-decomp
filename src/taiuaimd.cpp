@@ -395,7 +395,6 @@ int TribeRangedUnitAIModule::processNotify(NotifyEvent* nEvent, ulong uTime) {
 TribeRangedUnitAIModule2::TribeRangedUnitAIModule2(RGE_Static_Object* o, int iQS) : UnitAIModule(o, iQS) {
 }
 
-extern "C" double __cdecl sqrt(double);
 
 int TribeRangedUnitAIModule2::processNotify(NotifyEvent* nEvent, unsigned long uTime) {
     RGE_Static_Object* target;

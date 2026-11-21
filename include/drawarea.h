@@ -10,11 +10,11 @@ typedef unsigned char uchar;
 class RGE_Color_Table;
 
 #include <ddraw.h>
+#include <stdio.h>
 #include "bitmap_info.h"
 
 #undef WIN32_LEAN_AND_MEAN
 
-extern "C" int __cdecl sprintf(char*, const char*, ...);
 
 typedef BITMAPINFO256 BitmapInfo;
 typedef char draw_bitmap_info_256_size_check[(sizeof(BITMAPINFO256) == 0x428) ? 1 : -1];

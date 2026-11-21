@@ -1,5 +1,7 @@
 
 #include "../include/campaign.h"
+#include <io.h>
+#include <stdlib.h>
 #include "../include/main.h"
 #include "../include/basegame.h"
 #include "../include/rge_base_game_global.h"
@@ -11,17 +13,6 @@
 #include <sys/stat.h>
 
 // These declarations expose the period CRT and executable helper interfaces.
-extern "C" int __cdecl sprintf(char*, const char*, ...);
-extern "C" int __cdecl open(const char*, int);
-extern "C" int __cdecl _open(const char*, int, ...);
-extern "C" int __cdecl read(int, void*, int);
-extern "C" int __cdecl write(int, void*, int);
-extern "C" int __cdecl close(int);
-extern "C" int __cdecl lseek(int, int, int);
-extern "C" int __cdecl _lseek(int, int, int);
-extern "C" long __cdecl _tell(int);
-extern "C" void* __cdecl calloc(unsigned int, unsigned int);
-extern "C" void __cdecl free(void*);
 extern int __cdecl rge_fake_open(int, int);
 
 RGE_Campaign::RGE_Campaign(char* in_filename) {

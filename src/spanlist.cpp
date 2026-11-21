@@ -1,4 +1,5 @@
 #include "../include/spanlist.h"
+#include <io.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 
@@ -21,11 +22,6 @@ struct vc5_phase_9;
 struct vc5_phase_10;
 struct vc5_phase_11;
 
-extern "C" void* __cdecl malloc(unsigned int size);
-extern "C" int __cdecl abs(int);
-extern "C" int __cdecl open(const char* path, int flags, ...);
-extern "C" int __cdecl close(int fd);
-extern "C" int __cdecl write(int fd, const void* buf, unsigned int count);
 
 TSpan_Node_List::TSpan_Node_List(int InitialSize, int GrowSize, int szitem) :
     Free_Pool_Zone(-1), Free_Pool_Index(-1), Zone_Ptrs(0), Zone_Size_Ptrs(0), Used_Zones(0), Free_Head(0), Total_Blocks(0),

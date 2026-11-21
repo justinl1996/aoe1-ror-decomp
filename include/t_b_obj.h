@@ -87,6 +87,10 @@ class TRIBE_Building_Object : public TRIBE_Combat_Object {
     virtual int setup(int infile, RGE_Game_World* gworld);
 };
 
+// The Linux build's C++ ABI (Itanium) places a derived class's first members in its
+// base class's tail padding; MSVC does not. These layout checks are MSVC's.
+#ifndef AOE_LINUX
 typedef char tribe_building_object_size_check[(sizeof(TRIBE_Building_Object) == 0x204) ? 1 : -1];
+#endif
 
 #endif // AOE1_T_B_OBJ_H

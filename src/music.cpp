@@ -1,4 +1,5 @@
 #include "../include/game_globals.h"
+#include <io.h>
 #include "../include/music.h"
 #include "../include/surface.h"
 
@@ -18,8 +19,6 @@ static const char READ_MODE[] = "r";
 typedef MCIERROR(WINAPI* MCI_SEND_COMMAND_PROC)(MCIDEVICEID, UINT, DWORD, DWORD);
 
 extern unsigned long debug_timeGetTime(char* file, int line);
-extern "C" int __cdecl open(const char*, int);
-extern "C" int __cdecl close(int);
 
 TMusic_System::TMusic_System(
     unsigned char music_type_in, void* instance_in, void* window_in, TSound_Driver* sound_system_in, char* path_in

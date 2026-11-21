@@ -907,12 +907,7 @@ int RGE_Base_Game::run() {
 
 extern int startLoggingAI;
 
-extern "C" {
-char* __cdecl _mbsstr(const char* str, const char* substr);
-char* __cdecl _mbsninc(const char* str, unsigned int count);
-int __cdecl _ismbcspace(unsigned int c);
-char* __cdecl _mbsncat(char* dst, const char* src, unsigned int count);
-}
+#include <mbstring.h>
 
 extern int do_run_log;
 extern int do_debug_timeGetTime;
@@ -996,34 +991,34 @@ int RGE_Base_Game::setup_cmd_options() {
         fixed_update_time = 20;
     }
 
-    argument = _mbsstr(cmd_line, "RESEND1=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "RESEND1=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         temp_str[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(temp_str, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) temp_str, (unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
         resend_adj1 = atol(temp_str);
     }
 
-    argument = _mbsstr(cmd_line, "RESEND2=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "RESEND2=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         temp_str[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(temp_str, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) temp_str, (unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
         resend_adj2 = atol(temp_str);
     }
@@ -1191,34 +1186,34 @@ int RGE_Base_Game::setup_cmd_options() {
         do_color_log = 1;
     }
 
-    argument = _mbsstr(cmd_line, "LOGAI=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "LOGAI=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         temp_str[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(temp_str, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) temp_str, (unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
         specificAIPlayerToLog = atol(temp_str);
     }
 
-    argument = _mbsstr(cmd_line, "LOGDEBUG=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "LOGDEBUG=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         temp_str[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(temp_str, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) temp_str, (unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
         logDebugID = atol(temp_str);
     }
@@ -1279,117 +1274,117 @@ int RGE_Base_Game::setup_cmd_options() {
         RESFILE_Set_Missing_Flag(1);
     }
 
-    argument = _mbsstr(cmd_line, "SCENARIOS=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "SCENARIOS=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         this->prog_info->scenario_dir[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(this->prog_info->scenario_dir, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) this->prog_info->scenario_dir, (const unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
-        _mbsncat(this->prog_info->scenario_dir, "\\", 1);
+        _mbsncat((unsigned char*) this->prog_info->scenario_dir, (const unsigned char*) "\\", 1);
     }
 
-    argument = _mbsstr(cmd_line, "WORLD=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "WORLD=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         this->prog_info->world_db_file[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(this->prog_info->world_db_file, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) this->prog_info->world_db_file, (const unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
     }
 
-    argument = _mbsstr(cmd_line, "FIXEDUPDATE=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "FIXEDUPDATE=");
     if (argument) {
         do_debug_timeGetTime = 1;
         do_fixed_update = 1;
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         temp_str[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(temp_str, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) temp_str, (unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
         fixed_update_time = atol(temp_str);
     }
 
-    argument = _mbsstr(cmd_line, "AISPEED=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "AISPEED=");
     if (argument) {
         do_debug_timeGetTime = 1;
         do_fixed_update = 1;
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         temp_str[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(temp_str, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) temp_str, (unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
         debug_timeGetTime_interval = atol(temp_str);
     }
 
-    argument = _mbsstr(cmd_line, "RANDOMGAME=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "RANDOMGAME=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         temp_str[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(temp_str, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) temp_str, (unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
         this->random_game_seed = atol(temp_str);
     }
 
-    argument = _mbsstr(cmd_line, "RANDOMMAP=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "RANDOMMAP=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         temp_str[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(temp_str, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) temp_str, (unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
         this->random_map_seed = atol(temp_str);
     }
 
-    argument = _mbsstr(cmd_line, "DRAWLOG=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "DRAWLOG=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         draw_log_name[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(draw_log_name, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) draw_log_name, (const unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
     }
 
@@ -1401,18 +1396,18 @@ int RGE_Base_Game::setup_cmd_options() {
         safe_draw_log = 1;
     }
 
-    argument = _mbsstr(cmd_line, "DATA=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "DATA=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         this->prog_info->game_data_file[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(this->prog_info->game_data_file, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) this->prog_info->game_data_file, (const unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
     }
 
@@ -1450,34 +1445,34 @@ int RGE_Base_Game::setup_cmd_options() {
         this->setGameDeveloperMode(1);
     }
 
-    argument = _mbsstr(cmd_line, "SPEED1=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "SPEED1=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         temp_str[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(temp_str, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) temp_str, (unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
         speed_val1 = atol(temp_str);
     }
 
-    argument = _mbsstr(cmd_line, "SPEED2=");
+    argument = (char*) _mbsstr((unsigned char*) cmd_line, (const unsigned char*) "SPEED2=");
     if (argument) {
         character = *argument;
         while (character != '=') {
-            argument = _mbsninc(argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
             character = *argument;
         }
-        argument = _mbsninc(argument, 1);
+        argument = (char*) _mbsninc((unsigned char*) argument, 1);
         temp_str[0] = 0;
         while (!_ismbcspace((unsigned char) *argument) && *argument != 0) {
-            _mbsncat(temp_str, argument, 1);
-            argument = _mbsninc(argument, 1);
+            _mbsncat((unsigned char*) temp_str, (unsigned char*) argument, 1);
+            argument = (char*) _mbsninc((unsigned char*) argument, 1);
         }
         speed_val2 = atol(temp_str);
     }

@@ -12,7 +12,7 @@
 #include "../include/panel.h"
 
 extern void operator delete(void* ptr);
-extern void* operator new(unsigned int size, void* ptr);
+#include <new.h>
 extern int DiagionalDistance[256];
 extern unsigned char ObstructionValueShift[4];
 extern unsigned char ObstructionValueMask[4];

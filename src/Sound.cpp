@@ -7,7 +7,6 @@
 
 // Sound.cpp-only runtime, helper, and global declarations.
 extern int __cdecl debug_rand(char* file, int line);
-extern "C" int __cdecl sprintf(char* buffer, const char* format, ...);
 extern unsigned long __cdecl debug_timeGetTime(char* file, int line);
 extern void __cdecl write_draw_log(char* message);
 extern void __cdecl write_draw_log2(char* message);

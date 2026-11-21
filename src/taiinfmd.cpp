@@ -486,21 +486,21 @@ TribeInformationAIModule::~TribeInformationAIModule() {
 #include <string.h>
 
 int TribeInformationAIModule::initialize() {
-    // This is md->player->world->map, then map_width and map_height, and 0xFF90 below is
-    // unitHistoryFilename. Typed member access keeps this function exact but changes the later
-    // objectToTradeWith (004DEA80) and storeAttackMemory (004E0FD0), so the raw offsets stay.
-    void* terrain = *(void**) (*(char**) (*(char**) ((char*) this->md + 0xF0) + 0x3C) + 0x28);
-    this->mapXSizeValue = *(int*) ((char*) terrain + 8);
-    this->mapYSizeValue = *(int*) ((char*) terrain + 0x0C);
+    // Typed members, not the original's raw offsets: the class layouts
+    // differ between compilers (the Linux build's C++ ABI packs derived
+    // classes differently).
+    RGE_Map* map = this->md->player->world->map;
+    this->mapXSizeValue = map->map_width;
+    this->mapYSizeValue = map->map_height;
 
     // Get player game info from global
     RGE_Game_Info* game_info = rge_base_game->player_game_info;
 
     // Check if player name exists
     if (game_info->get_current_player_name()) {
-        sprintf((char*) this + 0xFF90, "learn\\%s.uh", game_info->get_current_player_name());
+        sprintf(this->unitHistoryFilename, "learn\\%s.uh", game_info->get_current_player_name());
     } else {
-        strcpy((char*) this + 0xFF90, "learn\\Default.uh");
+        strcpy(this->unitHistoryFilename, "learn\\Default.uh");
     }
 
     return 1;
@@ -2418,8 +2418,7 @@ void TribeInformationAIModule::removeObject(int objID) {
     if (obj != 0) {
         ObjectMemory* mem = objectMemory(objID);
         if (mem != 0) {
-            // obj->owner->id, kept raw for the same reason as in initialize.
-            unsigned char owner_id = *(unsigned char*) (*(int*) ((char*) obj + 0x0C) + 0x4A);
+            unsigned char owner_id = (unsigned char) obj->owner->id;
             mem->owner = owner_id;
         }
     }

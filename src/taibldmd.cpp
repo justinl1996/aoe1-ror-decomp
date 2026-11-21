@@ -12,6 +12,7 @@
 #include "../include/tech.h"
 #include "../include/taibldmd.h"
 #include "../include/taimdmd.h"
+#include "../include/world.h"
 #include <string.h>
 
 TribeBuildAIModule::TribeBuildAIModule(void* pW, int pID) : BuildAIModule(pW, pID), md(0) {
@@ -760,9 +761,7 @@ int TribeBuildAIModule::addTrainedUnit(int uType, int location, int uniqueID, in
 }
 
 int TribeBuildAIModule::cancelTrainUnit(int reason, int uType, int location, int uniqueID) {
-    // md->player->world->world_time. This file does not include world.h; adding it changes
-    // mostNeededResource (004D4F80), so the raw chain stays.
-    int val = *(int*) (*(int*) (*(int*) ((char*) this->md + 0xF0) + 0x3C) + 4);
+    int val = (int) this->md->player->world->world_time;
     this->logCommonHistory("Canceling training (WT=%ld) for item of type %d at building w/ gameID=%d.", val, uType, location);
 
     BuildItem* item = (BuildItem*) this->specificBuildListItem(uniqueID);
@@ -792,7 +791,7 @@ int TribeBuildAIModule::addResearch(int uType, int location, int uniqueID) {
 
 int TribeBuildAIModule::cancelResearch(int reason, int rType, int location, int uniqueID) {
     // md->player->world->world_time; see cancelTrainUnit.
-    int val = *(int*) (*(int*) (*(int*) ((char*) this->md + 0xF0) + 0x3C) + 4);
+    int val = (int) this->md->player->world->world_time;
     this->logCommonHistory("Canceling research (WT=%ld) for item of type %d at building w/ gameID=%d.", val, rType, location);
 
     BuildItem* item = (BuildItem*) this->specificBuildListItem(uniqueID);

@@ -503,9 +503,12 @@ class _WIN32_FIND_DATAA;
 class _finddata_t;
 class _iobuf;
 class _tag_wavheader;
+// VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
+#ifndef AOE_LINUX
 class ios;
 class istream;
 class ostream;
+#endif
 class pcmwaveformat_tag;
 class rdlg_list_info;
 class res_file_type_info;
@@ -519,7 +522,6 @@ class tWAVEFORMATEX;
 class tagBITMAP;
 class tagBITMAPCOREHEADER;
 class tagBITMAPFILEHEADER;
-class tagBITMAPINFOHEADER;
 class tagLOGFONTA;
 class tagMCI_OPEN_PARMSA;
 class tagMCI_PLAY_PARMS;

@@ -121,7 +121,7 @@ LONG surface_mmio_read(HMMIO mmio, HPSTR data, LONG length);
 LONG surface_mmio_write(HMMIO mmio, const char* data, LONG length);
 LONG surface_mmio_seek(HMMIO mmio, LONG offset, int origin);
 MMRESULT surface_mmio_get_info(HMMIO mmio, LPMMIOINFO info, UINT flags);
-MMRESULT surface_mmio_set_info(HMMIO mmio, LPCMMIOINFO info, UINT flags);
+MMRESULT surface_mmio_set_info(HMMIO mmio, const MMIOINFO* info, UINT flags);
 MMRESULT surface_mmio_advance(HMMIO mmio, LPMMIOINFO info, UINT flags);
 MMRESULT surface_mmio_descend(HMMIO mmio, LPMMCKINFO chunk, const MMCKINFO* parent, UINT flags);
 MMRESULT surface_mmio_ascend(HMMIO mmio, LPMMCKINFO chunk, UINT flags);

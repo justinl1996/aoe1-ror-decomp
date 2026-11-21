@@ -1,4 +1,5 @@
 #include "../include/aimodule.h"
+#include <stdio.h>
 #include "../include/game_globals.h"
 
 #include <stdarg.h>
@@ -79,7 +80,6 @@ AIModule::AIModule(char* n, int i, int pN, void* pW) :
 }
 
 struct _iobuf;
-extern int __cdecl fclose(_iobuf*);
 
 AIModule::~AIModule() {
     if (logCommonHistoryValue != 0 && commonHistoryLogFile != 0) {

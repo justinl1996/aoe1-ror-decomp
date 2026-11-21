@@ -14,14 +14,8 @@
 static ResFileHdr* Res_Files;
 static int resource_missing_flag;
 
-extern "C" int __cdecl _open(const char* path, int flags, ...);
-extern "C" int __cdecl sprintf(char* buf, const char* fmt, ...);
 #ifndef _INC_IO
-extern "C" int __cdecl lseek(int fd, int offset, int whence);
 #endif
-extern "C" int __cdecl read(int fd, void* buf, unsigned size);
-extern "C" int __cdecl close(int fd);
-extern "C" int __cdecl write(int fd, const void* buf, unsigned size);
 
 void __cdecl RESFILE_open_new_resource_file(char* resFileName, char* password, char* path, int open_mode) {
     char resFile[260];
@@ -80,10 +74,8 @@ void __cdecl RESFILE_open_new_resource_file(char* resFileName, char* password, c
         newFile->mapped_file = 0;
         lseek(fHandle, 0, 1);
         if (read(fHandle, &rHeader, 64) != 0x40) {
-            // clang-format off
-            __asm int 3
+            // The original broke into the debugger here (int 3) first.
             surface_message_box("Error: Reading resfile header.", "RESOURCE ERROR", MB_ICONEXCLAMATION);
-            // clang-format on
             return;
         }
         newFile->header = (resfile_header*) malloc(rHeader.directory_size);

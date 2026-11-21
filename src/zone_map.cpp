@@ -8,8 +8,6 @@ void rge_write(int file, void* data, int size);
 #include <stdlib.h>
 #include <string.h>
 
-extern "C" void __cdecl free(void* block);
-extern "C" void* __cdecl calloc(unsigned int num, unsigned int size);
 
 unsigned char __cdecl zone_pop(Zone_Queue** zone_queue, Zone_Queue** zone_end, long& x, long& y) {
     Zone_Queue* node = *zone_queue;

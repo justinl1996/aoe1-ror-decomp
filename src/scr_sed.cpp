@@ -69,7 +69,6 @@ extern char s_Save_Game_Screen[];
 extern char s_Scenario_Editor_Open[];
 
 extern int View_Grid_Mode;
-extern "C" __declspec(dllimport) int __stdcall CompareStringA(unsigned long, unsigned long, const char*, int, const char*, int);
 
 int __cdecl TRIBE_Screen_Sed_unit_list_compare(const void*, const void*);
 

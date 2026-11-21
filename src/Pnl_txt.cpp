@@ -12,9 +12,6 @@ static char s_pnl_txt__draw[] = "pnl_txt::draw";
 static char s_pnl_txt__get_text_rect[] = "pnl_txt::get_text_rect";
 static char s_pnl_txt__word_wrap_append[] = "pnl_txt::word_wrap_append";
 
-extern "C" __declspec(dllimport) int __stdcall CompareStringA(
-    unsigned long locale, unsigned long flags, const char* string1, int length1, const char* string2, int length2
-);
 
 TTextPanel::TTextPanel() :
     list(0), num_lines(0), draw_lines(0), top_line(0), bot_line(0), cur_line(0), cur_col(0), font(0), font_wid(0), font_hgt(0),
@@ -1107,6 +1104,12 @@ void TTextPanel::set_line_by_id(long id_in) {
 
 int TTextPanel::append_line(char* text_in, long id_in) {
     return insert_line((int) num_lines, text_in, id_in);
+}
+
+// Called with string literals. It was declared and never defined: VC5 bound
+// those calls to the char* overload, which the Windows link still aliases.
+int TTextPanel::append_line(const char* text_in, long id_in) {
+    return append_line((char*) text_in, id_in);
 }
 
 int TTextPanel::append_line(char* text_in, char* text2_in, long id_in) {

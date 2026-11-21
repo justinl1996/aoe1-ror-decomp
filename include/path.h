@@ -5,7 +5,10 @@
 
 #include <new.h>
 
+// VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
+#ifndef AOE_LINUX
 class ostream;
+#endif
 
 class Path {
   public:
@@ -80,6 +83,9 @@ class Path {
 
 typedef char path_size_check[(sizeof(Path) == 0x34) ? 1 : -1];
 
+// VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
+#ifndef AOE_LINUX
 ostream& __cdecl operator<<(ostream& out, const Path& p);
+#endif
 
 #endif

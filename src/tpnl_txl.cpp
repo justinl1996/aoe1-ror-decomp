@@ -27,10 +27,6 @@ void TRIBE_Panel_Text_Line::set_info(unsigned char text_type_in, char* text_in, 
 }
 
 extern "C" {
-__declspec(dllimport) HGDIOBJ __stdcall SelectObject(HDC, HGDIOBJ);
-__declspec(dllimport) int __stdcall SetBkMode(HDC, int);
-__declspec(dllimport) COLORREF __stdcall SetTextColor(HDC, COLORREF);
-__declspec(dllimport) BOOL __stdcall TextOutA(HDC, int, int, LPCSTR, int);
 }
 
 void TRIBE_Panel_Text_Line::draw() {

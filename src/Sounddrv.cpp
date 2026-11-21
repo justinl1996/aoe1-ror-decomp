@@ -1,4 +1,6 @@
 #include "../include/sounddrv.h"
+#include <io.h>
+#include <stdio.h>
 #include "../include/Res_file.h"
 // Sound is mixed by SDL (port/sdl/dsound_memory.cpp); the calls below stay
 // DirectSound calls.
@@ -17,11 +19,6 @@ extern "C" int __cdecl ds_stream_pause(void);
 extern "C" int __cdecl ds_stream_resume(void);
 extern "C" int __cdecl ds_stream_stop(void);
 extern "C" unsigned int __cdecl ds_stream_messages(void* a, unsigned int b, unsigned int c, long d);
-extern "C" int __cdecl sprintf(char* buffer, const char* format, ...);
-extern "C" int __cdecl _open(const char* path, int flags, ...);
-extern "C" int __cdecl close(int fd);
-extern "C" unsigned int __cdecl read(int fd, void* buffer, unsigned int count);
-extern "C" int __cdecl strncmp(const char* left, const char* right, unsigned int count);
 extern void __cdecl color_log(unsigned char a, unsigned char b, int c);
 
 struct _tag_wavheader {

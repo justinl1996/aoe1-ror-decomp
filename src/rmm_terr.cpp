@@ -11,7 +11,6 @@ struct vc5_phase_1;
 struct vc5_phase_2;
 struct vc5_phase_3;
 
-extern "C" double __cdecl sqrt(double value);
 #pragma intrinsic(sqrt)
 
 RGE_RMM_Terrain_Generator::RGE_RMM_Terrain_Generator(

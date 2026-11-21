@@ -25,13 +25,6 @@
 #include <string.h>
 
 extern "C" {
-__declspec(dllimport) int __stdcall SetBkMode(HDC, int);
-__declspec(dllimport) COLORREF __stdcall SetTextColor(HDC, COLORREF);
-__declspec(dllimport) HGDIOBJ __stdcall SelectObject(HDC, HGDIOBJ);
-__declspec(dllimport) BOOL __stdcall SelectClipRgn(HDC, HRGN);
-__declspec(dllimport) BOOL __stdcall TextOutA(HDC, int, int, LPCSTR, int);
-__declspec(dllimport) BOOL __stdcall SetRect(LPRECT, int, int, int, int);
-__declspec(dllimport) int __stdcall DrawTextA(HDC, LPCSTR, int, LPRECT, UINT);
 }
 
 static short building_facet(const RGE_Master_Static_Object* master) {
