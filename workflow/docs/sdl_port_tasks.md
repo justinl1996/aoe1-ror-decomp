@@ -860,6 +860,28 @@ those.
   provoked), the clipboard paste in the input panels, saving settings
   from the options screen.
 
+### Fullscreen at 1280x1024 — fixed 2026-11-21
+
+- The game's hidden 1280x1024 mode (`1280` on the command line or
+  `Screen Size=1280` in settings.ini) showed a frame cut off and squashed
+  whenever the display was not 1280x1024. The window was created at the
+  game's size and centred, then switched to SDL's desktop fullscreen;
+  without a window manager (Xvfb here, kiosk setups) nothing moves or
+  resizes the window, so SDL drew a display-sized frame into a
+  1280x1024 window left where it had been centred. At 1024x768 and below
+  the centred window happened to sit at the display's origin.
+- The window is created windowed. Going fullscreen, the layout first makes
+  it borderless and covering the display, then asks SDL for fullscreen
+  (SDL ignores moves of a window it already holds fullscreen).
+- Checked on Linux (1024x768 and 1600x1200 displays) and Windows under Wine:
+  the whole 1280x1024 frame shows, scaled and letterboxed, and clicks
+  land; the 1024x768 menus are unchanged pixel for pixel.
+- The original's own 1280x1024 behaviour is unchanged: menu backgrounds
+  are its 1024x768 pictures in the top-left corner, and the game screen
+  uses the 1024x768 layout (`TRIBE_Screen_Game::handle_size` places
+  everything at fixed 1024x768 positions for any size from 1024 up), so
+  the rest of the frame stays black.
+
 ### The native Linux build — 2026-11-21
 
 `make linux` builds the game as a 32-bit Linux program with this SDL

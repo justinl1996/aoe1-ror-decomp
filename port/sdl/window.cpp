@@ -1038,11 +1038,11 @@ HWND surface_create_main_window(const char* title, int width, int height, WNDPRO
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
         return 0;
 
+    // Fullscreen comes when the frame's size is known (layout_apply in
+    // surface.cpp), which first makes the window cover the display.
     Uint32 flags = SDL_WINDOW_SHOWN;
     if (layout_is_windowed() != 0)
         flags |= SDL_WINDOW_RESIZABLE;
-    else
-        flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     sdl_window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
     if (sdl_window == 0) {
         SDL_Quit();

@@ -181,6 +181,21 @@ static void layout_apply(void) {
         return;
 
     if (layout_windowed == 0) {
+        // Cover the display before asking for fullscreen. A window manager
+        // makes the window fullscreen; without one (bare X11, kiosk setups)
+        // SDL only believes it is, and a window left at the size and
+        // position it had for the game's size (1280x1024, say) would show
+        // part of a frame drawn for the whole display. SDL ignores moves of
+        // a window it already holds fullscreen, so this happens first.
+        if ((SDL_GetWindowFlags(sdl_window) & SDL_WINDOW_FULLSCREEN) == 0) {
+            int display = SDL_GetWindowDisplayIndex(sdl_window);
+            SDL_Rect bounds;
+            if (SDL_GetDisplayBounds(display < 0 ? 0 : display, &bounds) == 0) {
+                SDL_SetWindowBordered(sdl_window, SDL_FALSE);
+                SDL_SetWindowPosition(sdl_window, bounds.x, bounds.y);
+                SDL_SetWindowSize(sdl_window, bounds.w, bounds.h);
+            }
+        }
         SDL_SetWindowFullscreen(sdl_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     } else {
         SDL_SetWindowFullscreen(sdl_window, 0);
