@@ -50,6 +50,10 @@ void surface_set_cursor(HCURSOR cursor);
 HWND surface_set_capture(HWND wnd);
 BOOL surface_release_capture(void);
 HWND surface_get_capture(void);
+// The clipboard, as single-byte (Windows-1252) text. get returns the
+// length copied into buffer (always 0-terminated).
+int surface_get_clipboard_text(char* buffer, int size);
+void surface_set_clipboard_text(const char* text, int length);
 // Key state as of the key messages the game has received.
 SHORT surface_get_key_state(int vk);
 SHORT surface_get_async_key_state(int vk);
@@ -100,8 +104,6 @@ BOOL surface_set_cursor_pos(int x, int y);
 BOOL surface_client_to_screen(HWND wnd, POINT* point);
 BOOL surface_screen_to_client(HWND wnd, POINT* point);
 BOOL surface_get_window_rect(HWND wnd, RECT* rect);
-// Place a child window (an edit box) given in game pixels.
-BOOL surface_move_child_window(HWND child, int x, int y, int width, int height, BOOL repaint);
 
 // GDI for the game's 8-bit surfaces (port/sdl/gdi.cpp), drawn with SDL_ttf.
 //
@@ -109,7 +111,7 @@ BOOL surface_move_child_window(HWND child, int x, int y, int width, int height, 
 // on it these functions draw into the surface's pixels. On any other device
 // context they are the Win32 calls of the same name. Every GDI object the
 // game creates comes from here; gdi_win32_object gives the real GDI object
-// standing for one (for the EDIT boxes, which are real controls).
+// standing for one (for a device context that is not a surface's).
 HFONT gdi_create_font_indirect(const LOGFONTA* logfont);
 HPEN gdi_create_pen(int style, int width, COLORREF color);
 HRGN gdi_create_rect_rgn(int left, int top, int right, int bottom);

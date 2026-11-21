@@ -1,7 +1,8 @@
 #ifndef AOE1_PNL_EDIT_H
 #define AOE1_PNL_EDIT_H
 
-// This header owns TEditPanel.
+// This header owns TEditPanel: a text box the game draws itself (it used to
+// wrap a Windows EDIT control).
 #include "panel.h"
 #include "drawarea.h"
 #include "basegame.h"
@@ -21,15 +22,12 @@ class TEditPanel : public TPanel {
     };
     TEditPanel();
     virtual ~TEditPanel();
-    HWND edit_wnd;
     short fixed_len;
     unsigned char pad_FA[2];
     char* text;
     int text_len;
-    int hidden;
     HBRUSH brush;
     int stock_brush;
-    WNDPROC old_sub_wnd_proc;
     unsigned long text_color1;
     unsigned long text_color2;
     unsigned long highlight_text_color1;
@@ -51,12 +49,16 @@ class TEditPanel : public TPanel {
     unsigned char bevel_color6;
     unsigned char pad_15A[2];
     int bevel_size;
-    unsigned long imc;
     int enable_ime;
     int turn_ime_on;
-    virtual long wnd_proc(void*, unsigned int, unsigned int, long);
+    // Editing state: byte offsets into text.
+    int caret;
+    int sel_anchor;       // the selection runs between sel_anchor and caret
+    int scroll_pos;       // first byte shown, for a single line
+    char* undo_text;      // the text when the box got focus, for Escape and Ctrl+Z
+    unsigned long caret_time;
+    int caret_shown;
     long setup(TDrawArea*, TPanel*, long, long, long, long, void*, short, char*, FormatType, int);
-    long sub_wnd_proc(void*, unsigned int, unsigned int, long);
     void set_text(char*);
     void update_text();
     char* get_text();
@@ -71,6 +73,9 @@ class TEditPanel : public TPanel {
     char* get_trimmed_str(char*, int);
     virtual void handle_reactivate();
     virtual long handle_mouse_down(unsigned char, long, long, int, int);
+    virtual long handle_idle();
+    virtual long char_action(long, short);
+    virtual long key_down_action(long, short, int, int, int);
     virtual void set_rect(long, long, long, long);
     virtual void set_redraw(RedrawMode);
     void set_text_color(unsigned long, unsigned long);
@@ -79,7 +84,5 @@ class TEditPanel : public TPanel {
     void set_bevel_info(int, int, int, int, int, int, int);
     void set_ime_info(int, int);
 };
-
-typedef char pnl_edit_teditpanel_size_check[(sizeof(TEditPanel) == 0x16C) ? 1 : -1];
 
 #endif

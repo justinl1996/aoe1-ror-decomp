@@ -721,6 +721,70 @@ BOOL surface_is_iconic(HWND wnd) {
 }
 
 // ---------------------------------------------------------------------------
+// Clipboard. The game's text is single-byte (Windows-1252); SDL's is UTF-8.
+
+int surface_get_clipboard_text(char* buffer, int size) {
+    if (buffer == 0 || size <= 0)
+        return 0;
+    buffer[0] = 0;
+    char* text = SDL_GetClipboardText();
+    if (text == 0)
+        return 0;
+    int length = 0;
+    const unsigned char* p = (const unsigned char*) text;
+    while (*p != 0 && length < size - 1) {
+        unsigned long code;
+        int extra;
+        if (*p < 0x80) {
+            code = *p;
+            extra = 0;
+        } else if ((*p & 0xE0) == 0xC0) {
+            code = *p & 0x1F;
+            extra = 1;
+        } else if ((*p & 0xF0) == 0xE0) {
+            code = *p & 0x0F;
+            extra = 2;
+        } else {
+            code = *p & 0x07;
+            extra = 3;
+        }
+        ++p;
+        for (int i = 0; i < extra && (*p & 0xC0) == 0x80; ++i, ++p)
+            code = (code << 6) | (*p & 0x3F);
+        if (code < 0x100)
+            buffer[length++] = (char) code;
+        else
+            buffer[length++] = '?';
+    }
+    buffer[length] = 0;
+    SDL_free(text);
+    return length;
+}
+
+void surface_set_clipboard_text(const char* text, int length) {
+    if (text == 0)
+        return;
+    if (length < 0)
+        length = (int) strlen(text);
+    char* utf8 = (char*) SDL_malloc(length * 2 + 1);
+    if (utf8 == 0)
+        return;
+    int out = 0;
+    for (int i = 0; i < length; ++i) {
+        unsigned char c = (unsigned char) text[i];
+        if (c < 0x80) {
+            utf8[out++] = (char) c;
+        } else {
+            utf8[out++] = (char) (0xC0 | (c >> 6));
+            utf8[out++] = (char) (0x80 | (c & 0x3F));
+        }
+    }
+    utf8[out] = 0;
+    SDL_SetClipboardText(utf8);
+    SDL_free(utf8);
+}
+
+// ---------------------------------------------------------------------------
 // The Windows bridge
 
 static LRESULT CALLBACK bridge_wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {

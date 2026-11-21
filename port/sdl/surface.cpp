@@ -307,21 +307,3 @@ BOOL surface_get_window_rect(HWND wnd, RECT* rect) {
     }
     return GetWindowRect(wnd, rect);
 }
-
-BOOL surface_move_child_window(HWND child, int x, int y, int width, int height, BOOL repaint) {
-    if (map_active()) {
-        POINT top_left;
-        POINT bottom_right;
-        top_left.x = x;
-        top_left.y = y;
-        bottom_right.x = x + width;
-        bottom_right.y = y + height;
-        map_game_to_client(&top_left, 0);
-        map_game_to_client(&bottom_right, 0);
-        x = top_left.x;
-        y = top_left.y;
-        width = bottom_right.x - top_left.x;
-        height = bottom_right.y - top_left.y;
-    }
-    return MoveWindow(child, x, y, width, height, repaint);
-}

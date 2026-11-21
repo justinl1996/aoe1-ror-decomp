@@ -704,6 +704,41 @@ use GDI, and text is drawn with SDL_ttf.
   drawn with `LineTo` shows. Not checked: text on real Windows with the
   real fonts.
 
+### Edit boxes drawn by the game — done 2026-11-21
+
+- `TEditPanel` (src/pnl_edit.cpp) no longer wraps a Windows EDIT control.
+  The control was a real child window, painted by Windows over SDL's frame:
+  the chat box flickered between white and black and its text never
+  showed. The box now keeps its own text, caret and selection, gets keys
+  from the panel system (`key_down_action`, `char_action`), and draws with
+  the GDI layer. Its interface is unchanged, so the screens that use it
+  (chat, scenario editor, save, player-name and campaign dialogs) did not
+  change.
+- Kept from the control: the length limit and `verify_char`'s character
+  checks per format; Enter and Escape to the parent panel, with Escape
+  undoing the edit when the parent does not take it; Tab to the next panel;
+  select-all on focus for `auto_sel` boxes; word wrap and Enter for
+  `FormatMultiLine`; arrows (Ctrl for words), Home/End, Shift to select,
+  Delete, Backspace, Ctrl+A/C/X/V/Z and Shift+Insert/Ctrl+Insert/Shift+Delete;
+  a blinking caret; a click places the caret. Not kept: IME (the
+  `imc` field is gone; `enable_ime` is still stored).
+- The clipboard is SDL's (`surface_get_clipboard_text`,
+  `surface_set_clipboard_text` in window.cpp), converted between the
+  game's Windows-1252 text and SDL's UTF-8.
+- `TEditPanel` is larger than the original 0x16C bytes now; nothing
+  depended on that size. `surface_move_child_window` is gone with its last
+  caller.
+- Checked under Wine: in-game chat shows its text as typed, with no flicker;
+  Backspace, Home, typing at the caret, End, Shift+Home selection and Enter
+  (the line appears on screen) work. In the scenario editor, the Messages
+  box takes several lines, wraps a long one and edits with Up/Home; the
+  Save Scenario name box takes text and rejects `*`. Not checked: the
+  clipboard keys, and the multiplayer and campaign dialogs.
+- Found while testing: an original off-by-one in
+  `RGE_Random_Map_Module::randomize_stack` (bucket index 100 of 100)
+  overwrote the return address in the clang build, an intermittent crash
+  while generating a map. Fixed in src/rmm_base.cpp.
+
 ### Testing under Wine
 
 - The test setup (Xvfb without root, a separate Wine prefix with a fake CD
