@@ -4257,7 +4257,7 @@ int TRIBE_Game::setup_video_system() {
     return 1;
 }
 
-extern "C" int restore_mouse_after_paint; // 62C55Ch
+extern int restore_mouse_after_paint; // 62C55Ch
 
 void TRIBE_Game::shutdown_video_system() {
     if (video_setup == 0)

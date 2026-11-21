@@ -1,0 +1,20 @@
+--- a/src/Dib.cpp
++++ b/src/Dib.cpp
+@@ -1315,7 +1315,7 @@
+ 
+ namespace {
+ 
+-extern "C" static void __cdecl memmove(unsigned char* d, unsigned char* s, long len) {
++static void __cdecl dib_memmove(unsigned char* d, unsigned char* s, long len) {
+     int count;
+ 
+     d = d + len - 1;
+@@ -1419,7 +1419,7 @@
+             NewBits = (unsigned char*) pdib + pdib->biSize + 3 * sizeof(DWORD);
+         else
+             NewBits = (unsigned char*) pdib + pdib->biSize + pdib->biClrUsed * sizeof(RGBQUAD);
+-        memmove(NewBits, lpBits, SizeImage);
++        dib_memmove(NewBits, lpBits, SizeImage);
+ 
+         if (pdib->biCompression == BI_BITFIELDS)
+             lpBits = (unsigned char*) pdib + pdib->biSize + 3 * sizeof(DWORD);

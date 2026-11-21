@@ -1482,7 +1482,7 @@ unsigned char RGE_Game_World::save_game(char* name) {
     int fd = rge_open(tempname, _O_BINARY | _O_WRONLY | _O_CREAT | _O_APPEND | _O_TRUNC, _S_IREAD | _S_IWRITE);
     if (fd != -1) {
         rge_write_error = 0;
-        rge_write(fd, "VER 8.6", 8);
+        rge_write(fd, (void*) "VER 8.6", 8);
         rge_write(fd, &save_game_version, 4);
 
         this->save(fd);
@@ -1573,9 +1573,9 @@ byte RGE_Game_World::save_scenario(char* filename) {
     if (fd != -1) {
         rge_write_error = 0;
         if (rge_base_game->check_prog_argument("TRIAL") == 1) {
-            rge_write_uncompressed(fd, "1.10", 4);
+            rge_write_uncompressed(fd, (void*) "1.10", 4);
         } else {
-            rge_write_uncompressed(fd, "1.11", 4);
+            rge_write_uncompressed(fd, (void*) "1.11", 4);
         }
         rge_base_game->write_scenario_header(fd);
         rge_write(fd, &this->next_object_id, 4);

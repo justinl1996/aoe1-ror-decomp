@@ -539,7 +539,7 @@ void TRIBE_Command::do_command_queue(TRIBE_Command_Queue* order) {
     }
 }
 
-extern "C" TDebuggingLog* L;
+extern TDebuggingLog* L;
 extern "C" void* __cdecl calloc(size_t num, size_t size);
 
 void TRIBE_Command::command_make(RGE_Static_Object* unit, short obj_id) {

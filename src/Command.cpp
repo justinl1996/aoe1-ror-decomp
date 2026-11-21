@@ -1415,7 +1415,7 @@ void RGE_Command::command_add_waypoint(int playerID, int recipient, unsigned cha
     packet->waypoint[0].y = y;
     packet->waypoint[0].z = z;
     RGE_Static_Object* obj = this->world->object(recipient);
-    char* name = obj != 0 ? obj->master_obj->name : "X";
+    char* name = obj != 0 ? obj->master_obj->name : (char*) "X";
     L->Log("      >SEND CMD ADD WAY2 (PLR=%d,REC=%s)", playerID, name);
     this->submit(packet, sizeof(RGE_Command_Add_Waypoint));
 }

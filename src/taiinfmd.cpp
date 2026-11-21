@@ -138,7 +138,8 @@ TribeInformationAIModule::TribeInformationAIModule(void* pW, int pID) :
     this->lastWallPosition2.x = -1;
     this->lastWallPosition2.y = -1;
     this->numberGatesValue = -1;
-    for (int k = 0; k < 4; k++) {
+    int k;
+    for (k = 0; k < 4; k++) {
         this->minGatePosition[k].x = -1;
         this->minGatePosition[k].y = -1;
         this->maxGatePosition[k].x = -1;
