@@ -153,10 +153,12 @@ only; the build never links it.
 and all relocation targets with the original executable, and runs the setup,
 HLine, and sprite fixtures against the assembled object at two image bases.
 
-`assembly_sources` in `config/executable.json` lists the standalone MASM sources.
-`tools/build_assembly.py` verifies the assembler hash and uses the compiler admission gate.
-The build reports assembly results separately from C/C++ compilation.
-It requires every assembly input to produce an object successfully.
+The build does not assemble these files. `port_sources` in `config/executable.json`
+lists their C++ ports in `port/asm/`, which the build compiles with the default flags
+and reports separately from the registry modules; it requires every port to compile.
+The assembly stays as recovered source and as the reference that
+`tools/asm_port_harness.py` checks the ports against (see `asm_port.md`).
+`tools/build_assembly.py` verifies the assembler hash for the harness and the probes.
 
 The drawing sources restore instructions through assembly source and shared operation macros.
 

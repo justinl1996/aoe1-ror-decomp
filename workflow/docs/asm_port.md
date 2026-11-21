@@ -8,10 +8,13 @@ The three hand-written assembly modules have C++ ports in `port/asm/`:
 | `src/Drawarea_asm.asm` | `port/asm/Drawarea_asm.cpp` | `TDrawArea::PtrClear`, `TDrawArea::PtrSpanCopy`, `TDrawArea::OverlayMemCopy` |
 | `src/Inf32.asm` | `port/asm/Inf32.cpp` | `Inf32BufSize`, `Inf32Decode` |
 
-The ports are behavior ports, not matching source. They never feed
-`config/functions/` status, and the assembly stays the source of the
-Windows build. The ports exist so the game can build without an assembler,
-for example for the Linux port (`workflow/docs/linux_port.md`).
+The ports are behavior ports, not matching source; they never feed
+`config/functions/` status. The executable build compiles them
+(`port_sources` in `config/executable.json`) and no longer assembles
+anything. The assembly in `src/` stays as recovered source, tied to the
+original bytes by `tests/test_drawing_engine.py` and
+`tests/test_compression_library.py`, and as the reference the harness below
+checks the ports against.
 
 ## The harness
 
@@ -121,9 +124,8 @@ These reference paths cannot be reproduced and are not generated as inputs:
   the assembly's row and byte counts run away. The port keeps the same
   loops, which the harness does not exercise.
 
-## Building the game with the ports
+## Building the game
 
-`python tools/build_executable.py --asm-port` links the ports instead of the
-assembly. The game has been linked this way with VC6 under Wine
-(`workflow/docs/vc6_wine_build.md`); it has not been play-tested or run
-under the replay harness.
+`tools/build_executable.py` and `tools/build_clang.py` link the ports. The
+game has been linked this way with VC6 under Wine and with clang; it has not
+been play-tested or run under the replay harness.

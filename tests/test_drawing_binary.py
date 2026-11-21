@@ -33,8 +33,10 @@ def test_drawing_scope_and_active_owner():
     assert [(s['original_va'],s['size']) for s in manifest['sections']]==[(0x563000,0xABE1),(0x88C000,0x90)]
     assert len(manifest['exports'])==9
     assert 'drawing_binary' not in config
-    assert 'src/Asm_draw.asm' in config['assembly_sources']
-    assert 'src/Drawarea_asm.asm' in config['assembly_sources']
+    # The build links the C++ ports; the assembly is the harness reference.
+    assert 'assembly_sources' not in config
+    assert 'port/asm/Asm_draw.cpp' in config['port_sources']
+    assert 'port/asm/Drawarea_asm.cpp' in config['port_sources']
     pdb=ORIGINAL.parent/'age1_x1.pdb'
     assert hashlib.sha256(pdb.read_bytes()).hexdigest()==manifest['pdb_sha256']
 

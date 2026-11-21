@@ -3,7 +3,7 @@
   "name": "empiresx",
   "original": "orig/empiresx.exe",
   "original_sha256": "88a0392120280c1b91ee90fe6f7cf50c72e55149a16c9b1ca79505572b8b9c90",
-  "assembly_sources": ["src/Asm_draw.asm", "src/Drawarea_asm.asm", "src/Inf32.asm"],
+  "port_sources": ["port/asm/Asm_draw.cpp", "port/asm/Drawarea_asm.cpp", "port/asm/Inf32.cpp"],
   "resource_script": "src/empiresx.rc",
   "icons": [
     {"file": "empiresx.ico", "group": "APPICON", "source": "runtime/EMPIRES.EXE",
