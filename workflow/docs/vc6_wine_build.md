@@ -94,3 +94,10 @@ build/linux-venv/bin/python tools/build_executable.py \
   `path` is stale. Check `report.json` → `assembly_sources`.
 - **`No module named 'iced_x86'`**: use the venv's Python, not the system one.
 - **`Assembler hash differs from the pinned tool`**: the wrong `ml.exe`.
+
+## Without the assembly
+
+Add `--asm-port` to the build command to link the C++ ports in `port/asm/`
+instead of the three assembly sources. Check the ports first with
+`tools/asm_port_harness.py` (same environment variables); see
+`workflow/docs/asm_port.md`.

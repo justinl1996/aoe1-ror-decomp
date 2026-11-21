@@ -18,6 +18,14 @@ from build_assembly import assemble_source
 from linked_inputs import digest, registry_digest
 
 
+# C++ replacements for config/executable.json's assembly_sources.
+ASM_PORT_SOURCES = ("port/asm/Asm_draw.cpp", "port/asm/Drawarea_asm.cpp", "port/asm/Inf32.cpp")
+
+
+def config_default_rsp(toolchain: dict) -> str:
+    return toolchain["compiler"]["default_rsp"].replace("\\", "/")
+
+
 def run_command(command: list[str], output: Path, toolchain: dict) -> subprocess.CompletedProcess:
     try:
         return subprocess.run(command, capture_output=True, text=True,
@@ -67,6 +75,9 @@ def main() -> int:
                         help="Build output directory under build/. Each run uses a new subdirectory.")
     parser.add_argument("--no-icon", action="store_true",
                         help="Build without the program icon, so no retail EMPIRES.EXE is needed.")
+    parser.add_argument("--asm-port", action="store_true",
+                        help="Link the C++ ports in port/asm/ instead of the assembly sources. "
+                             "tools/asm_port_harness.py checks the ports against the assembly.")
     args = parser.parse_args()
     output_root = repo_path(args.output_dir).resolve()
     if not output_root.is_relative_to((REPO_ROOT / "build").resolve()):
@@ -100,7 +111,22 @@ def main() -> int:
         print(f"[{index}/{len(plan)}] {entry['source']}: {'OK' if row['compiled'] else 'FAILED'}", flush=True)
 
     report["assembly_sources"] = []
-    for source_name in config.get("assembly_sources", []):
+    report["asm_port_sources"] = []
+    if args.asm_port:
+        for source_name in ASM_PORT_SOURCES:
+            source = repo_path(source_name)
+            obj = output / (source.stem + "_port.obj")
+            row = dict(source=source_name, object=str(obj), compiled=False)
+            try:
+                row["build"] = compile_source(source, obj, repo_path(config_default_rsp(toolchain)),
+                                              REPO_ROOT / "include")
+                row["compiled"] = True
+                objects.append(obj)
+            except (OSError, RuntimeError, ValueError) as error:
+                row["error"] = str(error)
+            report["asm_port_sources"].append(row)
+            print(f"[port] {source_name}: {'OK' if row['compiled'] else 'FAILED'}", flush=True)
+    for source_name in ([] if args.asm_port else config.get("assembly_sources", [])):
         source = repo_path(source_name)
         obj = output / (source.stem + "_asm.obj")
         try:
@@ -161,6 +187,7 @@ def main() -> int:
     report["linked"] = (result.returncode == 0 and exe.is_file()
                         and all(row["compiled"] for row in report["sources"])
                         and all(row["compiled"] for row in report["assembly_sources"])
+                        and all(row["compiled"] for row in report["asm_port_sources"])
                         and report["resources"]["compiled"]
                         and all(row["returncode"] == 0 for row in report["import_libraries"]))
     report["summary"] = {
@@ -168,6 +195,8 @@ def main() -> int:
         "compiled_count": sum(row["compiled"] for row in report["sources"]),
         "assembly_source_count": len(report["assembly_sources"]),
         "assembled_count": sum(row["compiled"] for row in report["assembly_sources"]),
+        "asm_port_source_count": len(report["asm_port_sources"]),
+        "asm_port_compiled_count": sum(row["compiled"] for row in report["asm_port_sources"]),
         "unresolved_symbol_count": len(report["link"]["unresolved"]),
         "link_error_count": len(report["link"]["errors"]),
         "linked": report["linked"],
