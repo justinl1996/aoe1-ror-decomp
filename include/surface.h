@@ -1,13 +1,10 @@
 #ifndef SURFACE_H
 #define SURFACE_H
 
-// SDL2 display layer (workflow/docs/sdl_port_tasks.md). Built only with
-// AOE_SDL. SDL.h is included only by port/sdl/*.cpp, never by headers.
+// SDL2 display and sound layer (workflow/docs/sdl_port_tasks.md), in
+// port/sdl/. SDL.h is included only by port/sdl/*.cpp, never by headers.
 
 #include <windows.h>
-
-#ifdef AOE_SDL
-
 #include <ddraw.h>
 
 // Attach SDL to the game's own window. The game keeps its window procedure
@@ -52,16 +49,13 @@ void surface_present_flush(void);
 // the starting layout.
 void surface_set_windowed(int windowed);
 
-#endif // AOE_SDL
-
 // Cursor and window coordinates as the game sees them.
 //
-// In the SDL build the window may be scaled, so the game works in a virtual
-// screen: its coordinates are game pixels, and the game window's client
-// area starts at its origin. Mouse messages are translated before the game
-// sees them; the game's direct cursor and window-rectangle calls go through
-// these functions. Without SDL they are the plain Win32 calls.
-#ifdef AOE_SDL
+// The window may be scaled, so the game works in a virtual screen: its
+// coordinates are game pixels, and the game window's client area starts at
+// its origin. Mouse messages are translated before the game sees them; the
+// game's direct cursor and window-rectangle calls go through these
+// functions.
 BOOL surface_get_cursor_pos(POINT* point);
 BOOL surface_set_cursor_pos(int x, int y);
 BOOL surface_client_to_screen(HWND wnd, POINT* point);
@@ -69,15 +63,5 @@ BOOL surface_screen_to_client(HWND wnd, POINT* point);
 BOOL surface_get_window_rect(HWND wnd, RECT* rect);
 // Place a child window (an edit box) given in game pixels.
 BOOL surface_move_child_window(HWND child, int x, int y, int width, int height, BOOL repaint);
-#else
-inline BOOL surface_get_cursor_pos(POINT* point) { return GetCursorPos(point); }
-inline BOOL surface_set_cursor_pos(int x, int y) { return SetCursorPos(x, y); }
-inline BOOL surface_client_to_screen(HWND wnd, POINT* point) { return ClientToScreen(wnd, point); }
-inline BOOL surface_screen_to_client(HWND wnd, POINT* point) { return ScreenToClient(wnd, point); }
-inline BOOL surface_get_window_rect(HWND wnd, RECT* rect) { return GetWindowRect(wnd, rect); }
-inline BOOL surface_move_child_window(HWND child, int x, int y, int width, int height, BOOL repaint) {
-    return MoveWindow(child, x, y, width, height, repaint);
-}
-#endif
 
 #endif // SURFACE_H

@@ -564,9 +564,7 @@ RGE_Base_Game::~RGE_Base_Game() {
 
     rge_base_game = 0;
 
-#ifdef AOE_SDL
     surface_detach_window();
-#endif
     if (this->prog_window != 0)
         DestroyWindow(this->prog_window);
 
@@ -903,16 +901,12 @@ int RGE_Base_Game::run() {
                 } else {
                     this->handle_idle();
                 }
-#ifdef AOE_SDL
                 surface_present_flush();
-#endif
                 continue;
             }
         }
 
-#ifdef AOE_SDL
         surface_present_flush();
-#endif
         if (GetMessageA(&msg, 0, 0, 0) == 0) {
             return (int) msg.wParam;
         }
@@ -1049,14 +1043,9 @@ int RGE_Base_Game::setup_cmd_options() {
     }
 
     if (strstr(cmd_line, "WING") != 0) {
-#ifdef AOE_SDL
         // The software (WinG) draw path has no surface code left, so it
-        // could only fail to start; the SDL build treats WING as WINDOW.
+        // could only fail to start; WING is treated as WINDOW.
         surface_set_windowed(1);
-#else
-        this->prog_info->full_screen = 0;
-        this->prog_info->use_dir_draw = 0;
-#endif
     }
 
     if ((strstr(cmd_line, "DIRECTDRAW") != 0) || (strstr(cmd_line, "DIRECT DRAW") != 0)) {
@@ -1446,13 +1435,9 @@ int RGE_Base_Game::setup_cmd_options() {
     }
 
     if (strstr(cmd_line, "WINDOW")) {
-#ifdef AOE_SDL
-        // The SDL build always draws as if fullscreen; the window layout is
-        // the SDL layer's (port/sdl/surface.cpp).
+        // The game always draws as if fullscreen; the window layout is the
+        // SDL layer's (port/sdl/surface.cpp).
         surface_set_windowed(1);
-#else
-        this->prog_info->full_screen = 0;
-#endif
     }
 
     if ((strstr(cmd_line, "FILEFIRST") != 0) || (strstr(cmd_line, "FILE FIRST") != 0) || (strstr(cmd_line, "FILE_FIRST") != 0)) {
@@ -1572,10 +1557,8 @@ int RGE_Base_Game::setup_main_window() {
     if (this->prog_window == 0)
         return 0;
 
-#ifdef AOE_SDL
     if (surface_attach_window(this->prog_window) == 0)
         return 0;
-#endif
 
     GetWindowRect(this->prog_window, &win_rect);
     GetClientRect(this->prog_window, &client_rect);
@@ -2276,7 +2259,6 @@ void RGE_Base_Game::clear_window() {
     HDC dc;
     HBRUSH brush;
 
-#ifdef AOE_SDL
     // SDL draws the primary surface into the window, so clear that instead
     // of painting over the window with GDI (on a real 8-bit display the
     // window and the primary surface were the same pixels).
@@ -2284,7 +2266,6 @@ void RGE_Base_Game::clear_window() {
         this->draw_system->ClearPrimarySurface();
         return;
     }
-#endif
 
     if (this->prog_window != 0) {
         dc = GetDC(this->prog_window);

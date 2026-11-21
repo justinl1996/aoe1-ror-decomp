@@ -21,7 +21,6 @@
 
 #include "../../include/surface.h"
 
-#ifdef AOE_SDL
 
 class MemDirectDraw;
 class MemSurface;
@@ -782,4 +781,3 @@ extern "C" HRESULT WINAPI surface_DirectDrawCreate(GUID FAR*, LPDIRECTDRAW FAR* 
     return *out != 0 ? DD_OK : DDERR_OUTOFMEMORY;
 }
 
-#endif // AOE_SDL

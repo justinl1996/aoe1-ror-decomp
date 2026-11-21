@@ -49,9 +49,9 @@ Rome install (`make play` does this for `runtime/`) and run
   with include-name aliases (the sources assume a case-insensitive file
   system) and the patch in `port/clang/` (see its README).
 - Uses the C++ ports in `port/asm/` instead of the three assembly files.
-- Defines `AOE_SDL` and adds `port/sdl/` (in-memory DirectDraw and
-  DirectSound over SDL2); links `SDL2.lib` instead of `ddraw.lib` and
-  `dsound.lib`.
+- Adds `port/sdl/` (in-memory DirectDraw and DirectSound over SDL2); links
+  `SDL2.lib` instead of `ddraw.lib` and `dsound.lib`. `src/` calls into
+  `port/sdl/` unconditionally, so this is the only build that links.
 - Targets `i686-pc-windows-msvc` with `_MSC_VER` 1200, x87 floating point
   (`-mno-sse`), C++98 and C89, no exception tables and no stack cookies.
 - Links against VC6's `LIBC.LIB`, the game's import libraries, and a

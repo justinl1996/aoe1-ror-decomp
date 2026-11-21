@@ -26,7 +26,6 @@
 
 #include "../../include/surface.h"
 
-#ifdef AOE_SDL
 
 // The VC6 C runtime lacks _aligned_malloc, which clang's intrinsic headers
 // use. Nothing here needs SDL's intrinsics.
@@ -574,4 +573,3 @@ extern "C" HRESULT WINAPI surface_DirectSoundCreate(LPGUID, LPDIRECTSOUND* out, 
     return DS_OK;
 }
 
-#endif // AOE_SDL

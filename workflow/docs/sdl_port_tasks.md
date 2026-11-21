@@ -575,11 +575,12 @@ primary screen).
   `build/clang/<time>/` with `SDL2.dll`, and `make play` copies both files.
   The `make sdl` and `make play-sdl` targets and `build/sdl/` are gone.
   The import table has neither `DDRAW.dll` nor `DSOUND.dll`.
-- Narrower than planned: the `#ifdef AOE_SDL` branches in `src/` stay. The
-  VC5 matching build and the VC6/Wine build (`tools/build_executable.py`,
-  used by `game.cmd`) compile `src/` without `port/sdl/`, so they keep the
-  DirectDraw path and `surface.h`'s plain Win32 pass-throughs. Only builds
-  through `build_clang.py` define `AOE_SDL`.
+- The `#ifdef AOE_SDL` branches are gone (the user decided on 2026-11-21
+  that only the clang build matters): `src/` calls `port/sdl/`
+  unconditionally, `surface.h` lost its plain-Win32 fallbacks, and
+  `config/sdl.json` defines nothing. The VC5 matching build and the VC6/Wine
+  build (`tools/build_executable.py`, used by `game.cmd`) compile `src/`
+  without `port/sdl/` and so no longer link.
 - The `WING` switch selected the software draw path, which has no surface
   code left and could only fail to start. In the SDL build it now means
   `WINDOW`.
@@ -587,9 +588,8 @@ primary screen).
 - Checked: the tool tests pass; the default clang build's menus are
   pixel-identical to the reference under Wine; `WING` opens the windowed
   layout; a random-map game from a retail install plays (selection,
-  movement, training, scrolling, game menu, sounds). Not checked: the
-  VC5/VC6 builds with these `src/` changes, and the parity suite (Windows
-  only).
+  movement, training, scrolling, game menu, sounds). Not run: the parity
+  suite (Windows only, and built on the VC5 route).
 
 ### Testing under Wine
 

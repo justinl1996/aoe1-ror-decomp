@@ -9,7 +9,6 @@
 
 #include "../../include/surface.h"
 
-#ifdef AOE_SDL
 
 // The VC6 C runtime lacks _aligned_malloc, which clang's intrinsic headers
 // use. Nothing here needs SDL's intrinsics.
@@ -448,4 +447,3 @@ void surface_detach_window(void) {
     SDL_Quit();
 }
 
-#endif // AOE_SDL

@@ -10,7 +10,7 @@
     "sha256": "8c91d91e5bcb997d062ec2b553c53832ebf95654d4aa35e8c02a954d4ce752ae",
     "directory": "build/third_party/SDL2-2.30.9"
   },
-  "defines": ["AOE_SDL=1"],
+  "defines": [],
   "sources": ["port/sdl/surface.cpp", "port/sdl/ddraw_memory.cpp", "port/sdl/dsound_memory.cpp"],
   "libraries": ["SDL2.lib"],
   "drop_libraries": ["ddraw.lib", "dsound.lib"],
