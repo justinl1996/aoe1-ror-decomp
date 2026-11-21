@@ -451,12 +451,20 @@ has to supply:
 - The test setup (Xvfb without root, a separate Wine prefix with a fake CD
   drive, screenshot and comparison scripts) lives under `build/sdl_test/`
   and is not committed.
-- The plain clang build, the VC6 build and the `--sdl` build all stop on
-  "Starting a new game..." when a random-map game starts under Wine 10.
-  The main thread sits in the game's idle loop (sampled with `ptrace`: it
-  is in libc, not in game code). The retail executable cannot be compared
-  because it stops at its CD check. This predates the SDL work and is not
-  yet explained.
+- Games start and play under Wine 10 from a complete retail install
+  (checked 2026-11-21). An earlier install copy, taken from installer
+  files, let every build reach the menus but stalled on "Starting a new
+  game..." (main thread idle, no error); that copy was the cause, not Wine
+  or the code. The notes above that say a running game could not be
+  checked predate this.
+- In-game check of the `--sdl` build (after Task 5), on a random map at
+  1024x768: units and the town centre select, a right-click moves a
+  villager, the `C` hotkey trains a villager (food and the progress
+  percentage update in the panel), arrow keys scroll, and F10 opens the
+  game menu. The plain clang build does the same. Maps and civilizations
+  differ between runs despite `RANDOMGAME`/`RANDOMMAP`, so these screens
+  were compared by eye. With SDL's `disk` audio driver, the recording holds
+  the menu clicks and the in-game unit and building sounds.
 - At 800x600 (the default `Screen Size`), Wine scales the plain build's
   emulated display mode up to the whole screen, while the SDL build draws
   an 800x600 window. Pixel comparisons therefore use 1024x768.
