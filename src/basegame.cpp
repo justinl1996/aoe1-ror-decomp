@@ -1049,8 +1049,14 @@ int RGE_Base_Game::setup_cmd_options() {
     }
 
     if (strstr(cmd_line, "WING") != 0) {
+#ifdef AOE_SDL
+        // The software (WinG) draw path has no surface code left, so it
+        // could only fail to start; the SDL build treats WING as WINDOW.
+        surface_set_windowed(1);
+#else
         this->prog_info->full_screen = 0;
         this->prog_info->use_dir_draw = 0;
+#endif
     }
 
     if ((strstr(cmd_line, "DIRECTDRAW") != 0) || (strstr(cmd_line, "DIRECT DRAW") != 0)) {

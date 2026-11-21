@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "notes": [
-    "The SDL2 build of the clang PE (workflow/docs/sdl_port_tasks.md). tools/build_clang.py --sdl reads this file.",
+    "The clang PE draws and plays sound through SDL2 (workflow/docs/sdl_port_tasks.md). tools/build_clang.py reads this file.",
     "The SDL2 VC development package is downloaded by tools/fetch_sdl2.py into build/third_party/ and is never committed."
   ],
   "sdl2": {

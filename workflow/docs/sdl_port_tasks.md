@@ -1,6 +1,6 @@
 # SDL2 port on Windows: task breakdown
 
-Status: written 2026-11-21. Done: Tasks 0 to 5 (see "Progress" at the end).
+Status: written 2026-11-21. Done: Tasks 0 to 6 (see "Progress" at the end).
 The rest is still a plan.
 
 Scope: **Windows only for now.** The target is the clang-cl PE build
@@ -58,7 +58,7 @@ Files this plan adds:
 | `include/surface.h`, `port/sdl/surface.cpp` | attaching SDL to the window, presenting the primary surface (Tasks 0, 2–4) |
 | `port/sdl/ddraw_memory.cpp` | the in-memory DirectDraw (Task 1) |
 | `port/sdl/dsound_memory.cpp` | the in-memory DirectSound and its SDL mixer (Task 5) |
-| `config/sdl.json` | SDL2 package pin, defines, sources and libraries for `--sdl` |
+| `config/sdl.json` | SDL2 package pin, defines, sources and libraries for the clang build |
 | `tools/fetch_sdl2.py` | downloads the pinned SDL2 VC package into `build/third_party/` (never committed) |
 
 The SDL sources live in `port/sdl/`, not `src/`: the matching-build tools
@@ -446,7 +446,152 @@ has to supply:
 - Not checked: palette fades on the credits screen, and which SDL renderer
   Wine ends up using.
 
+### Task 3 — done 2026-11-21
 
+- No new code: Task 1 already covers it. `MemSurface::GetDC` loads the
+  DIB color table from the surface's palette (or the primary's) before
+  handing out the DC, and the text code only passes plain `RGB()` colors
+  (no `PALETTEINDEX`; checked by grep), which GDI matches against that
+  table.
+- Checked under Wine at 1024x768, against the plain clang build: the
+  "help not updated" dialog and the scenario editor's Players, Diplomacy,
+  Individual Victory, Options and Cinematics tabs are pixel-identical,
+  including all their text.
+- The Messages tab differs, and the SDL build is the more faithful one.
+  Its instructions box is a child `EDIT` window. The SDL build shows it (a
+  black field); the plain build under Wine shows the previous tab's pixels
+  there, because Wine's exclusive-mode DirectDraw hides child windows. On a
+  real 8-bit display GDI draws child windows over the primary surface.
+- Clicking OK on the help dialog opens Wine's WinHelp viewer in both
+  builds; behind it the SDL build keeps showing the game, the plain build
+  shows black.
+
+### Task 4 — done 2026-11-21
+
+How it was built, where it differs from the plan above:
+
+- **Window layout** (`layout_apply` in `port/sdl/surface.cpp`), applied
+  whenever a primary surface is created (game start, resolution change):
+  - fullscreen (the default) is a borderless popup covering the screen;
+  - windowed is an ordinary resizable window, sized to the largest whole
+    multiple of the game resolution that fits the work area and centred.
+    The size is measured after `SetWindowPos` and corrected once, because
+    the real frame can differ from `AdjustWindowRect`'s.
+  - The game's `WINDOW` switch now selects the windowed layout
+    (`surface_set_windowed`) and leaves `full_screen` at 1, so the game
+    always takes its fullscreen (`ScreenMode` 2) paths.
+  - Alt+Enter toggles the two layouts; the game never sees the key.
+  - SDL scales the frame with `SDL_RenderSetLogicalSize` (letterboxed,
+    nearest neighbour). Integer-only scaling was not added.
+- **A virtual screen in game pixels** instead of per-site mapping helpers:
+  - `surface_wnd_proc` rewrites the coordinates of mouse messages
+    (`WM_MOUSEMOVE` to `WM_MBUTTONDBLCLK`) from client pixels to game
+    pixels, clamped to the game area, so the letterbox bars act as its
+    edges.
+  - The game's direct calls go through `surface_get_cursor_pos`,
+    `surface_set_cursor_pos`, `surface_client_to_screen`,
+    `surface_screen_to_client` and `surface_get_window_rect` (declared in
+    `include/surface.h`; plain Win32 calls in non-SDL builds). For the game
+    window, screen and client coordinates are the same game pixels, and its
+    window rectangle is the game area.
+  - Changed call sites: `TMousePointer::update_mouse_position`, `center`;
+    `RGE_Base_Game::get_mouse_pos`; `RGE_Main_View::do_auto_scroll`,
+    `mouse_left_down_action`; `TPanel::get_mouse_pos`;
+    `RGE_View::Get_Cursor_Position`, `handle_scroll_view`,
+    `end_scroll_view` and the other `SetCursorPos` sites in view.cpp;
+    `color_log`. `RGE_Base_Game`'s other `GetWindowRect` calls size the real
+    window and are unchanged.
+  - Edit boxes: `TEditPanel::set_rect` places its `EDIT` window through
+    `surface_move_child_window`, which scales the rectangle. Its font is
+    not scaled, and a box is not moved again when the layout changes while
+    it is shown.
+- SDL had to stop handling `WM_GETMINMAXINFO`: for a window it considers
+  not resizable, SDL pins the size it last recorded, which undid every
+  layout change. It now goes straight to the game, like `WM_NCCALCSIZE`.
+- The SDL event filter lets window events through (the renderer's event
+  watcher, which follows the window size, only sees events that pass the
+  filter); `surface_present_flush` discards them.
+
+Checked under Wine at 800x600 on a 1024x768 screen, with the Direct3D
+renderer:
+
+- fullscreen scales the menus to the whole screen, and clicks land on the
+  right buttons;
+- with `WINDOW`, an 800x600 client area is centred, and a click inside it
+  works;
+- Alt+Enter switches to fullscreen and back, keeping the right sizes;
+- in the scenario editor, tab clicks land, the Messages instructions box is
+  placed at its scaled position, and pushing the cursor to the screen edge
+  scrolls the map.
+- The plain clang build, now calling the pass-through wrappers, is still
+  pixel-identical to before on the menu screens.
+
+Not checked: text typed into an edit box (it did not show in the scaled
+instructions box; the plain build hides that box under Wine, so there is no
+reference), high-DPI displays, and multiple monitors (the layout uses the
+primary screen).
+
+### Task 5 — done 2026-11-21
+
+- Built the same way as Task 1, not with a new `TSoundBuffer` type:
+  `port/sdl/dsound_memory.cpp` implements `IDirectSound` and
+  `IDirectSoundBuffer` as the VC98 `dsound.h` declares them, and
+  `src/Sounddrv.cpp` maps `DirectSoundCreate` to
+  `surface_DirectSoundCreate` under `AOE_SDL`. `Dsutil.c`'s
+  `IDirectSound*_` C macros call through the same vtables, so neither file
+  changed otherwise. `dsound.lib` is no longer linked; `DSOUND.dll` is gone
+  from the imports.
+- Mixer: one SDL audio device, 44100 Hz, 16-bit stereo, 512-frame
+  callbacks. Every playing buffer is resampled with linear interpolation (8
+  or 16 bit, mono or stereo, any rate, `SetFrequency` honored). Volume and
+  pan follow DirectSound's hundredths-of-a-decibel curves, and pan
+  attenuates only the opposite channel. Duplicates share sample memory.
+  `GetStatus` reports `PLAYING | LOOPING` for looping buffers, as
+  DirectSound does (`TDigital::is_playing` compares with `==`, so it is
+  false for them, as before).
+- The play cursor advances in the audio callback. The write cursor leads
+  it by 15 ms, so `Dsutil.c`'s timer thread refills the stream buffer as it
+  did. Playback state changes under `SDL_LockAudioDevice`.
+- With no SDL audio device, `surface_DirectSoundCreate` fails and the game
+  runs silent, as it does without DirectSound.
+- Kept on WINMM, as planned: `mmio*` WAV reading, `mixer*` volume and MCI
+  CD audio.
+- Checked under Wine with SDL's `disk` audio driver (which writes the mix to
+  a file): each menu button press produced a click (six presses, six
+  sounds). A streamed 5-second 440 Hz test WAV came out as 440 Hz for 5
+  seconds at the expected -50 dB peak (the default `Music Volume`), across
+  several refills of its 1.2-second ring buffer. The menus are still
+  pixel-identical to the plain clang build.
+- Found while testing, not changed: with `STREAM_MUSIC`, the music system
+  passes a full path and `TSound_Driver::stream_file` prepends the sound
+  folder again, so `WaveOpenFile` fails and no music plays. The streaming
+  test above bypassed this in a throwaway build. The retail game ships
+  only MIDI music, which goes through MCI.
+
+### Task 6 — done 2026-11-21
+
+- The clang build is the SDL build: `tools/build_clang.py` always applies
+  `config/sdl.json` (the `--sdl` flag is gone), `make clang` writes
+  `build/clang/<time>/` with `SDL2.dll`, and `make play` copies both files.
+  The `make sdl` and `make play-sdl` targets and `build/sdl/` are gone.
+  The import table has neither `DDRAW.dll` nor `DSOUND.dll`.
+- Narrower than planned: the `#ifdef AOE_SDL` branches in `src/` stay. The
+  VC5 matching build and the VC6/Wine build (`tools/build_executable.py`,
+  used by `game.cmd`) compile `src/` without `port/sdl/`, so they keep the
+  DirectDraw path and `surface.h`'s plain Win32 pass-throughs. Only builds
+  through `build_clang.py` define `AOE_SDL`.
+- The `WING` switch selected the software draw path, which has no surface
+  code left and could only fail to start. In the SDL build it now means
+  `WINDOW`.
+- `workflow/docs/clang_build.md` describes the SDL build and how to play it.
+- Checked: the tool tests pass; the default clang build's menus are
+  pixel-identical to the reference under Wine; `WING` opens the windowed
+  layout; a random-map game from a retail install plays (selection,
+  movement, training, scrolling, game menu, sounds). Not checked: the
+  VC5/VC6 builds with these `src/` changes, and the parity suite (Windows
+  only).
+
+### Testing under Wine
 
 - The test setup (Xvfb without root, a separate Wine prefix with a fake CD
   drive, screenshot and comparison scripts) lives under `build/sdl_test/`
@@ -457,7 +602,7 @@ has to supply:
   game..." (main thread idle, no error); that copy was the cause, not Wine
   or the code. The notes above that say a running game could not be
   checked predate this.
-- In-game check of the `--sdl` build (after Task 5), on a random map at
+- In-game check of the SDL build (after Task 5), on a random map at
   1024x768: units and the town centre select, a right-click moves a
   villager, the `C` hotkey trains a villager (food and the progress
   percentage update in the panel), arrow keys scroll, and F10 opens the
