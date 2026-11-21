@@ -16,6 +16,10 @@ It compiles every source in the executable's build plan with clang-cl,
 including the C++ ports in port/asm/ (config/executable.json port_sources), builds the
 DirectPlay import library and the resources with the LLVM tools, and links
 with lld-link against VC6's import libraries and C runtime.
+
+With --sdl it builds the SDL2 variant (config/sdl.json,
+workflow/docs/sdl_port_tasks.md): it fetches the pinned SDL2 package, adds the
+SDL defines, sources and libraries, and copies SDL2.dll next to the executable.
 """
 from __future__ import annotations
 
@@ -30,11 +34,12 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
+import fetch_sdl2
 from build_executable import source_plan
 from common import REPO_ROOT, load_build_modules, repo_path
 
 PATCH_DIR = REPO_ROOT / "port/clang"
-TREE_ROOTS = ("src", "include", "port/asm", "third_party")
+TREE_ROOTS = ("src", "include", "port/asm", "port/sdl", "third_party")
 INCLUDE = re.compile(r'^\s*#\s*include\s*[<"]([^>"]+)[>"]', re.M)
 
 # Link-time aliases for names clang mangles or chooses differently from VC5.
@@ -156,7 +161,10 @@ def main() -> int:
     parser.add_argument("--llvm-lib", default="llvm-lib")
     parser.add_argument("--llvm-rc", default="llvm-rc")
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
+    parser.add_argument("--sdl", action="store_true", help="Build the SDL2 variant (config/sdl.json).")
     args = parser.parse_args()
+    sdl_config = json.loads((REPO_ROOT / "config/sdl.json").read_text()) if args.sdl else None
+    sdl_dir = fetch_sdl2.fetch() if args.sdl else None
 
     root = repo_path(args.output_dir).resolve()
     if not root.is_relative_to((REPO_ROOT / "build").resolve()):
@@ -165,7 +173,8 @@ def main() -> int:
     tree = output / "tree"
     objects_dir = output / "obj"
     objects_dir.mkdir(parents=True)
-    report: dict = dict(output=str(output), compiler=run([args.clang_cl, "--version"], output).stdout.splitlines()[:1])
+    report: dict = dict(output=str(output), compiler=run([args.clang_cl, "--version"], output).stdout.splitlines()[:1],
+                        sdl=bool(args.sdl))
 
     for name in TREE_ROOTS:
         case_insensitive_view(REPO_ROOT / name, tree / name)
@@ -177,6 +186,12 @@ def main() -> int:
     plan = [entry["source"] for entry in source_plan(config, load_build_modules())] + config["port_sources"]
     base = [args.clang_cl, *COMMON_FLAGS, "-imsvc", vc["include"], "-imsvc", vc["mfc_include"],
             "/I" + str(tree / "include")]
+    libraries = list(config["libraries"])
+    if sdl_config:
+        plan += sdl_config["sources"]
+        base += ["/D" + d for d in sdl_config["defines"]] + ["-imsvc", str(sdl_dir / "include")]
+        dropped = {name.lower() for name in sdl_config["drop_libraries"]}
+        libraries = [name for name in libraries if name.lower() not in dropped] + sdl_config["libraries"]
 
     def compile_one(source: str) -> dict:
         path = tree / source
@@ -227,8 +242,9 @@ def main() -> int:
                   "/OUT:" + str(exe), "/MAP:" + str(output / "empiresx.map"),
                   "/LIBPATH:" + str(vc["lib"]),
                   *["/LIBPATH:" + str(repo_path(p)) for p in config.get("library_dirs", [])],
+                  *(["/LIBPATH:" + str(sdl_dir / "lib/x86")] if sdl_config else []),
                   *[row["object"] for row in rows if row["compiled"]],
-                  *config["libraries"], str(dplayx), "libc.lib", "oldnames.lib"]
+                  *libraries, str(dplayx), "libc.lib", "oldnames.lib"]
     if rc_result.returncode == 0:
         link_args.append(str(resource))
     response = output / "link.rsp"
@@ -238,6 +254,9 @@ def main() -> int:
     report["link"] = dict(returncode=link.returncode,
                           errors=[l for l in (link.stdout + link.stderr).splitlines() if "error" in l][:40])
     report["linked"] = link.returncode == 0 and exe.is_file() and not failed
+    if sdl_config and report["linked"]:
+        for name in sdl_config["runtime_files"]:
+            shutil.copy2(sdl_dir / name, output / Path(name).name)
     report["summary"] = dict(sources=len(rows), compiled=len(rows) - len(failed), patches=len(report["patches"]),
                              dplayx_ok=lib_result.returncode == 0, resources_ok=rc_result.returncode == 0,
                              linked=report["linked"])

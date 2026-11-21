@@ -1,6 +1,7 @@
 # SDL2 port on Windows: task breakdown
 
-Status: plan only, written 2026-11-21. Nothing here has been built.
+Status: written 2026-11-21. Done: Task 0 (see "Progress" at the end).
+The rest is still a plan.
 
 Scope: **Windows only for now.** The target is the clang-cl PE build
 (`workflow/docs/clang_build.md`). SDL2 replaces DirectDraw, and later
@@ -52,9 +53,14 @@ Files this plan adds:
 
 | File | Holds |
 | --- | --- |
-| `include/surface.h`, `src/surface.cpp` | `TSurface`, `TSurfacePalette`, `TSurfaceClipper`, presenting (Tasks 1–4) |
-| `include/sdl_sound.h`, `src/sdl_sound.cpp` | `TSoundBuffer` and the SDL mixer (Task 5) |
-| `third_party/SDL2/` | SDL2 2.30.x development package for VC, x86: `include/`, `lib/x86/SDL2.lib`, `SDL2.dll` |
+| `include/surface.h`, `port/sdl/surface.cpp` | `TSurface`, `TSurfacePalette`, `TSurfaceClipper`, presenting (Tasks 1–4) |
+| `include/sdl_sound.h`, `port/sdl/sdl_sound.cpp` | `TSoundBuffer` and the SDL mixer (Task 5) |
+| `config/sdl.json` | SDL2 package pin, defines, sources and libraries for `--sdl` |
+| `tools/fetch_sdl2.py` | downloads the pinned SDL2 VC package into `build/third_party/` (never committed) |
+
+The SDL sources live in `port/sdl/`, not `src/`: the matching-build tools
+(`tools/build_executable.py`) require a registry route for every file in
+`src/`, and these files are not part of the matching build.
 
 Every task checks the same three things:
 
@@ -67,16 +73,16 @@ Every task checks the same three things:
 
 ## Task 0: Put SDL2 into the build and attach it to the game window
 
-- Vendor the SDL2 VC development package under `third_party/SDL2/`.
+- Fetch the pinned SDL2 VC development package (`tools/fetch_sdl2.py`).
 - `tools/build_clang.py`:
-  - a `--sdl` flag that adds `-DAOE_SDL=1` and `/I third_party/SDL2/include`;
+  - a `--sdl` flag that adds `-DAOE_SDL=1` and `the SDL2 include directory`;
   - link `SDL2.lib` and drop `ddraw.lib` (and later `dsound.lib`);
   - copy `SDL2.dll` next to `empiresx.exe`.
 - Add `make sdl`.
 - Check that the SDL headers compile against the VC98 headers under
   clang-cl with `_MSC_VER` 1200. `SDL_stdinc.h` must find `stdint.h`;
-  clang supplies it. Include `SDL.h` only from `src/surface.cpp` and
-  `src/sdl_sound.cpp`, never from shared headers, so the rest of the tree
+  clang supplies it. Include `SDL.h` only from `port/sdl/surface.cpp` and
+  `port/sdl/sdl_sound.cpp`, never from shared headers, so the rest of the tree
   never sees it.
 - `WinMain` (`src/main.cpp`) calls nothing from SDL. Call `SDL_Init` from
   `TDrawSystem::Init` (Task 2). Set `SDL_HINT_WINDOWS_ENABLE_MESSAGELOOP`
@@ -197,7 +203,7 @@ game to completion (the screen may still be black). Parity cases pass.
 
 ## Task 2: Present the frame with SDL
 
-In `src/surface.cpp`:
+In `port/sdl/surface.cpp`:
 
 - **The present call.** `TDrawSystem::Present()` runs only when the frame
   is dirty. It converts the primary surface through the current palette
@@ -317,7 +323,7 @@ edge scrolling, minimap clicks and edit boxes hit the right place.
 DirectSound works on current Windows, so this task is only needed to
 remove DirectX entirely or to prepare for Linux.
 
-- **`TSoundBuffer`** (`src/sdl_sound.cpp`): PCM bytes and format, play
+- **`TSoundBuffer`** (`port/sdl/sdl_sound.cpp`): PCM bytes and format, play
   cursor, loop, volume (hundredths of a dB, gain = 10^(v/2000)), pan
   (attenuates the opposite channel), frequency, status. Duplicates share
   the same bytes. One `SDL_AudioCallback` mixes at 22050 Hz, 16-bit,
@@ -406,3 +412,30 @@ has to supply:
 - Do the AVI intro videos (`MCIWndCreateA` child window in
   `TRIBE_Game::start_video`) still show over the SDL-rendered window? If
   not, stop presenting while `start_video` is active.
+
+## Progress
+
+### Task 0 — done 2026-11-21
+
+- `make sdl` builds `build/sdl/<time>/empiresx.exe` with `SDL2.dll` beside
+  it; `make play-sdl` runs it under Wine. SDL2 2.30.9 headers compile
+  against the VC98 headers once `surface.cpp` defines the
+  `SDL_DISABLE_*INTRIN_H` switches (clang's intrinsic headers need
+  `_aligned_malloc`, which VC6's runtime lacks).
+- `surface_attach_window` (called from `RGE_Base_Game::setup_main_window`)
+  attaches SDL with `SDL_CreateWindowFrom`, with SDL's message loop off and
+  all SDL events dropped. `surface_detach_window` runs in
+  `~RGE_Base_Game` before `DestroyWindow`.
+- Smoke test result: SDL forwards every message, but it validated the
+  window before forwarding `WM_PAINT` (all 11 paints in the test reached
+  the game with an empty update region, against 10 of 11 non-empty without
+  SDL) and swallowed `WM_ERASEBKGND`. Fixed by a window procedure on top
+  of SDL's that sends those two messages straight to the game. With it,
+  the paint sequence matches the plain build. The only extra messages are
+  SDL's own `WM_GETTEXT`/`WM_GETTEXTLENGTH` and input-language messages.
+- Checked under Wine 10 on Xvfb with the retail data at 1024x768
+  (`NOSTARTUP GAMECD NODXCHECK`; the install's `langua_1.dll` copied to
+  `languagex.dll`): main menu, single-player menu and back again are
+  pixel-identical to the plain clang build. That was also the first run of
+  the clang build; it reaches the main menu like the retail executable.
+- Not run: the parity suite (`game.cmd test-parity`) needs Windows.

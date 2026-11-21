@@ -18,22 +18,28 @@ ASSEMBLER     ?= build/assembler-ml615.json
 VC6_WIN   = Z:$(subst /,\,$(VC6_DIR))
 WINE_ENV  = VC5_DIR='$(VC6_WIN)' AOE_TOOLCHAIN=$(VC6_TOOLCHAIN) AOE_ASSEMBLER=$(ASSEMBLER)
 LATEST_CLANG = $$(ls -d build/clang/2*/ 2>/dev/null | tail -1)
+LATEST_SDL   = $$(ls -d build/sdl/2*/ 2>/dev/null | tail -1)
 
-.PHONY: all help clang vc6 harness test play clean
+.PHONY: all help clang sdl vc6 harness test play play-sdl clean
 
 all: clang
 
 help:
 	@echo "make clang      native clang-cl/lld-link build (default)       -> build/clang/<time>/empiresx.exe"
-	@echo "make vc6        VC6 under Wine                               -> build/executable/vc6/<time>/"
+	@echo "make sdl        clang build with the SDL2 display layer          -> build/sdl/<time>/empiresx.exe"
+	@echo "make vc6       VC6 under Wine                               -> build/executable/vc6/<time>/"
 	@echo "make harness    check the C++ ports against the assembly (VC6 + ml.exe under Wine)"
 	@echo "make test       tool tests for the port harness and build scripts"
 	@echo "make play       run the newest clang build under Wine with GAMECD (needs runtime/ data)"
-	@echo "make clean      remove build/clang and build/asm_port"
+	@echo "make play-sdl   run the newest SDL build under Wine with GAMECD"
+	@echo "make clean     remove build/clang and build/asm_port"
 	@echo "Variables: PYTHON=$(PYTHON) VC6_DIR=$(VC6_DIR) WINE=$(WINE) PLAY_DIR=$(PLAY_DIR)"
 
 clang:
 	VC6_DIR=$(VC6_DIR) $(PYTHON) tools/build_clang.py
+
+sdl:
+	VC6_DIR=$(VC6_DIR) $(PYTHON) tools/build_clang.py --sdl --output-dir build/sdl
 
 vc6:
 	$(WINE_ENV) $(PYTHON) tools/build_executable.py --output-dir build/executable/vc6 --no-icon
@@ -52,5 +58,12 @@ play:
 	cp "$(LATEST_CLANG)empiresx.exe" $(PLAY_DIR)/empiresx.exe
 	cd $(PLAY_DIR) && $(WINE) empiresx.exe NOSTARTUP GAMECD
 
+play-sdl:
+	@test -n "$(LATEST_SDL)" || { echo "No SDL build yet: run make sdl"; exit 1; }
+	@ls runtime | grep -qiv '^readme' || { echo "runtime/ has no game data: see runtime/README.md"; exit 1; }
+	@test -d $(PLAY_DIR) || cp -r runtime $(PLAY_DIR)
+	cp "$(LATEST_SDL)empiresx.exe" "$(LATEST_SDL)SDL2.dll" $(PLAY_DIR)/
+	cd $(PLAY_DIR) && $(WINE) empiresx.exe NOSTARTUP GAMECD
+
 clean:
-	rm -rf build/clang build/asm_port
+	rm -rf build/clang build/sdl build/asm_port

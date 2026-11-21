@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "notes": [
+    "The SDL2 build of the clang PE (workflow/docs/sdl_port_tasks.md). tools/build_clang.py --sdl reads this file.",
+    "The SDL2 VC development package is downloaded by tools/fetch_sdl2.py into build/third_party/ and is never committed."
+  ],
+  "sdl2": {
+    "version": "2.30.9",
+    "url": "https://github.com/libsdl-org/SDL/releases/download/release-2.30.9/SDL2-devel-2.30.9-VC.zip",
+    "sha256": "8c91d91e5bcb997d062ec2b553c53832ebf95654d4aa35e8c02a954d4ce752ae",
+    "directory": "build/third_party/SDL2-2.30.9"
+  },
+  "defines": ["AOE_SDL=1"],
+  "sources": ["port/sdl/surface.cpp"],
+  "libraries": ["SDL2.lib"],
+  "drop_libraries": [],
+  "runtime_files": ["lib/x86/SDL2.dll"]
+}

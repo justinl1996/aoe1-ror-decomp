@@ -30,6 +30,7 @@
 #include "../include/Mouseptr.h"
 #include "../include/Shape.h"
 #include "../include/panel.h"
+#include "../include/surface.h"
 #include "../include/panel_ez.h"
 #include "../include/Pnl_scr.h"
 #include "../include/world.h"
@@ -563,6 +564,9 @@ RGE_Base_Game::~RGE_Base_Game() {
 
     rge_base_game = 0;
 
+#ifdef AOE_SDL
+    surface_detach_window();
+#endif
     if (this->prog_window != 0)
         DestroyWindow(this->prog_window);
 
@@ -1549,6 +1553,11 @@ int RGE_Base_Game::setup_main_window() {
 
     if (this->prog_window == 0)
         return 0;
+
+#ifdef AOE_SDL
+    if (surface_attach_window(this->prog_window) == 0)
+        return 0;
+#endif
 
     GetWindowRect(this->prog_window, &win_rect);
     GetClientRect(this->prog_window, &client_rect);
