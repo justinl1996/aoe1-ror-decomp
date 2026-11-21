@@ -5,6 +5,8 @@ import difflib
 import hashlib
 import json
 import os
+import re
+import shutil
 import struct
 from dataclasses import dataclass
 from functools import lru_cache
@@ -56,8 +58,18 @@ def expand_vc5_dir(value):
     return value
 
 
+def toolchain_config_path() -> Path:
+    """The pinned VC5 toolchain, or a local substitute named by AOE_TOOLCHAIN.
+
+    A substitute compiler does not reproduce the original code; its output is
+    never evidence for function status.
+    """
+    override = os.environ.get("AOE_TOOLCHAIN")
+    return repo_path(override) if override else CONFIG_DIR / "toolchain.json"
+
+
 def load_toolchain() -> dict:
-    return expand_vc5_dir(load_json(CONFIG_DIR / "toolchain.json"))
+    return expand_vc5_dir(load_json(toolchain_config_path()))
 
 
 def load_binaries() -> dict:
@@ -937,7 +949,62 @@ def ensure_build_subdir(name: str) -> Path:
     return path
 
 
+# Off Windows, the Windows tools (VC5, MASM) run under Wine. Configured tool
+# paths stay Windows paths such as C:\..., which Wine resolves in its prefix.
+# Paths to repository files become Z:\... paths, since Wine maps Z: to /.
+ON_WINE = os.name != "nt"
+_DRIVE_PATH = re.compile(r"^([A-Za-z]):[\\/]")
+_WINE_ENV_KEYS = ("HOME", "USER", "LOGNAME", "PATH", "LANG", "LC_ALL", "XDG_RUNTIME_DIR",
+                  "WINEPREFIX", "WINEARCH", "WINESERVER", "WINELOADER", "WINEDLLOVERRIDES")
+
+
+def wine_prefix() -> Path:
+    return Path(os.environ.get("WINEPREFIX") or Path.home() / ".wine")
+
+
+def win_path(path: str | Path) -> str:
+    """A local path as a Windows tool sees it."""
+    if not ON_WINE:
+        return str(path)
+    text = str(path)
+    if _DRIVE_PATH.match(text):
+        return text.replace("/", "\\")
+    return "Z:" + os.path.abspath(text).replace("/", "\\")
+
+
+def tool_path(value: str | Path) -> str:
+    """A configured toolchain path (Windows or repository-relative) as a Windows tool sees it."""
+    if not ON_WINE:
+        return str(repo_path(value))
+    text = str(value)
+    if _DRIVE_PATH.match(text):
+        return text.replace("/", "\\")
+    return win_path(repo_path(text.replace("\\", "/")))
+
+
+def host_path(value: str | Path) -> Path:
+    """A configured toolchain path as a file this Python process can read."""
+    if not ON_WINE:
+        return repo_path(value)
+    text = str(value)
+    match = _DRIVE_PATH.match(text)
+    if match:
+        parts = [part for part in re.split(r"[\\/]", text[match.end():]) if part]
+        return wine_prefix().joinpath("dosdevices", match[1].lower() + ":", *parts)
+    return repo_path(text.replace("\\", "/"))
+
+
+def tool_command(executable: str | Path, *arguments: str) -> list[str]:
+    """Command line for a Windows tool; under Wine, prefixed with the wine loader."""
+    if not ON_WINE:
+        return [tool_path(executable), *arguments]
+    wine = os.environ.get("WINE") or shutil.which("wine") or "wine"
+    return [wine, tool_path(executable), *arguments]
+
+
 def tool_env(config: dict) -> dict[str, str]:
+    if ON_WINE:
+        return _wine_tool_env(config)
     env: dict[str, str] = {}
     for key in ("COMSPEC", "PATHEXT", "SystemRoot", "WINDIR"):
         value = os.environ.get(key)
@@ -956,6 +1023,22 @@ def tool_env(config: dict) -> dict[str, str]:
     temp_dir = ensure_build_subdir("tmp")
     env["TEMP"] = str(temp_dir)
     env["TMP"] = str(temp_dir)
+    env.update(config["environment"].get("set", {}))
+    return env
+
+
+def _wine_tool_env(config: dict) -> dict[str, str]:
+    # Keep the minimal-environment rule: only what Wine itself needs comes from
+    # the host. WINEPATH prepends the tool directories to Wine's Windows PATH.
+    env = {key: os.environ[key] for key in _WINE_ENV_KEYS if key in os.environ}
+    env["WINEDEBUG"] = os.environ.get("WINEDEBUG", "-all")
+    env["WINEPATH"] = ";".join(tool_path(item) for item in config["environment"]["path_prepend"])
+    env["INCLUDE"] = ";".join(tool_path(item) for item in config["environment"]["include"])
+    env["LIB"] = ";".join(tool_path(item) for item in config["environment"]["lib"])
+    temp_dir = win_path(ensure_build_subdir("tmp"))
+    env["TEMP"] = temp_dir
+    env["TMP"] = temp_dir
+    env.update(config["environment"].get("set", {}))
     return env
 
 

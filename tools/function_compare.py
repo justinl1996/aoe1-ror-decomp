@@ -17,7 +17,9 @@ from common import (
     load_pdb_function_source_map,
     load_toolchain,
     repo_path,
+    tool_command,
     tool_env,
+    win_path,
 )
 from extract_obj_function import (
     extraction_extent,
@@ -185,14 +187,13 @@ def compile_source(
     include_dir: Path,
 ) -> dict[str, object]:
     toolchain = load_toolchain()
-    compiler = repo_path(toolchain["compiler"]["cl"])
-    command = [
-        str(compiler),
-        f"@{response_path}",
-        f"/I{include_dir}",
-        f"/Fo{object_path}",
-        str(source_path),
-    ]
+    command = tool_command(
+        toolchain["compiler"]["cl"],
+        f"@{win_path(response_path)}",
+        f"/I{win_path(include_dir)}",
+        f"/Fo{win_path(object_path)}",
+        win_path(source_path),
+    )
     with compiler_admission():
         result = subprocess.run(
             command, capture_output=True, text=True, env=tool_env(toolchain)

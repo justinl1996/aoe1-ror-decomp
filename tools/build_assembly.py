@@ -3,22 +3,30 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 
 from build_cache import compiler_admission
-from common import REPO_ROOT
+from common import REPO_ROOT, host_path, repo_path, tool_command, win_path
+
+
+def assembly_config_path() -> Path:
+    """The pinned assembler, or a local substitute named by AOE_ASSEMBLER."""
+    override = os.environ.get('AOE_ASSEMBLER')
+    return repo_path(override) if override else REPO_ROOT / 'config/assembly_toolchain.json'
 
 
 def assemble_source(source: Path, output: Path) -> dict:
-    config_path = REPO_ROOT / 'config/assembly_toolchain.json'
+    config_path = assembly_config_path()
     config = json.loads(config_path.read_text())
-    assembler = Path(config['path'])
+    assembler = host_path(config['path'])
     digest = hashlib.sha256(assembler.read_bytes()).hexdigest()
     if digest != config['sha256']:
         raise ValueError('Assembler hash differs from the pinned tool.')
     output.parent.mkdir(parents=True, exist_ok=True)
-    command = [str(assembler), *config['flags'], '/Fo' + str(output), str(source)]
+    command = tool_command(config['path'], *config['flags'],
+                           '/Fo' + win_path(output), win_path(source))
     with compiler_admission():
         result = subprocess.run(command, cwd=source.parent, capture_output=True, text=True)
     return dict(source=source.relative_to(REPO_ROOT).as_posix(), object=str(output),

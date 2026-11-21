@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pefile
 
+from common import tool_command, win_path
+
 
 def align4(data: bytes) -> bytes:
     return data + b"\0" * (-len(data) % 4)
@@ -92,9 +94,10 @@ def extract_icon(executable: Path, group_name: str, destination: Path, expected_
     return dict(source=str(executable), icon=str(destination), sha256=digest)
 
 
-def compile_resources(rc: Path, script: Path, include_dir: Path, destination: Path,
+def compile_resources(rc: str | Path, script: Path, include_dir: Path, destination: Path,
                       env: dict[str, str]) -> dict:
-    command = [str(rc), "/r", "/i", str(include_dir), "/fo", str(destination), str(script)]
+    command = tool_command(rc, "/r", "/i", win_path(include_dir), "/fo", win_path(destination),
+                           win_path(script))
     result = subprocess.run(command, cwd=script.parent, capture_output=True, text=True, env=env)
     return dict(script=str(script), command=command, returncode=result.returncode,
                 stdout=result.stdout, stderr=result.stderr,

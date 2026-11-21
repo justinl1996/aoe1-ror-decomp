@@ -7,9 +7,10 @@ import hashlib
 import json
 import re
 import subprocess
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
-from common import REPO_ROOT, load_build_modules, load_toolchain, repo_path, tool_env
+from common import (REPO_ROOT, load_build_modules, load_toolchain, repo_path, tool_command,
+                    tool_env, win_path)
 from build_cache import build_input_manifest
 from function_compare import compile_source
 from pe_resources import compile_resources, extract_icon
@@ -64,6 +65,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", default="build/executable",
                         help="Build output directory under build/. Each run uses a new subdirectory.")
+    parser.add_argument("--no-icon", action="store_true",
+                        help="Build without the program icon, so no retail EMPIRES.EXE is needed.")
     args = parser.parse_args()
     output_root = repo_path(args.output_dir).resolve()
     if not output_root.is_relative_to((REPO_ROOT / "build").resolve()):
@@ -110,34 +113,46 @@ def main() -> int:
 
     exe = output / (config["name"] + ".exe")
     response = output / "link.rsp"
-    arguments = config["link_flags"] + [f'/OUT:"{exe}"', f'/MAP:"{output / "empiresx.map"}"']
+    arguments = config["link_flags"] + [f'/OUT:"{win_path(exe)}"',
+                                        f'/MAP:"{win_path(output / "empiresx.map")}"']
     if any(flag.upper().split(":")[0] == "/DEBUG" for flag in config["link_flags"]):
-        arguments.append(f'/PDB:"{output / "empiresx.pdb"}"')
-    arguments += [f'/LIBPATH:"{repo_path(path)}"' for path in config.get("library_dirs", [])]
-    arguments += [f'"{path}"' for path in objects] + config["libraries"]
+        arguments.append(f'/PDB:"{win_path(output / "empiresx.pdb")}"')
+    arguments += [f'/LIBPATH:"{win_path(repo_path(path))}"' for path in config.get("library_dirs", [])]
+    arguments += [f'"{win_path(path)}"' for path in objects] + config["libraries"]
     report["import_libraries"] = []
     for definition in config.get("import_definitions", []):
         definition = repo_path(definition)
         library = output / (definition.stem + ".lib")
-        command = [str(repo_path(toolchain["compiler"]["link"]).with_name("LIB.EXE")),
-                   "/NOLOGO", "/MACHINE:IX86", f"/DEF:{definition}", f"/OUT:{library}"]
+        librarian = str(PureWindowsPath(toolchain["compiler"]["link"]).with_name("LIB.EXE"))
+        command = tool_command(librarian, "/NOLOGO", "/MACHINE:IX86",
+                               f"/DEF:{win_path(definition)}", f"/OUT:{win_path(library)}")
         result = run_command(command, output, toolchain)
         report["import_libraries"].append(dict(command=command, returncode=result.returncode,
                                               stdout=result.stdout, stderr=result.stderr))
-        arguments.append(f'"{library}"')
+        arguments.append(f'"{win_path(library)}"')
     assets = output / "assets"
-    icons = [extract_icon(repo_path(icon["source"]), icon["group"], assets / icon["file"], icon["sha256"])
-             for icon in config["icons"]]
+    assets.mkdir(parents=True, exist_ok=True)
     script = repo_path(config["resource_script"])
     resource = output / (script.stem + ".res")
+    if args.no_icon:
+        # Compile a copy of the script without its ICON statements.
+        icons = []
+        text = script.read_text(encoding="ascii")
+        kept = [line for line in text.splitlines(keepends=True)
+                if not re.match(r"^\s*\w+\s+ICON\b", line)]
+        script = assets / script.name
+        script.write_text("".join(kept), encoding="ascii")
+    else:
+        icons = [extract_icon(repo_path(icon["source"]), icon["group"], assets / icon["file"], icon["sha256"])
+                 for icon in config["icons"]]
     report["resources"] = dict(compile_resources(
-        repo_path(toolchain["compiler"]["rc"]), script, assets, resource, tool_env(toolchain)), icons=icons)
+        toolchain["compiler"]["rc"], script, assets, resource, tool_env(toolchain)), icons=icons)
     if report["resources"]["compiled"]:
-        arguments.append(f'"{resource}"')
+        arguments.append(f'"{win_path(resource)}"')
     response.write_text("\n".join(arguments) + "\n", encoding="ascii")
     # Even with compiler failures, collect a diagnostic link report. Never call
     # such an image a complete build.
-    command = [str(repo_path(toolchain["compiler"]["link"])), f"@{response}", "/VERBOSE"]
+    command = tool_command(toolchain["compiler"]["link"], f"@{win_path(response)}", "/VERBOSE")
     result = run_command(command, output, toolchain)
     text = result.stdout + result.stderr
     (output / "link.log").write_text(text, encoding="utf-8")

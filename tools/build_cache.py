@@ -15,7 +15,9 @@ from common import (
     REPO_ROOT,
     build_module_for_source,
     build_module_signature,
+    host_path,
     repo_path,
+    toolchain_config_path,
 )
 
 
@@ -275,10 +277,10 @@ def source_dependencies(source_path: Path, include_dirs: tuple[Path, ...] = ()) 
 def build_input_manifest(source_path: Path, rsp_path: Path, toolchain: dict) -> dict[str, object]:
     source_path = source_path.resolve()
     rsp_path = rsp_path.resolve()
-    compiler_path = repo_path(toolchain["compiler"]["cl"]).resolve()
-    include_dirs = tuple(Path(value).resolve() for value in toolchain.get("environment", {}).get("include", []))
+    compiler_path = host_path(toolchain["compiler"]["cl"]).resolve()
+    include_dirs = tuple(host_path(value).resolve() for value in toolchain.get("environment", {}).get("include", []))
     input_paths = source_dependencies(source_path, include_dirs)
-    for extra in (rsp_path, CONFIG_DIR / "toolchain.json"):
+    for extra in (rsp_path, toolchain_config_path()):
         resolved = extra.resolve()
         if resolved not in input_paths:
             input_paths.append(resolved)
