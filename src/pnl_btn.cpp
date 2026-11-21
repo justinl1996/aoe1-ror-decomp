@@ -1,5 +1,6 @@
 // Recovered direct owner module for C:\msdev\work\age1_x1\Pnl_btn.cpp.
 #include "../include/pnl_btn.h"
+#include "../include/surface.h"
 #include "../include/game_globals.h"
 #include "../include/Shape.h"
 #include "../include/sounddrv.h"
@@ -671,7 +672,7 @@ long TButtonPanel::mouse_left_up_action(long x, long y, int ctrl_key, int shift_
             is_down = 0;
         }
         set_redraw(TPanel::RedrawNormal);
-        SendMessageA(render_area->Wnd, WM_PAINT, 0, 0);
+        surface_send_message(render_area->Wnd, WM_PAINT, 0, 0);
         do_action();
         return 1;
     }
@@ -742,7 +743,7 @@ long TButtonPanel::mouse_right_up_action(long x, long y, int ctrl_key, int shift
             is_down = 0;
         }
         set_redraw(TPanel::RedrawNormal);
-        SendMessageA(render_area->Wnd, WM_PAINT, 0, 0);
+        surface_send_message(render_area->Wnd, WM_PAINT, 0, 0);
         do_right_action(shift_key);
         return 1;
     }
@@ -845,7 +846,7 @@ long TButtonPanel::wnd_proc(void* hwnd, unsigned msg, unsigned wParam, long lPar
             this->is_down = 0;
         }
         this->set_redraw(TPanel::RedrawNormal);
-        SendMessageA(this->render_area->Wnd, WM_PAINT, 0, 0);
+        surface_send_message(this->render_area->Wnd, WM_PAINT, 0, 0);
         this->do_action();
         return 1;
     }
@@ -904,7 +905,7 @@ void TButtonPanel::do_action(void) {
             return;
         }
     } else if (this->id[this->cur_state] != 0 || this->id2[this->cur_state] != 0) {
-        SendMessageA(this->render_area->Wnd, WM_COMMAND, this->id[this->cur_state], this->id2[this->cur_state]);
+        surface_send_message(this->render_area->Wnd, WM_COMMAND, this->id[this->cur_state], this->id2[this->cur_state]);
     }
 }
 
@@ -936,7 +937,7 @@ void TButtonPanel::do_right_action(int shift_key) {
             return;
         }
     } else if (this->id[this->cur_state] != 0 || this->id2[this->cur_state] != 0) {
-        SendMessageA(this->render_area->Wnd, WM_COMMAND, id_value, id2_value);
+        surface_send_message(this->render_area->Wnd, WM_COMMAND, id_value, id2_value);
     }
 }
 

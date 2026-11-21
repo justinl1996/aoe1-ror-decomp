@@ -435,7 +435,7 @@ long TEditPanel::sub_wnd_proc(void* hwnd, unsigned int msg, unsigned int wParam,
             case WM_SYSKEYDOWN:
                 if (this->imc == 0 || this->enable_ime == 0) {
                     SetFocus((HWND) this->render_area->Wnd);
-                    PostMessageA((HWND) this->render_area->Wnd, msg, wParam, lParam);
+                    surface_post_message((HWND) this->render_area->Wnd, msg, wParam, lParam);
                 }
                 return 0;
 

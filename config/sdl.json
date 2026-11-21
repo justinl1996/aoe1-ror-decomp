@@ -11,7 +11,7 @@
     "directory": "build/third_party/SDL2-2.30.9"
   },
   "defines": [],
-  "sources": ["port/sdl/surface.cpp", "port/sdl/ddraw_memory.cpp", "port/sdl/dsound_memory.cpp"],
+  "sources": ["port/sdl/surface.cpp", "port/sdl/window.cpp", "port/sdl/ddraw_memory.cpp", "port/sdl/dsound_memory.cpp"],
   "libraries": ["SDL2.lib"],
   "drop_libraries": ["ddraw.lib", "dsound.lib"],
   "runtime_files": ["lib/x86/SDL2.dll"]

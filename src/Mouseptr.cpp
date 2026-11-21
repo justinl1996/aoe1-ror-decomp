@@ -136,7 +136,7 @@ int TMousePointer::setup(
     this->renderSurface = render_area_in->DrawSurface;
     this->PrimarySurface = render_area_in->DrawSystem->PrimarySurface;
     this->primary_area = render_area_in->DrawSystem->PrimaryArea;
-    SetCursor(NULL);
+    surface_set_cursor(NULL);
     sprintf(file_name, "%s.slp", cursor_file_name);
     this->Cursor_Shape = new TShape(file_name, cursor_resId);
     if (this->Cursor_Shape == 0)
@@ -495,7 +495,7 @@ void TMousePointer::draw(int dMode) {
                 this->save_area_valid = 0;
             }
             if (this->GameMode == 0 || this->GameEnabled == 0) {
-                InvalidateRect(this->render_area->Wnd, &this->mouse_rect, FALSE);
+                surface_invalidate_rect(this->render_area->Wnd, &this->mouse_rect, FALSE);
             }
             this->drawn = 1;
         }
@@ -527,7 +527,7 @@ void TMousePointer::erase() {
         return;
     }
 
-    InvalidateRect(render_area->Wnd, &restore_rect, FALSE);
+    surface_invalidate_rect(render_area->Wnd, &restore_rect, FALSE);
     save_area_valid = 0;
 }
 
@@ -565,7 +565,7 @@ void TMousePointer::off() {
             this->erase();
             this->render_area->DrawSystem->Paint(&this->restore_rect);
         }
-        SetCursor(NULL);
+        surface_set_cursor(NULL);
         this->active = 0;
         this->reset();
     }
@@ -574,7 +574,7 @@ void TMousePointer::off() {
 void TMousePointer::on(void) {
     if (this->Shutdown == 0) {
         if (this->custom_draw == 0) {
-            SetCursor(LoadCursorA(NULL, IDC_ARROW));
+            surface_set_cursor(LoadCursorA(NULL, IDC_ARROW));
         }
         this->active = 1;
     }

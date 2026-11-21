@@ -1,5 +1,6 @@
 
 #include <windows.h>
+#include "../include/surface.h"
 
 #include "../third_party/directplay/include/dplay.h"
 
@@ -13,7 +14,7 @@ RGE_Comm_Error::RGE_Comm_Error(void* Host) {
 }
 
 void RGE_Comm_Error::NotifyWindowParam(COMMMESSAGES msg, long lparam) {
-    PostMessageA(HostHWND, WM_USER, msg, lparam);
+    surface_post_message(HostHWND, WM_USER, msg, lparam);
     L->Log("COMM: Send msg to window WM_USER  Msg=%d  Param=%d ", msg, lparam);
 }
 

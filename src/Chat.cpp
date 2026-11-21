@@ -1,5 +1,6 @@
 
 #include "../include/chat.h"
+#include "../include/surface.h"
 #include "../include/basegame.h"
 #include "../include/game_globals.h"
 
@@ -55,7 +56,7 @@ int TChat::AddChatMsg(char* PlayerName, char* Text, unsigned char Local) {
     }
 
     sprintf(Chat[CurrentMsgNo], "%s: %s", PlayerName, Text);
-    PostMessageA(HostWnd, WM_USER, CHAT_RECEIVED, CurrentMsgNo);
+    surface_post_message(HostWnd, WM_USER, CHAT_RECEIVED, CurrentMsgNo);
     if (taunt != 0) {
         taunt->PlayTauntStr(Text, Local);
     }

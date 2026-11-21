@@ -1,5 +1,6 @@
 
 #include "../include/scr_game.h"
+#include "../include/surface.h"
 #include "../include/program_mode.h"
 #include "../include/game_globals.h"
 #include "../include/resource_ids.h"
@@ -994,7 +995,7 @@ long TRIBE_Screen_Game::handle_paint() {
     if (rge_base_game->prog_active == 0) {
         return 0;
     }
-    if (IsIconic(this->render_area->Wnd) != 0) {
+    if (surface_is_iconic(this->render_area->Wnd) != 0) {
         return 0;
     }
 
@@ -1334,7 +1335,7 @@ long TRIBE_Screen_Game::wnd_proc(void* hwnd, unsigned int msg, unsigned int wPar
 
     if (msg == WM_KEYUP && this->have_focus != 0 && this->main_view->get_focus() != 0) {
         if (wParam == VK_F3 || wParam == VK_PAUSE) {
-            short(__stdcall * get_key_state)(int) = GetKeyState;
+            SHORT (*get_key_state)(int) = surface_get_key_state;
             int alt = get_key_state(VK_MENU) < 0;
             int ctrl = get_key_state(VK_CONTROL) < 0;
             int shift = get_key_state(VK_SHIFT) < 0;
@@ -1348,7 +1349,7 @@ long TRIBE_Screen_Game::wnd_proc(void* hwnd, unsigned int msg, unsigned int wPar
             int mode = rge_base_game->prog_mode;
             if (mode == ProgModeGameOver || mode == ProgModeGame || mode == ProgModeGameTempPaused
                 || mode == ProgModeScenarioEditor) {
-                if (IsIconic(this->render_area->Wnd) == 0) {
+                if (surface_is_iconic(this->render_area->Wnd) == 0) {
                     this->popupYesNoDialog(STRING_ID_CONFIRM_QUIT_GAME, "CloseProgramDialog", TEASY_POPUP_WIDTH, 100);
                     return 1;
                 }
@@ -3635,7 +3636,7 @@ void TRIBE_Screen_Game::handle_terrain_sound() {
 
 void TRIBE_Screen_Game::handle_mouse_pointing_at() {
     void* window = rge_base_game->prog_window;
-    if (GetForegroundWindow() != window) {
+    if (surface_get_foreground_window() != window) {
         return;
     }
     if (this->main_view->get_focus() == 0) {

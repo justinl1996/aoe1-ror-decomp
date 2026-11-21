@@ -187,7 +187,7 @@ int TPanelSystem::restorePreviousPanel(int destroyOldCurrentPanel) {
     current_panel = previous;
     previous->set_focus(1);
     current_panel->set_redraw(TPanel::RedrawImmediate);
-    UpdateWindow(AppWnd);
+    surface_update_window(AppWnd);
     return 1;
 }
 
@@ -341,7 +341,7 @@ void TPanelSystem::setCurrentPanel(TPanel* p, int makeModal) {
     current_panel = p;
     p->set_focus(1);
     current_panel->set_redraw(TPanel::RedrawImmediate);
-    UpdateWindow(AppWnd);
+    surface_update_window(AppWnd);
     if (makeModal != 0) {
         setCurrentPanelModal();
     }
@@ -808,7 +808,7 @@ void TPanel::set_redraw(TPanel::RedrawMode redraw_mode) {
     }
     need_redraw = redraw_mode;
     if (redraw_mode != TPanel::RedrawNone && render_area != 0 && visible != 0 && active != 0) {
-        InvalidateRect(render_area->Wnd, &clip_rect, FALSE);
+        surface_invalidate_rect(render_area->Wnd, &clip_rect, FALSE);
     }
 }
 
@@ -965,7 +965,7 @@ void TPanel::draw_finish(void) {
 void TPanel::paint(void) {
     if (render_area != 0 && visible != 0 && active != 0) {
         render_area->DrawSystem->Paint(&clip_rect);
-        ValidateRect(render_area->Wnd, &clip_rect);
+        surface_validate_rect(render_area->Wnd, &clip_rect);
     }
 }
 
@@ -1046,9 +1046,9 @@ long TPanel::wnd_proc(void* hwnd, unsigned int msg, unsigned int wParam, long lP
         if (msg != WM_KEYDOWN && msg != WM_SYSKEYDOWN) {
             return target->handle_char(wParam, (short) lParam);
         }
-        int alt = GetKeyState(VK_MENU) < 0;
-        ctrl_key = GetKeyState(VK_CONTROL) < 0;
-        shift_key = GetKeyState(VK_SHIFT) < 0;
+        int alt = surface_get_key_state(VK_MENU) < 0;
+        ctrl_key = surface_get_key_state(VK_CONTROL) < 0;
+        shift_key = surface_get_key_state(VK_SHIFT) < 0;
         return target->handle_key_down(wParam, (short) lParam, alt, ctrl_key, shift_key);
     }
 
@@ -1241,7 +1241,7 @@ long TPanel::handle_paint() {
     if (rge_base_game->prog_active == 0) {
         return 0;
     }
-    if (IsIconic(this->render_area->Wnd) != 0) {
+    if (surface_is_iconic(this->render_area->Wnd) != 0) {
         return 0;
     }
 
@@ -1544,7 +1544,7 @@ int TPanel::capture_mouse(void) {
     if (panel_system.mouseOwner() == this) {
         return 1;
     }
-    SetCapture(render_area->Wnd);
+    surface_set_capture(render_area->Wnd);
     panel_system.setMouseOwner(this);
     mouse_captured = 1;
     return 1;
@@ -1554,7 +1554,7 @@ void TPanel::release_mouse(void) {
     if (mouse_captured != 0) {
         if (panel_system.mouseOwner() == this) {
             panel_system.setMouseOwner(0);
-            ReleaseCapture();
+            surface_release_capture();
         }
         mouse_captured = 0;
     }

@@ -591,6 +591,71 @@ primary screen).
   movement, training, scrolling, game menu, sounds). Not run: the parity
   suite (Windows only, and built on the VC5 route).
 
+### SDL owns the window and the event loop — done 2026-11-21
+
+The first step towards Linux (item 1 of "What a Linux port still needs"):
+SDL creates the game window and drives the game's message loop, so input
+no longer reaches the game from Windows' message queue.
+
+- `port/sdl/window.cpp` (new):
+  - `surface_create_main_window` replaces `CreateWindowExA` in
+    `RGE_Base_Game::setup_main_window`: `SDL_CreateWindow` in the starting
+    layout, and the game knows the window by its handle (from
+    `SDL_GetWindowWMInfo` on Windows). `surface_destroy_main_window`
+    replaces `DestroyWindow` in `~RGE_Base_Game`.
+  - `RGE_Base_Game::run` takes messages from `surface_peek_message` and
+    `surface_get_message` and hands them to `surface_dispatch_message`,
+    which calls the game's unchanged `wnd_proc`. There is no
+    `TranslateMessage`: `WM_CHAR` comes from the translator.
+  - The queue keeps Windows' order: posted messages (thread-safe; the
+    stream timer thread posts), then input, then `WM_QUIT`, then
+    `WM_PAINT` (from an emulated update region, kept until validated),
+    then `WM_TIMER` (SDL timers, never piling up).
+  - SDL events become Windows messages: keys with virtual-key codes and
+    `lParam` flags (system keys for Alt and F10), `WM_CHAR` from SDL text
+    input plus Enter, Backspace, Tab, Escape and Ctrl+letter, mouse
+    messages in game pixels with `MK_*` flags, double-clicks from SDL's
+    click count, activation (`WM_ACTIVATEAPP`, `WM_ACTIVATE`), `WM_SIZE`
+    and `WM_CLOSE`. Alt+Enter is taken before the game sees it.
+  - Wrappers for the game's calls on its window, which fall through to
+    Windows for any other window: `surface_post_message`,
+    `surface_send_message`, `surface_post_quit_message`,
+    `surface_set_timer`, `surface_kill_timer`,
+    `surface_invalidate_rect`, `surface_validate_rect`,
+    `surface_get_update_rect`, `surface_update_window`,
+    `surface_is_iconic`, `surface_get_foreground_window`,
+    `surface_set_cursor` (for `SetCursor` and the class cursor),
+    `surface_set_capture`, `surface_release_capture`,
+    `surface_get_capture`, `surface_get_key_state`,
+    `surface_get_async_key_state` and `surface_get_keyboard_state`.
+    About 110 call sites in 15 files now use them.
+  - The Windows bridge: a procedure on top of SDL's sends the messages
+    Windows components send the game window (edit-box `WM_COMMAND` and
+    `WM_CTLCOLOR*`, `MM_MCINOTIFY`, palette and power messages,
+    `WM_SYSCOMMAND`, `WM_USER` and up) straight to the game, and turns
+    Windows' own `WM_PAINT` into a repaint. Everything else goes to SDL.
+- `port/sdl/surface.cpp`: the layout uses SDL (desktop fullscreen, or a
+  resizable window sized from `SDL_GetDisplayUsableBounds` and centred), and
+  the cursor wrappers use `SDL_GetGlobalMouseState` and
+  `SDL_WarpMouseInWindow`. The `SDL_CreateWindowFrom` attachment and its
+  message routing are gone.
+- SDL already reports mouse events in the renderer's logical coordinates
+  once `SDL_RenderSetLogicalSize` is set, so the translator only clamps
+  them to the game area. (Mapping them again worked only at 1:1 scale.)
+- Still Windows on Windows, for Linux to replace: the game's `EDIT` boxes
+  (which take keyboard focus as real child windows; their own key handling
+  uses Win32 `GetKeyState`), the video window, `ShowWindow`/`SetFocus` on
+  the game window during setup, and the input-disabled child window that
+  captures the mouse while loading.
+- Checked under Wine: the menu screens and six scenario-editor tabs at
+  1024x768 are pixel-identical to the earlier references; at 800x600,
+  fullscreen scaling, the `WINDOW` switch, Alt+Enter, editor clicks, map
+  generation and edge scrolling work; a random-map game plays (selection,
+  movement, training, the `C` hotkey, arrow scrolling, F10), and Enter
+  opens chat, where typed text is sent and shown. The chat box itself
+  shows no text while typing: it is a Windows `EDIT` control whose colours
+  come out black on black (also before this step).
+
 ### Testing under Wine
 
 - The test setup (Xvfb without root, a separate Wine prefix with a fake CD

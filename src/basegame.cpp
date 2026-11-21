@@ -374,7 +374,7 @@ int RGE_Base_Game::setup() {
                                     ShowWindow(this->prog_window, SW_SHOW);
                                     SetFocus(this->prog_window);
                                     this->mouse_on();
-                                    this->is_timer = SetTimer(this->prog_window, 1, 50, 0);
+                                    this->is_timer = surface_set_timer(this->prog_window, 1, 50);
 
                                     file_number = this->registry->RegGetInt(0, "Game File Number");
                                     if (file_number >= 0) {
@@ -564,15 +564,14 @@ RGE_Base_Game::~RGE_Base_Game() {
 
     rge_base_game = 0;
 
-    surface_detach_window();
-    if (this->prog_window != 0)
-        DestroyWindow(this->prog_window);
+    surface_destroy_main_window();
+    this->prog_window = 0;
 
     this->get_string(STRING_ID_HELP_WINDOW_TITLE, str, 256);
     if (str[0] != 0) {
         HWND help_window = FindWindowA("MS_WINHELP", str);
         if (help_window != 0)
-            SendMessageA(help_window, WM_CLOSE, 0, 0);
+            surface_send_message(help_window, WM_CLOSE, 0, 0);
     }
 
     if (StringTable != 0 && StringTable != this->prog_info->instance) {
@@ -890,13 +889,12 @@ int RGE_Base_Game::run() {
         if (this->prog_active != 0 && (this->prog_mode == ProgModeGame || this->prog_mode == ProgModeMenu)) {
             TCommunications_Handler* comm = this->comm_handler;
             if (comm == 0 || comm->IsPaused() == 0) {
-                if (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE) != 0) {
+                if (surface_peek_message(&msg) != 0) {
                     if (msg.message == WM_QUIT) {
                         return (int) msg.wParam;
                     }
                     if (this->handle_message(&msg) != 0) {
-                        TranslateMessage(&msg);
-                        DispatchMessageA(&msg);
+                        surface_dispatch_message(&msg);
                     }
                 } else {
                     this->handle_idle();
@@ -907,11 +905,10 @@ int RGE_Base_Game::run() {
         }
 
         surface_present_flush();
-        if (GetMessageA(&msg, 0, 0, 0) == 0) {
+        if (surface_get_message(&msg) == 0) {
             return (int) msg.wParam;
         }
-        TranslateMessage(&msg);
-        DispatchMessageA(&msg);
+        surface_dispatch_message(&msg);
     }
 }
 
@@ -1535,47 +1532,14 @@ int RGE_Base_Game::setup_class() {
 }
 
 int RGE_Base_Game::setup_main_window() {
-    int screen_width = GetSystemMetrics(SM_CXSCREEN);
-    int screen_height = GetSystemMetrics(SM_CYSCREEN);
-    RECT win_rect;
-    RECT client_rect;
-
-    if (this->prog_info->full_screen == 0
-        && (screen_width != this->prog_info->main_wid || screen_height != this->prog_info->main_hgt)) {
-        this->prog_window = CreateWindowExA(
-            0, this->prog_info->prog_name, this->prog_info->prog_title,
-            WS_CLIPCHILDREN | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, 0, 0, this->prog_info->main_wid,
-            this->prog_info->main_hgt, 0, 0, this->prog_info->instance, 0
-        );
-    } else {
-        this->prog_window = CreateWindowExA(
-            0, this->prog_info->prog_name, this->prog_info->prog_title, WS_POPUP | WS_CLIPCHILDREN | WS_SYSMENU, 0, 0,
-            screen_width, screen_height, 0, 0, this->prog_info->instance, 0
-        );
-    }
-
+    // SDL creates and owns the game window (port/sdl/window.cpp); its
+    // messages reach wnd_proc through RGE_Base_Game::run. The window layout
+    // (fullscreen or a window, scaled) is the SDL layer's.
+    this->prog_window = surface_create_main_window(
+        this->prog_info->prog_title, this->prog_info->main_wid, this->prog_info->main_hgt, rge_base_game_wnd_proc
+    );
     if (this->prog_window == 0)
         return 0;
-
-    if (surface_attach_window(this->prog_window) == 0)
-        return 0;
-
-    GetWindowRect(this->prog_window, &win_rect);
-    GetClientRect(this->prog_window, &client_rect);
-
-    if (client_rect.right != this->prog_info->main_wid || client_rect.bottom != this->prog_info->main_hgt) {
-        SetWindowPos(
-            this->prog_window, 0, win_rect.left, win_rect.top,
-            (win_rect.right - win_rect.left) - client_rect.right + this->prog_info->main_wid,
-            (win_rect.bottom - win_rect.top) - client_rect.bottom + this->prog_info->main_hgt, 0
-        );
-    }
-
-    if (this->prog_info->full_screen != 0) {
-        ShowWindow(this->prog_window, this->prog_info->show_wnd_flag);
-        UpdateWindow(this->prog_window);
-        SetFocus(this->prog_window);
-    }
 
     AppWnd = this->prog_window;
     panel_system.DisableIME();
@@ -1968,7 +1932,7 @@ int RGE_Base_Game::setup_blank_screen() {
 
     panel_system.setCurrentPanel("Blank Screen", 0);
     this->set_render_all();
-    SendMessageA(this->prog_window, WM_PAINT, 0, 0);
+    surface_send_message(this->prog_window, WM_PAINT, 0, 0);
     return 1;
 }
 
@@ -2189,12 +2153,12 @@ int RGE_Base_Game::check_multi_copies() {
         HWND window = FindWindowA(this->prog_info->prog_name, this->prog_info->prog_title);
         if (window != 0) {
             if (this->check_prog_argument("LOBBY") != 0) {
-                SendMessageA(window, WM_CLOSE, 0, 0);
+                surface_send_message(window, WM_CLOSE, 0, 0);
                 if (this->prog_mutex != 0)
                     ReleaseMutex(this->prog_mutex);
                 return 1;
             }
-            if (IsIconic(window) != 0)
+            if (surface_is_iconic(window) != 0)
                 ShowWindow(window, SW_SHOWNORMAL);
             SetForegroundWindow(window);
             BringWindowToTop(GetLastActivePopup(window));
@@ -2219,20 +2183,20 @@ int RGE_Base_Game::check_paint() {
 
     if (this->prog_ready == 0) {
         this->clear_window();
-        ValidateRect(this->prog_window, 0);
+        surface_validate_rect(this->prog_window, 0);
         return 0;
     }
 
-    if (IsIconic(this->prog_window) != 0) {
-        ValidateRect(this->prog_window, 0);
+    if (surface_is_iconic(this->prog_window) != 0) {
+        surface_validate_rect(this->prog_window, 0);
         return 0;
     }
 
     if (this->prog_active == 0) {
-        if (GetUpdateRect(this->prog_window, &update_rect, 0) != 0) {
+        if (surface_get_update_rect(this->prog_window, &update_rect, 0) != 0) {
             this->draw_system->Paint(&update_rect);
         }
-        ValidateRect(this->prog_window, 0);
+        surface_validate_rect(this->prog_window, 0);
         return 0;
     }
 
@@ -2245,7 +2209,7 @@ int RGE_Base_Game::check_paint() {
             this->set_render_all();
             break;
         case 3:
-            ValidateRect(this->prog_window, 0);
+            surface_validate_rect(this->prog_window, 0);
             DestroyWindow(this->prog_window);
             return 0;
         default:
@@ -2281,7 +2245,7 @@ RGE_Game_World* RGE_Base_Game::create_world() {
 }
 
 void RGE_Base_Game::close() {
-    SendMessageA(this->prog_window, WM_CLOSE, 0, 0);
+    surface_send_message(this->prog_window, WM_CLOSE, 0, 0);
 }
 
 int RGE_Base_Game::create_dialog(TPanel** dialog_ptr, TPanel* new_dialog) {
@@ -2407,7 +2371,7 @@ RGE_Player* RGE_Base_Game::get_player(void) {
 }
 
 void RGE_Base_Game::draw_window() {
-    UpdateWindow(this->prog_window);
+    surface_update_window(this->prog_window);
 }
 
 void RGE_Base_Game::mouse_on() {
@@ -2417,8 +2381,8 @@ void RGE_Base_Game::mouse_on() {
             this->is_mouse_on = 1;
             return;
         }
-        SetCursor(this->mouse_cursor);
-        SetClassLongA(this->prog_window, GCL_HCURSOR, (LONG) this->mouse_cursor);
+        surface_set_cursor(this->mouse_cursor);
+        surface_set_cursor((HCURSOR) (LONG) this->mouse_cursor);
         this->is_mouse_on = 1;
     }
 }
@@ -2429,8 +2393,8 @@ void RGE_Base_Game::mouse_off() {
             is_mouse_on = 0;
             return;
         }
-        SetCursor(NULL);
-        SetClassLongA(prog_window, GCL_HCURSOR, 0);
+        surface_set_cursor(NULL);
+        surface_set_cursor((HCURSOR) 0);
         is_mouse_on = 0;
     }
 }
@@ -2442,8 +2406,8 @@ void RGE_Base_Game::set_windows_mouse(int val) {
     }
 
     if ((this->custom_mouse != 0) && (this->windows_mouse == 0)) {
-        SetCursor(NULL);
-        SetClassLongA(this->prog_window, GCL_HCURSOR, 0);
+        surface_set_cursor(NULL);
+        surface_set_cursor((HCURSOR) 0);
         if (this->is_mouse_on != 0) {
             this->mouse_pointer->on();
             return;
@@ -2454,11 +2418,11 @@ void RGE_Base_Game::set_windows_mouse(int val) {
 
     this->mouse_pointer->off();
     if (this->is_mouse_on != 0) {
-        SetCursor(this->mouse_cursor);
-        SetClassLongA(this->prog_window, GCL_HCURSOR, (LONG) this->mouse_cursor);
+        surface_set_cursor(this->mouse_cursor);
+        surface_set_cursor((HCURSOR) (LONG) this->mouse_cursor);
     } else {
-        SetCursor(NULL);
-        SetClassLongA(this->prog_window, GCL_HCURSOR, 0);
+        surface_set_cursor(NULL);
+        surface_set_cursor((HCURSOR) 0);
     }
 }
 void RGE_Base_Game::set_mouse_cursor(HCURSOR val) {
@@ -2478,8 +2442,8 @@ void RGE_Base_Game::set_mouse_cursor(HCURSOR val) {
         }
     }
 
-    SetCursor(this->mouse_cursor);
-    SetClassLongA(this->prog_window, GCL_HCURSOR, (LONG) this->mouse_cursor);
+    surface_set_cursor(this->mouse_cursor);
+    surface_set_cursor((HCURSOR) (LONG) this->mouse_cursor);
 }
 
 void RGE_Base_Game::set_mouse_facet(long facet) {
@@ -2507,7 +2471,7 @@ int __stdcall enum_thread_proc(void* hwnd, long lParam) {
 int __stdcall close_thread_windows(void* hwnd, long lParam) {
     if (hwnd != AppWnd) {
         if (GetParent(hwnd) != AppWnd) {
-            SendMessageA(hwnd, WM_CLOSE, 0, 0);
+            surface_send_message(hwnd, WM_CLOSE, 0, 0);
         }
     }
     return 1;
@@ -2520,7 +2484,7 @@ int __stdcall close_child_windows(void* hwnd, long lParam) {
     GetWindowTextA(hwnd, str, 255);
 
     if (strcmp(str, "Locate Session") != 0) {
-        SendMessageA(hwnd, WM_CLOSE, 0, 0);
+        surface_send_message(hwnd, WM_CLOSE, 0, 0);
     }
 
     return 1;
@@ -2581,11 +2545,11 @@ LRESULT CALLBACK RGE_Base_Game::wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPAR
 
             if (MouseCursorInChildContol != 0) {
                 if (this->windows_mouse == 0) {
-                    SetCursor(NULL);
-                    SetClassLongA(this->prog_window, GCL_HCURSOR, 0);
+                    surface_set_cursor(NULL);
+                    surface_set_cursor((HCURSOR) 0);
                     this->mouse_on();
                 } else {
-                    SetCursor(this->mouse_cursor);
+                    surface_set_cursor(this->mouse_cursor);
                 }
                 MouseCursorInChildContol = 0;
             }
@@ -2610,7 +2574,7 @@ LRESULT CALLBACK RGE_Base_Game::wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPAR
             break;
 
         case WM_SYSCOMMAND:
-            if (wparam == SC_KEYMENU && this->prog_info->full_screen != 0 && IsIconic(this->prog_window) == 0) {
+            if (wparam == SC_KEYMENU && this->prog_info->full_screen != 0 && surface_is_iconic(this->prog_window) == 0) {
                 return 0;
             }
             break;
@@ -2656,8 +2620,8 @@ LRESULT CALLBACK RGE_Base_Game::wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPAR
             if (this->prog_ready != 0) {
                 if (wparam == 1) {
                     if (basegame_is_active != 0) {
-                        SetCursor(NULL);
-                        SetClassLongA(this->prog_window, GCL_HCURSOR, 0);
+                        surface_set_cursor(NULL);
+                        surface_set_cursor((HCURSOR) 0);
 
                         if (this->prog_mode != ProgModeVideo) {
                             this->restart_sound_system();
@@ -2678,14 +2642,14 @@ LRESULT CALLBACK RGE_Base_Game::wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPAR
                             }
 
                             this->set_render_all();
-                            InvalidateRect(this->prog_window, NULL, TRUE);
+                            surface_invalidate_rect(this->prog_window, NULL, TRUE);
                             do_restore_palette = 10;
                             restore_palette_timer = debug_timeGetTime("C:\\msdev\\work\\age1_x1\\basegame.cpp", 3739);
                             restore_mouse_after_paint = 1;
                         }
                     }
                 } else if (basegame_is_active == 0) {
-                    SetClassLongA(this->prog_window, GCL_HCURSOR, 0);
+                    surface_set_cursor((HCURSOR) 0);
 
                     if (this->prog_mode != ProgModeVideo) {
                         this->stop_sound_system();
@@ -2888,7 +2852,7 @@ int RGE_Base_Game::handle_key_down(HWND wnd, UINT msg, WPARAM wparam, LPARAM lpa
         return 1;
     }
 
-    short(__stdcall * get_key_state)(int) = GetKeyState;
+    SHORT (*get_key_state)(int) = surface_get_key_state;
 
     basegame_key_message = wparam;
     basegame_key_parameter = lparam & 0xFFFF;
@@ -2898,7 +2862,7 @@ int RGE_Base_Game::handle_key_down(HWND wnd, UINT msg, WPARAM wparam, LPARAM lpa
 
     if (wnd == this->prog_window && msg == WM_SYSKEYDOWN
         && (basegame_key_message == VK_MENU || basegame_key_message == VK_SPACE || basegame_key_message == VK_F10)
-        && this->prog_info->full_screen != 0 && IsIconic(this->prog_window) == 0) {
+        && this->prog_info->full_screen != 0 && surface_is_iconic(this->prog_window) == 0) {
         return 0;
     }
 
@@ -3050,8 +3014,8 @@ paint_done:
     time_a = debug_timeGetTime("C:\\msdev\\work\\age1_x1\\basegame.cpp", 4448);
     color_log(0x32, 0x45, 4);
     this->draw_system->Paint(0);
-    ValidateRect(this->prog_window, 0);
-    ValidateRect(this->prog_window, 0);
+    surface_validate_rect(this->prog_window, 0);
+    surface_validate_rect(this->prog_window, 0);
     this->render_all = 0;
 
     time_b = debug_timeGetTime("C:\\msdev\\work\\age1_x1\\basegame.cpp", 4470);
@@ -3072,14 +3036,14 @@ paint_done:
             this->mouse_pointer->Restore_Mouse(this->draw_area);
             if (this->is_mouse_on != 0) {
                 if (this->custom_mouse == 0 || this->windows_mouse != 0) {
-                    SetCursor(this->mouse_cursor);
-                    SetClassLongA(this->prog_window, GCL_HCURSOR, (LONG) this->mouse_cursor);
+                    surface_set_cursor(this->mouse_cursor);
+                    surface_set_cursor((HCURSOR) (LONG) this->mouse_cursor);
                 } else {
                     this->mouse_pointer->on();
                     this->mouse_pointer->draw(1);
                 }
             }
-            InvalidateRect(wnd, NULL, FALSE);
+            surface_invalidate_rect(wnd, NULL, FALSE);
         }
         restore_mouse_after_paint = 0;
     }
@@ -3174,7 +3138,7 @@ int RGE_Base_Game::handle_palette_changed(HWND wnd, UINT msg, WPARAM wparam, LPA
 int RGE_Base_Game::handle_query_new_palette(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     TDrawSystem* ds = this->draw_system;
     if (ds != 0 && ds->DrawType != 1 && ds->ScreenMode != 1) {
-        InvalidateRect(wnd, NULL, FALSE);
+        surface_invalidate_rect(wnd, NULL, FALSE);
         return this->draw_system->HandleQueryNewPalette(wnd, msg, wparam, lparam);
     }
 
@@ -3190,7 +3154,7 @@ int RGE_Base_Game::handle_query_new_palette(HWND wnd, UINT msg, WPARAM wparam, L
     int result = RealizePalette(dc);
     ReleaseDC(wnd, dc);
     if (result != 0)
-        InvalidateRect(wnd, NULL, FALSE);
+        surface_invalidate_rect(wnd, NULL, FALSE);
     if (this->draw_system != 0)
         return this->draw_system->HandleQueryNewPalette(wnd, msg, wparam, lparam);
     return 1;
@@ -3209,10 +3173,10 @@ int RGE_Base_Game::handle_close(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam
 int RGE_Base_Game::handle_destroy(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     this->prog_ready = 0;
     if (this->is_timer != 0) {
-        KillTimer(this->prog_window, 1);
+        surface_kill_timer(this->prog_window, 1);
     }
     this->prog_window = 0;
-    PostQuitMessage(0);
+    surface_post_quit_message(0);
     return 1;
 }
 
@@ -3773,17 +3737,17 @@ void RGE_Base_Game::disable_input() {
     panel_system.DisableInput();
     this->input_enabled = 0;
     if (this->input_disabled_window != 0) {
-        if (GetCapture()) {
-            ReleaseCapture();
+        if (surface_get_capture()) {
+            surface_release_capture();
         }
-        SetCapture(this->input_disabled_window);
+        surface_set_capture(this->input_disabled_window);
     }
 }
 
 void RGE_Base_Game::enable_input() {
     if (this->input_disabled_window != 0) {
-        if (GetCapture()) {
-            ReleaseCapture();
+        if (surface_get_capture()) {
+            surface_release_capture();
         }
     }
     panel_system.EnableInput();
@@ -3800,8 +3764,8 @@ void RGE_Base_Game::set_screen_size(long wid, long hgt) {
 
     if (this->draw_area->Width != wid || this->draw_area->Height != hgt) {
         if (this->draw_system->DrawType == 2 && this->draw_system->ScreenMode == 2) {
-            SetCursor(NULL);
-            SetClassLongA(this->prog_window, GCL_HCURSOR, 0);
+            surface_set_cursor(NULL);
+            surface_set_cursor((HCURSOR) 0);
             this->mouse_pointer->Shutdown_Mouse();
             this->draw_system->SetDisplaySize(wid, hgt, 8);
             this->draw_system->CheckSurfaces();

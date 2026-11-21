@@ -66,7 +66,7 @@ int RGE_Main_View::do_auto_scroll() {
          || rge_base_game->prog_mode == RGE_PROGRAM_MODE_SCENARIO_EDITOR
          || rge_base_game->prog_mode == RGE_PROGRAM_MODE_GAME_OVER)
         && rge_base_game->get_paused() == 0 && rge_base_game->prog_info->auto_scroll != 0
-        && GetForegroundWindow() == this->TPanel::render_area->Wnd && panel_system.modalPanel() == 0
+        && surface_get_foreground_window() == this->TPanel::render_area->Wnd && panel_system.modalPanel() == 0
         && (panel_system.mouseOwner() == 0 || panel_system.mouseOwner() == this) && this->key_scrolling == 0) {
         surface_get_window_rect(this->TPanel::render_area->Wnd, &rect);
         surface_get_cursor_pos(&point);
@@ -75,7 +75,7 @@ int RGE_Main_View::do_auto_scroll() {
         vert_scroll = 0;
         info = rge_base_game->prog_info;
 
-        if (GetAsyncKeyState(VK_LBUTTON) >= 0 && GetAsyncKeyState(VK_RBUTTON) >= 0) {
+        if (surface_get_async_key_state(VK_LBUTTON) >= 0 && surface_get_async_key_state(VK_RBUTTON) >= 0) {
             if (point.x < rect.left + info->mouse_scroll_edge)
                 vert_scroll = -1;
             else if (point.x > rect.right - info->mouse_scroll_edge)
@@ -149,9 +149,9 @@ int RGE_Main_View::handle_keys() {
         && (rge_base_game->prog_mode == RGE_PROGRAM_MODE_GAME || rge_base_game->prog_mode == RGE_PROGRAM_MODE_GAME_TEMP_PAUSED
             || rge_base_game->prog_mode == RGE_PROGRAM_MODE_SCENARIO_EDITOR
             || rge_base_game->prog_mode == RGE_PROGRAM_MODE_GAME_OVER)
-        && GetForegroundWindow() == this->TPanel::render_area->Wnd && this->have_focus != 0) {
+        && surface_get_foreground_window() == this->TPanel::render_area->Wnd && this->have_focus != 0) {
         changed = 0;
-        GetKeyboardState(pbKeyState);
+        surface_get_keyboard_state(pbKeyState);
         horz_scroll = 0;
         vert_scroll = 0;
         info = rge_base_game->prog_info;

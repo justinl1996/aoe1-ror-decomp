@@ -1,5 +1,6 @@
 
 #include "../include/scr_sed.h"
+#include "../include/surface.h"
 #include "../include/program_mode.h"
 
 // Shared declarations are consumed privately by this source owner. The
@@ -2079,7 +2080,7 @@ long TRIBE_Screen_Sed::action(TPanel* from_panel, long action_in, unsigned long 
                 if (from_panel == this->generate_map_button) {
                     this->map_generating_text->set_active(1);
                     this->set_redraw(TPanel::RedrawImmediate);
-                    InvalidateRect(rge_base_game->prog_window, 0, 0);
+                    surface_invalidate_rect(rge_base_game->prog_window, 0, 0);
                     rge_base_game->draw_window();
                     i = this->map_size_drop->currentLineNumber();
                     int map_style = this->map_style_drop->currentLineNumber();

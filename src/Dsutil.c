@@ -1,4 +1,5 @@
 #include "../include/dsutil.h"
+#include "../include/surface.h"
 #include <stddef.h>
 
 #define DS_STREAM_STOP_MESSAGE 0x500
@@ -879,7 +880,7 @@ int __cdecl ds_stream_file(char* szName, int bLoop, long Volume) {
     ds_stream_stop_requested = 0;
     ds_stream_loop = bLoop & 0xFF;
     _bFileOpen = 1;
-    SendMessageA((HWND) _main_wnd, DS_STREAM_PROGRESS_MESSAGE, 0, 0);
+    surface_send_message((HWND) _main_wnd, DS_STREAM_PROGRESS_MESSAGE, 0, 0);
 
     IDirectSoundBuffer_SetCurrentPosition((LPDIRECTSOUNDBUFFER) _lpDSBStreamBuffer, 0);
     IDirectSoundBuffer_SetVolume((LPDIRECTSOUNDBUFFER) _lpDSBStreamBuffer, Volume);
@@ -1013,7 +1014,7 @@ void __stdcall ds_stream_time_func(
     if (ds_stream_at_end != 0 && ds_silence_chunks == 0) {
         if (ds_stream_stop_requested == 0) {
             ds_stream_stop_requested = 1;
-            PostMessageA(_main_wnd, DS_STREAM_STOP_MESSAGE, 0, 0);
+            surface_post_message(_main_wnd, DS_STREAM_STOP_MESSAGE, 0, 0);
         }
         bInTimer = 0;
         return;
@@ -1026,7 +1027,7 @@ void __stdcall ds_stream_time_func(
     }
     ds_last_play_cursor = dwPlay;
     ds_stream_position += playDistance;
-    PostMessageA(_main_wnd, DS_STREAM_PROGRESS_MESSAGE, 0, 0);
+    surface_post_message(_main_wnd, DS_STREAM_PROGRESS_MESSAGE, 0, 0);
 
     if (ds_stream_at_end != 0 && ds_silence_chunks != 0) {
         --ds_silence_chunks;

@@ -403,7 +403,7 @@ int TDrawSystem::SetDisplaySize(long wid_in, long hgt_in, int color_bits) {
     if (this->DrawArea != 0)
         this->DrawArea->SetSize(this->ScreenWidth, this->ScreenHeight, 0);
 
-    SendMessageA(this->Wnd, WM_SIZE, 0, MAKELONG(wid_in, hgt_in));
+    surface_send_message(this->Wnd, WM_SIZE, 0, MAKELONG(wid_in, hgt_in));
     return 1;
 }
 
@@ -582,7 +582,7 @@ int TDrawSystem::HandleQueryNewPalette(void* hwnd, unsigned int msg, unsigned in
         unsigned char result = (unsigned char) RealizePalette(hdc);
         ReleaseDC(this->Wnd, hdc);
         if (result != 0) {
-            InvalidateRect(this->Wnd, NULL, FALSE);
+            surface_invalidate_rect(this->Wnd, NULL, FALSE);
             return 1;
         }
     }

@@ -1,4 +1,5 @@
 #include "../third_party/directplay/include/dplay.h"
+#include "../include/surface.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1303,7 +1304,7 @@ void TCommunications_Handler::NotifyWindow(COMMMESSAGES msg) {
 }
 
 void TCommunications_Handler::NotifyWindowParam(COMMMESSAGES msg, long lparam) {
-    PostMessageA(this->HostHWND, WM_USER, msg, lparam);
+    surface_post_message(this->HostHWND, WM_USER, msg, lparam);
     L->Log("COMM: Send msg to window WM_USER  Msg=%d  Param=%d ", msg, lparam);
 }
 
