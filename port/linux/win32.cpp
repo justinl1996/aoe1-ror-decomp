@@ -35,6 +35,13 @@
 
 #undef open
 
+#ifdef __EMSCRIPTEN__
+extern "C" void web_note_file_write(void);  // port/web/main_loop.cpp
+#define NOTE_WRITE() web_note_file_write()
+#else
+#define NOTE_WRITE() ((void) 0)
+#endif
+
 extern "C" {
 
 const GUID GUID_NULL = {0, 0, 0, {0, 0, 0, 0, 0, 0, 0, 0}};
@@ -85,6 +92,8 @@ HANDLE WINAPI CreateFileA(LPCSTR name, DWORD access, DWORD, LPSECURITY_ATTRIBUTE
         case TRUNCATE_EXISTING: flags |= O_TRUNC; break;
         default: break;  // OPEN_EXISTING
     }
+    if ((access & GENERIC_WRITE) != 0)
+        NOTE_WRITE();
     int fd = open(linux_resolve_path(name, real, sizeof(real)), flags, 0666);
     if (fd < 0)
         return INVALID_HANDLE_VALUE;
@@ -160,6 +169,8 @@ HFILE WINAPI OpenFile(LPCSTR name, OFSTRUCT* info, UINT style) {
         info->cBytes = sizeof(*info);
         snprintf(info->szPathName, sizeof(info->szPathName), "%s", name);
     }
+    if ((style & (OF_DELETE | OF_WRITE | OF_READWRITE | OF_CREATE)) != 0)
+        NOTE_WRITE();
     if ((style & OF_DELETE) != 0)
         return unlink(real) == 0 ? 1 : HFILE_ERROR;
     int flags = O_RDONLY;

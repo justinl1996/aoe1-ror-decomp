@@ -433,13 +433,34 @@ the Linux port.
   by clicks: town centre selected, villager trained, keyboard scrolling,
   chat typed and sent, F10 menu. The Windows (Wine) and Linux builds still
   play a game and send chat after these changes.
+
+### Persistence, signature review, Firefox — 2026-11-22
+
+- **Writes reach IndexedDB promptly.** The file calls that write
+  (`linux_open` and `linux_fopen` for writing, unlink, rename, mkdir,
+  `CreateFileA` for writing, `OpenFile`) note the write
+  (`web_note_file_write`), and the main loop syncs `/game` two seconds
+  after the last one, besides the page's 30-second and page-hidden syncs.
+- `settings.ini` is written with one block per section (it repeated a
+  section's header when values were added in another order).
+- **Checked** in headless Chromium with a profile kept on disk:
+  - the game folder, `settings.ini` and a saved game survive a reload;
+  - the second load starts without the picker;
+  - after the reload, the saved game loads from the Single Player menu.
+- **Signature review (Task 2).** All sources compiled with
+  `-Wcast-function-type-strict`: four distinct casts, none a trap.
+  - `CallWindowProcA`'s `FARPROC` overload in `aoe_linux.h` is used only by
+    the video code, which does not exist here, and calls a real window
+    procedure.
+  - Three DirectPlay callbacks differ only in `const` on a pointer, which
+    is the same in WebAssembly, and are never called (no multiplayer).
+- **Firefox.** The menu shows in headless Firefox. It had no WebGL there,
+  so SDL used its software renderer, which the presenting code already
+  falls back to.
 - **Not yet:**
-  - the folder picker by hand;
-  - persistence across reloads;
-  - saving and loading;
-  - sound heard;
-  - Firefox;
+  - the folder picker and drop by hand;
+  - sound heard (headless browsers have no audio output here);
   - fullscreen;
-  - F-key defaults;
-  - the signature review;
-  - Tasks 6–8.
+  - the browser's own keys (F5, F11);
+  - clipboard paste;
+  - Tasks 7 and 8 (an automated test tool, release flags, docs).

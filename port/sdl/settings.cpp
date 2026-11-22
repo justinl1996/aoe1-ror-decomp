@@ -155,23 +155,32 @@ static void settings_save(void) {
     FILE* file = fopen(path, "wb");
     if (file == 0)
         return;
-    const char* section = 0;
-    for (Setting* setting = settings; setting != 0; setting = setting->next) {
-        if (section == 0 || strcmp(section, setting->section) != 0) {
-            fprintf(file, "%s[%s]\n", section != 0 ? "\n" : "", setting->section);
-            section = setting->section;
-        }
-        if (setting->type == REG_DWORD && setting->size == 4) {
-            unsigned long number;
-            memcpy(&number, setting->data, 4);
-            fprintf(file, "%s=dword:%lu\n", setting->name, number);
-        } else if (setting->type == REG_SZ && memchr(setting->data, '\n', setting->size) == 0) {
-            fprintf(file, "%s=sz:%s\n", setting->name, (const char*) setting->data);
-        } else {
-            fprintf(file, "%s=hex:", setting->name);
-            for (unsigned long i = 0; i < setting->size; ++i)
-                fprintf(file, i == 0 ? "%02x" : ",%02x", setting->data[i]);
-            fprintf(file, "\n");
+    // One block per section, in the order sections first appear.
+    int first_block = 1;
+    for (Setting* head = settings; head != 0; head = head->next) {
+        int seen = 0;
+        for (Setting* earlier = settings; earlier != head; earlier = earlier->next)
+            if (strcmp(earlier->section, head->section) == 0)
+                seen = 1;
+        if (seen)
+            continue;
+        fprintf(file, "%s[%s]\n", first_block ? "" : "\n", head->section);
+        first_block = 0;
+        for (Setting* setting = head; setting != 0; setting = setting->next) {
+            if (strcmp(setting->section, head->section) != 0)
+                continue;
+            if (setting->type == REG_DWORD && setting->size == 4) {
+                unsigned long number;
+                memcpy(&number, setting->data, 4);
+                fprintf(file, "%s=dword:%lu\n", setting->name, number);
+            } else if (setting->type == REG_SZ && memchr(setting->data, '\n', setting->size) == 0) {
+                fprintf(file, "%s=sz:%s\n", setting->name, (const char*) setting->data);
+            } else {
+                fprintf(file, "%s=hex:", setting->name);
+                for (unsigned long i = 0; i < setting->size; ++i)
+                    fprintf(file, i == 0 ? "%02x" : ",%02x", setting->data[i]);
+                fprintf(file, "\n");
+            }
         }
     }
     fclose(file);

@@ -22,6 +22,13 @@
 
 char* _pgmptr = (char*) "empiresx";
 
+#ifdef __EMSCRIPTEN__
+extern "C" void web_note_file_write(void);  // port/web/main_loop.cpp
+#define NOTE_WRITE() web_note_file_write()
+#else
+#define NOTE_WRITE() ((void) 0)
+#endif
+
 // ---------------------------------------------------------------------------
 // File names
 
@@ -122,6 +129,8 @@ int linux_open(const char* path, int flags, ...) {
         // umask allows.
         mode = (requested & 0200) != 0 ? 0666 : 0444;
     }
+    if ((flags & (O_WRONLY | O_RDWR | O_CREAT | O_TRUNC)) != 0)
+        NOTE_WRITE();
     return open(linux_resolve_path(path, real, sizeof(real)), flags, mode);
 }
 
@@ -134,20 +143,25 @@ FILE* linux_fopen(const char* path, const char* mode) {
         if (*m != 't')
             clean[n++] = *m;
     clean[n] = 0;
+    if (strpbrk(clean, "wa+") != 0)
+        NOTE_WRITE();
     return fopen(linux_resolve_path(path, real, sizeof(real)), clean);
 }
 
 int linux_unlink(const char* path) {
+    NOTE_WRITE();
     char real[PATH_MAX];
     return unlink(linux_resolve_path(path, real, sizeof(real)));
 }
 
 int linux_remove(const char* path) {
+    NOTE_WRITE();
     char real[PATH_MAX];
     return remove(linux_resolve_path(path, real, sizeof(real)));
 }
 
 int linux_rename(const char* from, const char* to) {
+    NOTE_WRITE();
     char real_from[PATH_MAX];
     char real_to[PATH_MAX];
     return rename(linux_resolve_path(from, real_from, sizeof(real_from)),
@@ -296,11 +310,13 @@ int _chdir(const char* path) {
 }
 
 int _mkdir(const char* path) {
+    NOTE_WRITE();
     char real[PATH_MAX];
     return mkdir(linux_resolve_path(path, real, sizeof(real)), 0777);
 }
 
 int _rmdir(const char* path) {
+    NOTE_WRITE();
     char real[PATH_MAX];
     return rmdir(linux_resolve_path(path, real, sizeof(real)));
 }
