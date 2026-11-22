@@ -457,6 +457,17 @@ the Linux port.
 - **Firefox.** The menu shows in headless Firefox. It had no WebGL there,
   so SDL used its software renderer, which the presenting code already
   falls back to.
+- **Cursor and focus (first real-browser report).** In a game, the drawn
+  cursor sat away from the pointer by the canvas's offset in the page:
+  `surface_get_cursor_pos` took SDL's global mouse state minus the window
+  position, which in a page is not the canvas's. The web build uses the
+  pointer's position in the canvas. The game also counted as inactive
+  without a focus event, and active only while the page had focus. It
+  shuts its drawn cursor down when inactive. In the browser it is now
+  active while its tab is visible (SDL's shown and hidden events), and
+  the canvas takes the keyboard focus at start and on clicks. Checked at
+  1600x1000 in headless Chromium: the drawn cursor is under the pointer,
+  where the old build drew it 288 and 116 pixels off.
 - **Not yet:**
   - the folder picker and drop by hand;
   - sound heard (headless browsers have no audio output here);

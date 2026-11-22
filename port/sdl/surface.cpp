@@ -284,6 +284,15 @@ BOOL surface_get_cursor_pos(POINT* point) {
 #else
         return FALSE;
 #endif
+#ifdef __EMSCRIPTEN__
+    // A page has no screen position to subtract: the pointer's position in
+    // the canvas.
+    int x;
+    int y;
+    SDL_GetMouseState(&x, &y);
+    point->x = x;
+    point->y = y;
+#else
     int global_x;
     int global_y;
     int window_x;
@@ -292,6 +301,7 @@ BOOL surface_get_cursor_pos(POINT* point) {
     SDL_GetWindowPosition(sdl_window, &window_x, &window_y);
     point->x = global_x - window_x;
     point->y = global_y - window_y;
+#endif
     if (map_active())
         map_client_to_game(point);
     return TRUE;

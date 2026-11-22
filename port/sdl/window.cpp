@@ -588,12 +588,25 @@ static void translate_event(const SDL_Event* event) {
             break;
         case SDL_WINDOWEVENT:
             switch (event->window.event) {
+#ifdef __EMSCRIPTEN__
+                // In a browser the page's focus comes and goes (the address
+                // bar, the developer tools, a click outside the canvas), and a
+                // page may never get a focus event at all. The game is active
+                // while its tab is visible.
+                case SDL_WINDOWEVENT_SHOWN:
+                    activate(1);
+                    break;
+                case SDL_WINDOWEVENT_HIDDEN:
+                    activate(0);
+                    break;
+#else
                 case SDL_WINDOWEVENT_FOCUS_GAINED:
                     activate(1);
                     break;
                 case SDL_WINDOWEVENT_FOCUS_LOST:
                     activate(0);
                     break;
+#endif
                 case SDL_WINDOWEVENT_EXPOSED:
                     window_invalidate_all();
                     present_repaint();
@@ -1082,8 +1095,12 @@ HWND surface_create_main_window(const char* title, int width, int height, WNDPRO
     window_sdl_proc = (WNDPROC) SetWindowLongA(sdl_hwnd, GWL_WNDPROC, (LONG) bridge_wnd_proc);
 #endif
 
+#ifdef __EMSCRIPTEN__
+    activate(1);  // the page is visible when the game starts
+#else
     if ((SDL_GetWindowFlags(sdl_window) & SDL_WINDOW_INPUT_FOCUS) != 0)
         activate(1);
+#endif
     window_invalidate_all();
     return sdl_hwnd;
 }

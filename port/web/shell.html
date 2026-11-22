@@ -194,7 +194,13 @@
       prepareGameFolder().then(() => Module.removeRunDependency('gamefolder'),
                                 (err) => setStatus('Could not prepare the game folder: ' + err));
     }],
-    onRuntimeInitialized: () => { panel.classList.add('hidden'); },
+    onRuntimeInitialized: () => {
+      panel.classList.add('hidden');
+      // Keys go to the game: the canvas has the focus, now and after clicks.
+      const canvas = document.getElementById('canvas');
+      canvas.focus();
+      canvas.addEventListener('mousedown', () => canvas.focus());
+    },
     print: (text) => console.log(text),
     printErr: (text) => console.warn(text),
     setStatus: (text) => { if (text) setStatus(text); },
