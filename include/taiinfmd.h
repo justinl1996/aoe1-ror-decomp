@@ -44,8 +44,6 @@ class RGE_Action_List;
 extern InfluenceMap iMap;
 extern InfluenceMap losMap;
 extern InfluenceMap attackMap;
-
-void* operator new(unsigned int size);
 void operator delete(void* pointer);
 
 class TribeInformationAIModule : public InformationAIModule {

@@ -34,7 +34,7 @@ static Setting* settings = 0;
 static int settings_loaded = 0;
 
 static void settings_path(char* out, size_t size) {
-    char* base = SDL_GetBasePath();
+    char* base = port_base_path();
     SDL_snprintf(out, size, "%ssettings.ini", base != 0 ? base : "");
     SDL_free(base);
 }

@@ -163,7 +163,7 @@ static void wav_close(WavFile* wav) {
 }
 
 static void music_dir_path(char* out, size_t size, const char* name) {
-    char* base = SDL_GetBasePath();
+    char* base = port_base_path();
     SDL_snprintf(out, size, "%smusic%c%s", base != 0 ? base : "", base != 0 ? base[SDL_strlen(base) - 1] : '/', name);
     SDL_free(base);
 }

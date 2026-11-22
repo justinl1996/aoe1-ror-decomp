@@ -72,7 +72,7 @@ TRIBE_World::~TRIBE_World() {
 }
 
 void TRIBE_World::logStatus(FILE* out, int firstTime) {
-    long clock;
+    time_t clock;
     char tempString[256];
 
     if (out != 0 && firstTime == 1) {

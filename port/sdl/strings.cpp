@@ -196,7 +196,7 @@ extern "C" void* surface_string_table_open(const char* name) {
     size_t size = 0;
     // LoadLibraryA looked in the executable's folder, then the current one.
     char path[MAX_PATH];
-    char* base = SDL_GetBasePath();
+    char* base = port_base_path();
     SDL_snprintf(path, sizeof(path), "%s%s", base != 0 ? base : "", name);
     SDL_free(base);
     unsigned char* file = read_file(path, &size);

@@ -876,33 +876,58 @@ void RGE_Base_Game::set_campaign_win() {
 }
 
 int RGE_Base_Game::run() {
+    int exit_code = 0;
+    while (this->run_step(&exit_code) != RunStepQuit) {
+    }
+    return exit_code;
+}
+
+// One pass of the message loop. While the game or a menu is active it polls:
+// a message if there is one, else idle work (the game's updates). Otherwise
+// it waits for the next message. The browser build cannot wait (its frame
+// function must return), so there it returns RunStepIdle instead and the
+// next browser frame polls again (port/web/main.cpp).
+int RGE_Base_Game::run_step(int* exit_code) {
     MSG msg;
 
-    while (1) {
-        if (this->prog_active != 0 && (this->prog_mode == ProgModeGame || this->prog_mode == ProgModeMenu)) {
-            TCommunications_Handler* comm = this->comm_handler;
-            if (comm == 0 || comm->IsPaused() == 0) {
-                if (surface_peek_message(&msg) != 0) {
-                    if (msg.message == WM_QUIT) {
-                        return (int) msg.wParam;
-                    }
-                    if (this->handle_message(&msg) != 0) {
-                        surface_dispatch_message(&msg);
-                    }
-                } else {
-                    this->handle_idle();
+    if (this->prog_active != 0 && (this->prog_mode == ProgModeGame || this->prog_mode == ProgModeMenu)) {
+        TCommunications_Handler* comm = this->comm_handler;
+        if (comm == 0 || comm->IsPaused() == 0) {
+            int step = RunStepIdle;
+            if (surface_peek_message(&msg) != 0) {
+                if (msg.message == WM_QUIT) {
+                    *exit_code = (int) msg.wParam;
+                    return RunStepQuit;
                 }
-                surface_present_flush();
-                continue;
+                if (this->handle_message(&msg) != 0) {
+                    surface_dispatch_message(&msg);
+                }
+                step = RunStepMessage;
+            } else {
+                this->handle_idle();
             }
+            surface_present_flush();
+            return step;
         }
-
-        surface_present_flush();
-        if (surface_get_message(&msg) == 0) {
-            return (int) msg.wParam;
-        }
-        surface_dispatch_message(&msg);
     }
+
+    surface_present_flush();
+#ifdef __EMSCRIPTEN__
+    if (surface_peek_message(&msg) == 0) {
+        return RunStepIdle;
+    }
+    if (msg.message == WM_QUIT) {
+        *exit_code = (int) msg.wParam;
+        return RunStepQuit;
+    }
+#else
+    if (surface_get_message(&msg) == 0) {
+        *exit_code = (int) msg.wParam;
+        return RunStepQuit;
+    }
+#endif
+    surface_dispatch_message(&msg);
+    return RunStepMessage;
 }
 
 extern int startLoggingAI;
@@ -2096,8 +2121,8 @@ int RGE_Base_Game::check_for_cd(int num_players) {
 
 int RGE_Base_Game::check_expiration() {
     struct tm kill_def;
-    long cur_date;
-    long expiration_time;
+    time_t cur_date;
+    time_t expiration_time;
 
     memset(&kill_def, 0, sizeof(kill_def));
     kill_def.tm_mon = (int) this->prog_info->expire_month - 1;

@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "notes": [
+    "The browser build (tools/build_web.py, workflow/docs/emscripten_port.md): WebAssembly (wasm32) with the same SDL layer and port/linux sources as the Linux build.",
+    "Emscripten is installed with emsdk (not vendored): git clone https://github.com/emscripten-core/emsdk build/third_party/emsdk, then ./emsdk install <version> && ./emsdk activate <version>. The tool uses EMSDK from the environment, else build/third_party/emsdk.",
+    "SDL2 and SDL2_ttf are Emscripten's built-in ports. Wine's headers come from config/linux.json's package, copied and given wasm32 branches by the tool."
+  ],
+  "emscripten_version": "6.0.13",
+  "emsdk_dir": "build/third_party/emsdk",
+  "sources": [
+    "port/web/main_loop.cpp"
+  ],
+  "defines": [
+    "NO_STRICT",
+    "AOE_WEB"
+  ],
+  "compile_flags": [
+    "-sUSE_SDL=2",
+    "-sUSE_SDL_TTF=2"
+  ],
+  "link_flags": [
+    "-sUSE_SDL=2",
+    "-sUSE_SDL_TTF=2",
+    "-sALLOW_MEMORY_GROWTH=1",
+    "-sINITIAL_MEMORY=256MB",
+    "-sMAXIMUM_MEMORY=2GB",
+    "-sSTACK_SIZE=4MB",
+    "-lidbfs.js",
+    "-sEXPORTED_RUNTIME_METHODS=FS,IDBFS,addRunDependency,removeRunDependency"
+  ]
+}

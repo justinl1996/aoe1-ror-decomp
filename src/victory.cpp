@@ -23,7 +23,6 @@ struct vc5_phase_9;
 struct vc5_phase_10;
 struct vc5_phase_11;
 
-extern "C" void* calloc(unsigned int count, unsigned int size);
 extern void __cdecl getstring(char** destination, char* source);
 
 RGE_Victory_Conditions::RGE_Victory_Conditions(

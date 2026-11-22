@@ -166,7 +166,12 @@ void surface_present_flush(void) {
 // coordinate functions below stand in for the game's direct cursor and
 // window-rectangle calls.
 
+#ifdef __EMSCRIPTEN__
+// In a browser, fullscreen needs a click or key first; start in the page.
+static int layout_windowed = 1;
+#else
 static int layout_windowed = 0;
+#endif
 
 void surface_set_windowed(int windowed) {
     layout_windowed = windowed != 0;

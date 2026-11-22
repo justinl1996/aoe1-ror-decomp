@@ -4,7 +4,9 @@
 
 #include <windows.h>
 #include <dlfcn.h>
+#ifndef __EMSCRIPTEN__
 #include <execinfo.h>
+#endif
 #include <limits.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -19,6 +21,11 @@ extern "C" int __stdcall WinMain(HINSTANCE prog_inst, HINSTANCE prev_inst, char*
 // On a crash, the stack as module+offset lines (llvm-symbolizer
 // --obj=empiresx turns the game's into source lines).
 static void report_crash(int signal_number) {
+#ifdef __EMSCRIPTEN__
+    // No signals or backtrace here: the browser's console shows the trap.
+    (void) signal_number;
+    return;
+#else
     void* frames[64];
     int count = backtrace(frames, 64);
     fprintf(stderr, "empiresx: crashed (signal %d). Stack:\n", signal_number);
@@ -32,6 +39,7 @@ static void report_crash(int signal_number) {
     }
     signal(signal_number, SIG_DFL);
     raise(signal_number);
+#endif
 }
 
 int main(int argc, char** argv) {

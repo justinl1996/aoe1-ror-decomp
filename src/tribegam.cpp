@@ -95,7 +95,6 @@ void encrypt_codes(char* source, char* dest, int maxlen) {
 struct _iobuf;
 
 extern "C" {
-char* __cdecl ctime(const long* t);
 }
 
 extern int do_run_log;       // 0x62C4F4
@@ -119,9 +118,10 @@ void __cdecl run_log(char* str, int show_time) {
         return;
 
     if (show_time) {
-        time((long*) &show_time);
+        // The original stored the time in show_time itself (an int).
+        time_t now = time(0);
         memset(stime, 0, sizeof(stime));
-        strncpy(stime, ctime((const long*) &show_time), 24);
+        strncpy(stime, ctime(&now), 24);
         fprintf(run_log_file, "%s - %s\n", stime, str);
     } else {
         fprintf(run_log_file, "%s\n", str);
@@ -619,8 +619,6 @@ int TRIBE_Game::setup_palette() {
     }
     return 1;
 }
-
-extern void* operator new(unsigned int size);
 
 int TRIBE_Game::setup_sounds() {
     TDigital* d;

@@ -385,4 +385,61 @@ the Linux port.
 
 ## Progress
 
-(Record each task's checks here as it is done.)
+### Tasks 0–3 done, 4 and 5 in part — 2026-11-22
+
+- **Toolchain (Task 0).** Emscripten 6.0.13 through emsdk in
+  `build/third_party/emsdk` (config/web.json). `make web` /
+  `tools/build_web.py` builds `build/web/<time>/index.html`, `index.js`,
+  `index.wasm` (3.3 MB at -O2) and `index.data` (the fonts). `--debug` uses
+  `-O0 -g` with assertions, `SAFE_HEAP=2` and stack checks. `SAFE_HEAP=1`
+  stops at the game's unaligned reads of its data files, which wasm allows.
+- **Compile (Task 1).** All 244 sources compile for wasm32. Wine's headers
+  get placeholder `CONTEXT` and `NtCurrentTeb()` for wasm32 (copied and
+  edited by the tool). On wasm32 `size_t` is `unsigned long` and `time_t`
+  is 64-bit. So the game's leftover declarations of the global
+  `operator new(unsigned int)` and of C functions were removed, and
+  variables passed to `time`/`ctime`/`localtime` are `time_t`
+  (`run_log` used its `int show_time` parameter as the time's storage).
+  The crash backtrace in port/linux/main.cpp is left out on the web.
+- **Link (Task 2).** Links with no undefined symbols. The linker found
+  one signature mismatch: `ds_stream_messages` was defined with two
+  parameters and called with four (Dsutil.c now takes the four). No
+  signature trap has shown at run time so far; a review with
+  `-Wcast-function-type-strict` is still to do.
+- **Main loop (Task 3).** `RGE_Base_Game::run()` is now a loop over
+  `run_step()`. On the web, `WinMain` hands the game to
+  port/web/main_loop.cpp, which runs passes each browser frame until idle
+  work is done or 25 ms have passed. `RGE_Prog_Info info` in `WinMain` is
+  static, since the game keeps a pointer to it after `WinMain` returns.
+- **Sound (Task 4, in part).** SDL's Emscripten audio kept calling a closed
+  device's callback and divided by zero. In the browser the audio device
+  stays open and closing only pauses it. The game's timers fire
+  (`SDL_AddTimer` works without threads); polling them is not needed.
+  Audio has not been listened to yet.
+- **Game folder (Task 5, in part).** port/web/shell.html mounts `/game` as
+  IndexedDB (IDBFS), and on the first visit copies the chosen folder in,
+  by picker or drop: everything except `avi/` and the Windows programs,
+  keeping `language.dll` and `languagex.dll`. It adds an empty
+  `empires.exe` for the startup check, saves to IndexedDB every 30 s and
+  when the page is hidden, and starts the game in `/game`. The port layer
+  finds settings, strings and music through `port_base_path()` (`/game/`
+  on the web). A development option `?devdata=URL&manifest=URL` fills
+  `/game` from a local server, for automated runs.
+- **Display.** The web build starts in the windowed layout (fullscreen
+  needs a user gesture).
+- **Checked** in headless Chromium (Playwright, SwiftShader WebGL),
+  1024x768: the menu matches the Linux build's except for 0.27% of
+  pixels (glyph rasterization). A random-map game started from the menus
+  by clicks: town centre selected, villager trained, keyboard scrolling,
+  chat typed and sent, F10 menu. The Windows (Wine) and Linux builds still
+  play a game and send chat after these changes.
+- **Not yet:**
+  - the folder picker by hand;
+  - persistence across reloads;
+  - saving and loading;
+  - sound heard;
+  - Firefox;
+  - fullscreen;
+  - F-key defaults;
+  - the signature review;
+  - Tasks 6–8.

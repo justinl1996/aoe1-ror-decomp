@@ -378,6 +378,11 @@ class RGE_Base_Game {
 
     virtual ~RGE_Base_Game();
     virtual int run();
+    // One pass of run()'s loop (see basegame.cpp): RunStepQuit with the exit
+    // code in *exit_code, RunStepMessage after handling a message,
+    // RunStepIdle after idle work or when there was nothing to do.
+    enum RunStep { RunStepQuit = 0, RunStepMessage = 1, RunStepIdle = 2 };
+    int run_step(int* exit_code);
     virtual LRESULT CALLBACK wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam);
     virtual void set_prog_mode(int value) {
         this->prog_mode = value;

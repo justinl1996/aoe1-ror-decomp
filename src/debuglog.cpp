@@ -170,7 +170,7 @@ void __cdecl TDebuggingLog::Log(char* fmt, ...) {
     va_end(args);
 
     unsigned long ticks = GetTickCount();
-    long ltime;
+    time_t ltime;
     char s2[32];
     char s3[32];
     char s4[32];

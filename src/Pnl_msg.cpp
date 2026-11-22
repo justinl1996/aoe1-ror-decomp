@@ -5,8 +5,6 @@
 #include "../include/rge_base_game_global.h"
 #include <string.h>
 
-extern "C" int strncmp(const char*, const char*, unsigned int);
-extern "C" char* strncpy(char*, const char*, unsigned int);
 unsigned long __cdecl debug_timeGetTime(char*, int);
 
 TMessagePanel::TMessagePanel(void* font_in, long font_wid_in, long font_hgt_in) :

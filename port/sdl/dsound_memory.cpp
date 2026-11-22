@@ -272,8 +272,10 @@ static void SDLCALL mix_callback(void*, Uint8* stream, int len) {
 }
 
 static int mix_open(void) {
-    if (mix_device != 0)
+    if (mix_device != 0) {
+        SDL_PauseAudioDevice(mix_device, 0);  // kept open across closes (browser)
         return 1;
+    }
     if (SDL_WasInit(SDL_INIT_AUDIO) == 0 && SDL_InitSubSystem(SDL_INIT_AUDIO) != 0)
         return 0;
     SDL_AudioSpec want;
@@ -293,6 +295,19 @@ static int mix_open(void) {
 }
 
 static void mix_close(void) {
+#ifdef __EMSCRIPTEN__
+    // Emscripten's SDL keeps calling a closed device's Web Audio callback
+    // for a moment, and it then divides by the cleared format's frame size
+    // (a WebAssembly trap). In the browser the device stays open: closing
+    // only pauses it and stops the buffers.
+    if (mix_device != 0) {
+        SDL_LockAudioDevice(mix_device);
+        mix_playing = 0;
+        SDL_UnlockAudioDevice(mix_device);
+        SDL_PauseAudioDevice(mix_device, 1);
+    }
+    return;
+#endif
     if (mix_device != 0) {
         SDL_CloseAudioDevice(mix_device);
         mix_device = 0;

@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Age of Empires: The Rise of Rome (web port)</title>
+<style>
+  :root { --bg: #000; --fg: #e8d9b0; --muted: #9c8f6c; --accent: #d9a441; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+               font: 15px/1.4 system-ui, sans-serif; overflow: hidden; }
+  #canvas { display: block; position: absolute; inset: 0; margin: auto; background: #000;
+            image-rendering: pixelated; outline: none; }
+  #panel { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  #box { max-width: 34em; padding: 1.5em 2em; border: 1px solid var(--muted); background: #0d0b06; }
+  #box h1 { font-size: 1.25em; margin: 0 0 .5em; color: var(--accent); }
+  #box p { margin: .5em 0; }
+  #status { color: var(--muted); min-height: 1.4em; }
+  #pick { display: none; }
+  button, label.button { display: inline-block; margin-top: .5em; padding: .45em 1em; color: var(--bg);
+           background: var(--accent); border: 0; cursor: pointer; font: inherit; }
+  #drop.over { outline: 2px dashed var(--accent); outline-offset: 6px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<canvas id="canvas" tabindex="-1" width="1024" height="768"></canvas>
+<div id="panel">
+  <div id="box">
+    <h1>Age of Empires: The Rise of Rome</h1>
+    <div id="choose" class="hidden">
+      <p>This page runs the game, but the game's files are yours: choose the folder of an
+         installed copy (the one with <code>data2</code>, <code>sound</code> and
+         <code>language.dll</code>), or drop it here. They are copied into this browser's
+         storage, once.</p>
+      <div id="drop"><label class="button" for="pick">Choose the game folder</label></div>
+      <input id="pick" type="file" webkitdirectory multiple>
+    </div>
+    <p id="status">Loading…</p>
+  </div>
+</div>
+<script>
+// The game's folder lives at /game in Emscripten's file system, backed by
+// IndexedDB (IDBFS) so it survives reloads, together with settings.ini,
+// saved games and scenarios.
+(function () {
+  const statusLine = document.getElementById('status');
+  const panel = document.getElementById('panel');
+  const choose = document.getElementById('choose');
+  const setStatus = (text) => { statusLine.textContent = text; };
+  const params = new URLSearchParams(location.search);
+
+  // What the game needs from an install: everything but the videos and the
+  // Windows programs (the language DLLs are read for their strings).
+  function wanted(path) {
+    const lower = path.toLowerCase();
+    if (lower.startsWith('avi/')) return false;
+    if (/\.(exe|dll|hlp|cnt|doc|rtf|ico)$/.test(lower))
+      return lower === 'language.dll' || lower === 'languagex.dll';
+    return true;
+  }
+
+  function writeFile(path, bytes) {
+    const parts = path.split('/');
+    let dir = '/game';
+    for (let i = 0; i < parts.length - 1; ++i) {
+      dir += '/' + parts[i];
+      try { FS.mkdir(dir); } catch (e) { /* exists */ }
+    }
+    FS.writeFile('/game/' + path, bytes);
+  }
+
+  function haveGame() {
+    try { FS.stat('/game/data2/empires.dat'); FS.stat('/game/language.dll'); return true; }
+    catch (e) { return false; }
+  }
+
+  function sync(populate) {
+    return new Promise((resolve) => FS.syncfs(populate, (err) => {
+      if (err) console.warn('IndexedDB sync failed', err);
+      resolve();
+    }));
+  }
+
+  async function copyFiles(files) {
+    let done = 0;
+    for (const [path, file] of files) {
+      writeFile(path, new Uint8Array(await file.arrayBuffer()));
+      if (++done % 25 === 0) setStatus(`Copying the game's files… ${done} of ${files.length}`);
+    }
+  }
+
+  // A folder picked or dropped: paths relative to the chosen folder.
+  async function fromFileList(list) {
+    const files = [];
+    for (const file of list) {
+      const rel = (file.webkitRelativePath || file.name).split('/').slice(1).join('/');
+      if (rel && wanted(rel)) files.push([rel, file]);
+    }
+    await copyFiles(files);
+  }
+
+  async function fromDroppedEntry(entry, prefix, out) {
+    if (entry.isFile) {
+      const file = await new Promise((ok, bad) => entry.file(ok, bad));
+      const rel = prefix + file.name;
+      if (wanted(rel)) out.push([rel, file]);
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader();
+      for (;;) {
+        const batch = await new Promise((ok, bad) => reader.readEntries(ok, bad));
+        if (batch.length === 0) break;
+        for (const child of batch) await fromDroppedEntry(child, prefix + entry.name + '/', out);
+      }
+    }
+  }
+
+  // Development and automated tests only: fetch an install from a local
+  // server (?devdata=URL with a manifest.json listing the files).
+  async function fromDevServer(base) {
+    const list = await (await fetch(params.get('manifest') || base + '/manifest.json')).json();
+    let done = 0;
+    for (const path of list) {
+      if (!wanted(path)) continue;
+      const bytes = new Uint8Array(await (await fetch(base + '/' + encodeURI(path))).arrayBuffer());
+      writeFile(path, bytes);
+      if (++done % 25 === 0) setStatus(`Loading development data… ${done} of ${list.length}`);
+    }
+  }
+
+  function askForFolder() {
+    return new Promise((resolve) => {
+      choose.classList.remove('hidden');
+      setStatus('');
+      const finish = async (work) => {
+        choose.classList.add('hidden');
+        setStatus("Copying the game's files…");
+        await work;
+        if (!haveGame()) {
+          setStatus('That folder does not look like the game: data2/empires.dat or language.dll is missing.');
+          choose.classList.remove('hidden');
+          return;
+        }
+        resolve();
+      };
+      document.getElementById('pick').addEventListener('change', (e) => finish(fromFileList(e.target.files)));
+      const drop = document.getElementById('drop');
+      drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('over'); });
+      drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+      drop.addEventListener('drop', (e) => {
+        e.preventDefault();
+        drop.classList.remove('over');
+        const out = [];
+        const entries = [...e.dataTransfer.items].map((i) => i.webkitGetAsEntry()).filter(Boolean);
+        // A dropped folder: its contents, without the folder's own name.
+        const work = (async () => {
+          for (const entry of entries) {
+            if (entry.isDirectory) {
+              const reader = entry.createReader();
+              for (;;) {
+                const batch = await new Promise((ok, bad) => reader.readEntries(ok, bad));
+                if (batch.length === 0) break;
+                for (const child of batch) await fromDroppedEntry(child, '', out);
+              }
+            }
+          }
+          await copyFiles(out);
+        })();
+        finish(work);
+      });
+    });
+  }
+
+  async function prepareGameFolder() {
+    try { FS.mkdir('/game'); } catch (e) { /* exists */ }
+    FS.mount(Module.IDBFS || IDBFS, {}, '/game');
+    await sync(true);
+    if (!haveGame()) {
+      const dev = params.get('devdata');
+      if (dev) await fromDevServer(dev);
+      else await askForFolder();
+    }
+    // The game checks that its program is in its folder.
+    try { FS.stat('/game/empires.exe'); } catch (e) { FS.writeFile('/game/empires.exe', new Uint8Array(0)); }
+    await sync(false);
+    FS.chdir('/game');
+    setStatus('Starting…');
+  }
+
+  window.Module = {
+    canvas: document.getElementById('canvas'),
+    arguments: (params.get('args') || 'NOSTARTUP GAMECD').split(/\s+/).filter(Boolean),
+    preRun: [() => {
+      Module.addRunDependency('gamefolder');
+      prepareGameFolder().then(() => Module.removeRunDependency('gamefolder'),
+                                (err) => setStatus('Could not prepare the game folder: ' + err));
+    }],
+    onRuntimeInitialized: () => { panel.classList.add('hidden'); },
+    print: (text) => console.log(text),
+    printErr: (text) => console.warn(text),
+    setStatus: (text) => { if (text) setStatus(text); },
+    onGameExit: (code) => {
+      sync(false);
+      panel.classList.remove('hidden');
+      setStatus('The game has ended. Reload the page to play again.');
+    },
+    onAbort: (what) => {
+      panel.classList.remove('hidden');
+      setStatus('The game stopped with an error: ' + what);
+    },
+  };
+
+  // Keep settings, saved games and scenarios: write them to IndexedDB
+  // regularly and when the page is hidden.
+  setInterval(() => { if (window.FS && FS.syncfs) sync(false); }, 30000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && window.FS && FS.syncfs) sync(false);
+  });
+
+  document.getElementById('canvas').addEventListener('contextmenu', (e) => e.preventDefault());
+})();
+</script>
+{{{ SCRIPT }}}
+</body>
+</html>

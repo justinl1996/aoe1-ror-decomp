@@ -915,8 +915,6 @@ void __cdecl operator delete(void* ptr);
 
 TribeStrategyAIModule::~TribeStrategyAIModule() {
 }
-
-extern void* __cdecl operator new(unsigned int size);
 extern void __cdecl operator delete(void* pointer);
 
 int TribeStrategyAIModule::update(int timeLimit) {
@@ -1003,7 +1001,6 @@ void TribeStrategyAIModule::setMainDecisionAI(TribeMainDecisionAIModule* m) {
 #include <string.h>
 
 void __cdecl rge_write(int fd, void* data, int size);
-void* __cdecl operator new(unsigned int size);
 void __cdecl operator delete(void* p);
 
 int TribeStrategyAIModule::save(int outfile) {
@@ -1094,7 +1091,6 @@ char* TribeStrategyAIModule::ruleSetName() {
     return this->ruleSetNameValue;
 }
 
-char* strncpy(char* dest, const char* src, unsigned int count);
 
 int TribeStrategyAIModule::loadRules(char* rName) {
     if (rName == 0) {

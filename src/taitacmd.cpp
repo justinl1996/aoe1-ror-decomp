@@ -1858,8 +1858,6 @@ diplomacy: {
 void TribeTacticalAIModule::setMainDecisionAI(TribeMainDecisionAIModule* m) {
     this->md = m;
 }
-
-void* __cdecl operator new(unsigned int size);
 void __cdecl operator delete(void* ptr);
 
 int TribeTacticalAIModule::save(int outfile) {
@@ -8065,8 +8063,6 @@ void TribeTacticalAIModule::displayBoatGroups() {
     }
 }
 
-void* __cdecl operator new(unsigned int size);
-
 TacticalAIGroup* TribeTacticalAIModule::createGroup(int initID) {
     TacticalAIGroup* group;
     int id;
@@ -8358,8 +8354,6 @@ int TribeTacticalAIModule::numberUnitsInGroups(int type) {
     }
     return total;
 }
-
-void* __cdecl operator new(unsigned int size);
 void __cdecl operator delete(void* ptr);
 
 int TribeTacticalAIModule::numberItemsToAttack() {
@@ -9575,8 +9569,6 @@ int TribeTacticalAIModule::desiredGathererCount(int n) {
         return -1;
     return this->desiredGathererDistribution[this->neededResourceValue[n]];
 }
-
-void* operator new(unsigned int size);
 void operator delete(void* ptr);
 void TribeTacticalAIModule::taskElephantGatherers(int mainHunterID, int numberToTask, int targetID) {
     RGE_Static_Object* targetObject = this->md->object(targetID);
@@ -9633,8 +9625,6 @@ void TribeTacticalAIModule::taskElephantGatherers(int mainHunterID, int numberTo
         }
     }
 }
-
-void* operator new(unsigned int size);
 void operator delete(void* ptr);
 
 void TribeTacticalAIModule::checkTradeBoats() {

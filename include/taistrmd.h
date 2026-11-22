@@ -14,8 +14,6 @@ class RGE_Victory_Conditions;
 class TribeMainDecisionAIModule;
 class TRIBE_Player;
 struct RGE_Victory_Entry;
-
-void* __cdecl operator new(unsigned int size);
 void __cdecl operator delete(void* pointer);
 
 class TribeStrategyAIModule : public StrategyAIModule {

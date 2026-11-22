@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern "C" int __cdecl _strnicmp(const char*, const char*, unsigned int);
 // These anonymous literals are the !MUTE and !NOMUTE command strings.
 
 void __cdecl operator delete(void* ptr);

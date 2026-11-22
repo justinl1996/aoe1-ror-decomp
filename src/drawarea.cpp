@@ -26,7 +26,6 @@ extern void __cdecl DibBlt(
     BITMAPINFO256*, unsigned char*, RECT*, long, long, long, long, BITMAPINFO256*, unsigned char*, long, long, long, long, int,
     int, int
 );
-extern void* __cdecl operator new(unsigned int);
 #pragma function(memset)
 
 TDrawSystem::TDrawSystem() {

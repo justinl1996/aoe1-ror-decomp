@@ -31,6 +31,11 @@ long map_game_height(void);
 void layout_toggle(void);
 int layout_is_windowed(void);
 
+// window.cpp: the folder that holds the game's own files next to the
+// program (settings.ini, the language DLLs, music/): the executable's
+// folder, or /game in the browser. Free with SDL_free.
+char* port_base_path(void);
+
 // dsound_memory.cpp: the SDL audio device and its mixer. The music source
 // fills frames of 16-bit stereo at 44100 Hz from the audio thread and
 // returns 0 when it has nothing to play. Lock around state the source reads.

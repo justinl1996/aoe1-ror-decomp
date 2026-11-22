@@ -915,6 +915,15 @@ static LRESULT CALLBACK bridge_wnd_proc(HWND wnd, UINT msg, WPARAM wparam, LPARA
 // ---------------------------------------------------------------------------
 // The game window as a whole
 
+char* port_base_path(void) {
+#ifdef __EMSCRIPTEN__
+    // The browser build keeps the game's folder at /game (port/web).
+    return SDL_strdup("/game/");
+#else
+    return SDL_GetBasePath();
+#endif
+}
+
 void surface_show_main_window(void) {
     if (sdl_window == 0)
         return;

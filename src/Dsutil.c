@@ -946,7 +946,12 @@ int __cdecl ds_stream_stop(void) {
     return 1;
 }
 
-int __cdecl ds_stream_messages(int hWnd, int wMsg) {
+/* The caller (TSound_Driver::handle_messages) passes a window message's
+   four parameters; the definition takes all four so the call's signature
+   matches (WebAssembly traps on a mismatch). */
+int __cdecl ds_stream_messages(void* hWnd, unsigned int wMsg, unsigned int wParam, long lParam) {
+    (void) wParam;
+    (void) lParam;
     (void) hWnd;
     switch (wMsg) {
         case DS_STREAM_STOP_MESSAGE:

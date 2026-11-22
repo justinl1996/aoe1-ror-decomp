@@ -7,10 +7,17 @@
 #include "../include/resource_ids.h"
 #include "../include/surface.h"
 
+#ifdef __EMSCRIPTEN__
+class RGE_Base_Game;
+void web_run_game(RGE_Base_Game* game);  // port/web/main_loop.cpp
+#endif
+
 extern "C" int __stdcall WinMain(HINSTANCE prog_inst, HINSTANCE prev_inst, char* cmd_line, int show_wnd_flag) {
     int retval;
     TRIBE_Game* game;
-    RGE_Prog_Info info;
+    // static: the browser build returns from WinMain while the game runs
+    // on (port/web/main_loop.cpp), and the game keeps a pointer to it.
+    static RGE_Prog_Info info;
     char title[256];
     char msg[256];
 
@@ -82,6 +89,11 @@ extern "C" int __stdcall WinMain(HINSTANCE prog_inst, HINSTANCE prev_inst, char*
     if (game != 0) {
         int error_code = game->get_error_code();
         if (error_code == RGE_ERROR_NONE) {
+#ifdef __EMSCRIPTEN__
+            // The browser calls the game once per frame from here on.
+            web_run_game(game);
+            return 0;
+#endif
             retval = game->run();
             // The original code discards this second status query.
             game->get_error_code();

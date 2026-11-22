@@ -12,7 +12,6 @@ RGE_RMM_Land_Generator::RGE_RMM_Land_Generator(RGE_Map* in_map, RGE_Random_Map_M
     this->info = *in_info;
 }
 
-extern "C" void* memset(void* dst, int value, unsigned int size);
 
 unsigned char RGE_RMM_Land_Generator::generate() {
     clear_stack();
