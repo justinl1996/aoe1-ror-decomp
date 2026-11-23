@@ -1,10 +1,12 @@
 #ifndef AOE1_CAMPAIGN_H
 #define AOE1_CAMPAIGN_H
 
+#include <stdint.h>
+
 class RGE_Scenario_Offset {
   public:
-    long size;
-    long offset;
+    int32_t size;
+    int32_t offset;
     char name[255];
     char file_name[255];
 };
@@ -13,9 +15,9 @@ typedef char campaign_scenario_offset_size_check[(sizeof(RGE_Scenario_Offset) ==
 
 class RGE_Campaign_Header {
   public:
-    long version;
+    int32_t version;
     char name[255];
-    long scenario_num;
+    int32_t scenario_num;
 };
 
 typedef char campaign_header_size_check[(sizeof(RGE_Campaign_Header) == 0x108) ? 1 : -1];
@@ -37,7 +39,9 @@ class RGE_Campaign {
     char* get_scenario_name(long num);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char campaign_size_check[(sizeof(RGE_Campaign) == 0x20C) ? 1 : -1];
+#endif
 
 extern int version_marker;
 

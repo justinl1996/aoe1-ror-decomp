@@ -1842,7 +1842,7 @@ long TRIBE_Screen_Game::char_action(long key, short count) {
     }
 }
 
-long TRIBE_Screen_Game::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TRIBE_Screen_Game::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     RGE_Panel_Tool_Box* tool_box;
     RGE_Base_Game* cleanup_game;
 

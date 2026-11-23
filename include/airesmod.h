@@ -47,6 +47,8 @@ class ResourceAIModule : public AIModule {
     int lowestResourceType() const;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char verify_airesmod_ResourceAIModule_size[sizeof(ResourceAIModule) == 0x10C ? 1 : -1];
+#endif
 
 #endif

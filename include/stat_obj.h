@@ -486,6 +486,8 @@ class RGE_Static_Object {
     );
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_static_object_size_check[(sizeof(RGE_Static_Object) == 0x88) ? 1 : -1];
+#endif
 
 #endif

@@ -28,6 +28,8 @@ class TRIBE_Action_Artifact : public RGE_Action {
     RGE_Player* check_ownership();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tact_art_action_size_check[(sizeof(TRIBE_Action_Artifact) == 0x40) ? 1 : -1];
+#endif
 
 #endif // AOE1_TACT_ART_H

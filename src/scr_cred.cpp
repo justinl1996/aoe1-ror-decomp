@@ -231,7 +231,7 @@ long TRIBE_Credits_Screen::key_down_action(long key, short count, int alt_key, i
     return 0;
 }
 
-long TRIBE_Credits_Screen::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TRIBE_Credits_Screen::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     long action_result;
 
     if (from_panel != 0 && from_panel == this->text_panel && (action_in == 1)) {
@@ -462,7 +462,7 @@ void RGE_fade_palette_start(
             target->peFlags = source->peFlags;
             ++target;
             ++source;
-        } while ((int) target < (int) palette_fade_result);
+        } while (target < palette_fade_result);
     }
 
     palette_fade_start_time = debug_timeGetTime("C:\\msdev\\work\\age1_x1\\scr_cred.cpp", 693);

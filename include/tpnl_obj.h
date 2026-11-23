@@ -96,6 +96,8 @@ class TRIBE_Panel_Object : public TPanel {
     void save_object_info();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tpnl_obj_panel_size_check[(sizeof(TRIBE_Panel_Object) == 0x214) ? 1 : -1];
+#endif
 
 #endif // AOE1_TPNL_OBJ_H

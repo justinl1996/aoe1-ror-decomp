@@ -73,7 +73,7 @@ class TribeGameSettingsScreen : public TScreenPanel {
     virtual long handle_user_command(unsigned int wParam, long lParam);
 
   protected:
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     void init_vars();
     void fillScenarios();
     void getSettings();
@@ -83,6 +83,8 @@ class TribeGameSettingsScreen : public TScreenPanel {
     void activateVictoryPanels();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_set_screen_size[(sizeof(TribeGameSettingsScreen) == 0x560) ? 1 : -1];
+#endif
 
 #endif

@@ -125,7 +125,7 @@ uchar RGE_Random_Map_Module::add_module(RGE_Random_Map_Module* module) {
     }
     // The shipped code dereferences allocation failure.
     // Publish the complete node only after both fields have values.
-    item = (RGE_Random_Map_Module_List*) calloc(1, 8);
+    item = (RGE_Random_Map_Module_List*) calloc(1, sizeof(RGE_Random_Map_Module_List));
     item->next = this->list;
     item->module = module;
     this->list = item;
@@ -174,7 +174,7 @@ void RGE_Random_Map_Module::create_shared_resources() {
     // Store each allocation before row-pointer publication.
     // The shipped code does not test allocation results.
     search_map = (uchar*) calloc(count, 1);
-    search_map_rows = (uchar**) calloc(map_height, 4);
+    search_map_rows = (uchar**) calloc(map_height, sizeof(uchar*));
 
     for (i = 0; i < map_height; i++) {
         search_map_rows[i] = search_map + i * map_width;
@@ -182,8 +182,8 @@ void RGE_Random_Map_Module::create_shared_resources() {
 
     count = map_height;
     count *= map_width;
-    stack_array = (Map_Stack*) calloc(count, 24);
-    stack_offsets = (Map_Stack**) calloc(map_height, 4);
+    stack_array = (Map_Stack*) calloc(count, sizeof(Map_Stack));
+    stack_offsets = (Map_Stack**) calloc(map_height, sizeof(Map_Stack*));
 
     for (i = 0; i < map_height; i++) {
         stack_offsets[i] = &stack_array[i * map_width];
@@ -303,13 +303,13 @@ void RGE_Random_Map_Module::push_stack(Map_Stack& stack, long x, long y, float c
         } while (current != 0 && current->tot_cost < tot_cost);
 
         this->add_stack_node(prev, node);
-        *(long*) &node->cost = *(long*) &cost;
+        node->cost = cost;
         node->tot_cost = tot_cost;
         return;
     }
 
     this->add_stack_node(&stack, node);
-    *(long*) &node->cost = *(long*) &cost;
+    node->cost = cost;
     node->tot_cost = tot_cost;
 }
 

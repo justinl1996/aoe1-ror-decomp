@@ -89,6 +89,8 @@ class RGE_Game_Info {
     void remove_player(long id);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_game_info_size_check[(sizeof(RGE_Game_Info) == 0x118) ? 1 : -1];
+#endif
 
 #endif

@@ -18,7 +18,7 @@ class THelpDialog : public TDialogPanel {
     THelpDialog(TEasy_Panel* parentPanel, char* in_parent_panel, long help_string_id, long in_help_page_id, long x, long y);
     THelpDialog(TEasy_Panel* parentPanel, char* in_parent_panel, char* in_help_string, long in_help_page_id, long x, long y);
     virtual ~THelpDialog();
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     virtual long handle_mouse_down(unsigned char mouse_button_in, long x, long y, int ctrl_key, int shift_key);
 
   protected:
@@ -27,6 +27,8 @@ class THelpDialog : public TDialogPanel {
     );
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dlg_help_dialog_size_check[(sizeof(THelpDialog) == 0x5A4) ? 1 : -1];
+#endif
 
 #endif

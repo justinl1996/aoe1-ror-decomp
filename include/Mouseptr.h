@@ -87,7 +87,9 @@ class TMousePointer {
     int GetDDBltError(long theError);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char mouseptr_tmousepointer_size[(sizeof(TMousePointer) == 0x254) ? 1 : -1];
+#endif
 
 // Original symbol: ?MouseSystem@@3PAVTMousePointer@@A.
 extern TMousePointer* MouseSystem;

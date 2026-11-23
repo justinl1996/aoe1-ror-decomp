@@ -28,6 +28,8 @@ class TRIBE_Action_Hunt : public RGE_Action {
     RGE_Sprite* get_wait_sprite();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tact_hnt_hunt_abi[(sizeof(TRIBE_Action_Hunt) == 0x44) ? 1 : -1];
+#endif
 
 #endif

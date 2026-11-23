@@ -29,6 +29,8 @@ class RGE_Action_Move_To : public RGE_Action {
     float range;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_action_move_to_size_check[(sizeof(RGE_Action_Move_To) == 0x44) ? 1 : -1];
+#endif
 
 #endif

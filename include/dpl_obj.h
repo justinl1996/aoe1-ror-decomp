@@ -39,7 +39,9 @@ class RGE_Doppleganger_Object : public RGE_Animated_Object {
     int doppledObjectID;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_doppleganger_object_size_check[(sizeof(RGE_Doppleganger_Object) == 0xB0) ? 1 : -1];
+#endif
 
 class RGE_Doppleganger_Creator {
   public:
@@ -61,6 +63,8 @@ class RGE_Doppleganger_Creator {
     void expand_allocations(int grow_size);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_doppleganger_creator_size_check[(sizeof(RGE_Doppleganger_Creator) == 0x1C) ? 1 : -1];
+#endif
 
 #endif // AOE1_DPL_OBJ_H

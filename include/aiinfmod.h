@@ -9,6 +9,8 @@ class InformationAIModule : public AIModule {
     virtual ~InformationAIModule();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiinfmod_information_ai_module_size[(sizeof(InformationAIModule) == 0xF0) ? 1 : -1];
+#endif
 
 #endif

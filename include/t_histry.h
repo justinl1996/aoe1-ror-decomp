@@ -36,7 +36,11 @@ class TRIBE_History_Info {
     unsigned char get_history_event(long time_slice, unsigned char& event);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char t_histry_info_size_check[(sizeof(TRIBE_History_Info) == 0x14) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char t_histry_events_size_check[(sizeof(TRIBE_History_Events) == 0x10) ? 1 : -1];
+#endif
 
 #endif

@@ -174,7 +174,7 @@ long TRIBE_Screen_Main_Menu::key_down_action(long key, short count, int alt_key,
     return 0;
 }
 
-long TRIBE_Screen_Main_Menu::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TRIBE_Screen_Main_Menu::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     long result;
 
     if (fromPanel != 0) {
@@ -286,7 +286,7 @@ void TRIBE_Screen_Main_Error::set_text(long message_in) {
     this->message->set_text(message_in);
 }
 
-long TRIBE_Screen_Main_Error::action(TPanel* from_panel, long action_in, unsigned long val1, unsigned long val2) {
+long TRIBE_Screen_Main_Error::action(TPanel* from_panel, long action_in, uintptr_t val1, uintptr_t val2) {
     TPanel* panel;
     long state;
 

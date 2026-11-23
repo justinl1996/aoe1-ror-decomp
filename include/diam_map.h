@@ -105,8 +105,14 @@ class RGE_Diamond_Map : public TPanel {
     TDrawArea* save_area;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char diam_map_image_line_size_check[(sizeof(RGE_Map_Image_Line) == 0x06) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char diam_map_tile_row_size_check[(sizeof(RGE_Map_Tile_Row) == 0x24) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char diam_map_size_check[(sizeof(RGE_Diamond_Map) == 0x16C) ? 1 : -1];
+#endif
 
 #endif

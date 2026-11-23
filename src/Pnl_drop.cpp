@@ -47,7 +47,7 @@ long TDropDownPanel::setup(
     TPanel::setup(render_area_in, parent_panel_in, x_in, y_in, wid_in, hgt_in, 0);
 
     this->val_panel = new TTextPanel;
-    result = (long) this->val_panel;
+    result = (this->val_panel != 0);
     if (result != 0
         && (result = this->val_panel->setup(
                 render_area_in, this, 0, 0, this->val_wid, this->val_hgt, font_in, font_wid_in, font_hgt_in, (char*) 0,
@@ -56,14 +56,14 @@ long TDropDownPanel::setup(
         this->val_panel->set_alignment(TTextPanel::AlignCenter, TTextPanel::AlignLeft);
 
         this->btn_panel = new TDropDownButtonPanel(this);
-        result = (long) this->btn_panel;
+        result = (this->btn_panel != 0);
         if (result != 0
             && (result = this->btn_panel->setup(
                     render_area_in, this, 0, 0, this->btn_wid, this->btn_hgt, TButtonPanel::DrawBevelPicture, (TDigital*) 0,
                     TButtonPanel::NotifyAction, 0
                 )) != 0) {
             this->list_panel = new TListPanel;
-            result = (long) this->list_panel;
+            result = (this->list_panel != 0);
             if (result != 0
                 && (result = this->list_panel->setup(
                         render_area_in, this, 0, 0, this->list_wid, this->list_hgt, font_in, font_wid_in, font_hgt_in, (char*) 0,
@@ -74,7 +74,7 @@ long TDropDownPanel::setup(
                 ((TTextPanel*) this->list_panel)->setCurrentLineNumber(this->val_num);
 
                 this->scbar_panel = new TScrollBarPanel;
-                result = (long) this->scbar_panel;
+                result = (this->scbar_panel != 0);
                 if (result != 0
                     && (result = this->scbar_panel->setup(
                             this->render_area, this, 0, 0, this->scbar_wid, this->list_hgt, s_empty_string, s_empty_string,
@@ -135,7 +135,7 @@ long TDropDownPanel::handle_key_down(long key, short count, int alt_key, int ctr
     return TPanel::handle_key_down(key, count, alt_key, ctrl_key, shift_key);
 }
 
-long TDropDownPanel::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TDropDownPanel::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     if (from_panel == this->btn_panel) {
         if (action_in == 2) {
             if (this->mode == 1) {

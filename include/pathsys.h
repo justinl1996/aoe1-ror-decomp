@@ -20,8 +20,12 @@ struct PathTileWork {
     XYPoint copied;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pathsys_tile_work_size_check[(sizeof(PathTileWork) == 0x18) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pathsys_managed_array_size_check[(sizeof(ManagedArray<int>) == 0x10) ? 1 : -1];
+#endif
 
 class PathingSystem {
   public:
@@ -113,7 +117,11 @@ class PathingSystem {
     void printToFile(char* filename);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pathsys_size_check[(sizeof(PathingSystem) == 0x11DCF8) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pathsys_mgp_float_heap_size_check[(sizeof(PathingSystem::MGP_FloatHeap) == 0x08) ? 1 : -1];
+#endif
 
 #endif

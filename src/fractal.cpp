@@ -154,9 +154,9 @@ void PointMaker::DrawMask(int x, int y, int size) {
         if (w > 0) {
             int map = mapptr;
             int count = w;
-            int mask_offset = (int) maskptr - map;
+            char* mp = maskptr;
             do {
-                int mask = *(char*) (mask_offset + map);
+                int mask = *mp++;
                 if (map >= 1 && map < SizeArrays - 1) {
                     value = ProbArray[map];
                     destination = ProbArray + map;

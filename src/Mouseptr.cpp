@@ -244,7 +244,7 @@ int TMousePointer::LoadCursors(char* cursor_file_name, int resId, int Reload) {
             return 0;
         for (int i = 0; i < this->Num_Cursors; i++) {
             // The height check follows the width check.
-            long* height = &((Shape_Info*) this->Cursor_Shape->shape_info)[i].Height;
+            int32_t* height = &((Shape_Info*) this->Cursor_Shape->shape_info)[i].Height;
             if (height[-1] > this->Max_CX)
                 return 0;
             if (*height > this->Max_CY)

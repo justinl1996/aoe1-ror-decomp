@@ -26,6 +26,8 @@ class RGE_RMM_Terrain_Generator : public RGE_Random_Map_Module {
     virtual uchar generate();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rmm_terrain_generator_size_check[(sizeof(RGE_RMM_Terrain_Generator) == 0x12CC) ? 1 : -1];
+#endif
 
 #endif

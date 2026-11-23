@@ -734,8 +734,6 @@ char* RGE_Base_Game::get_string2(int string_type, long id, long id2, char* str, 
 }
 
 extern int rge_open(char* path, int flags);
-extern void rge_read_uncompressed(int fd, void* buf, int len);
-extern void rge_read(int fd, void* buf, int len);
 extern int rge_close(int fd);
 
 RGE_Scenario* RGE_Base_Game::get_scenario_info(char* scenario_file, int from_campaign) {
@@ -2054,9 +2052,9 @@ HFONT RGE_Base_Game::make_font(HDC dc, char* face_name, int point_size, int wgt,
 int RGE_Base_Game::check_for_cd(int num_players) {
     char vol_name[256];
     char file_sys_name[256];
-    unsigned long vol_ser_num;
-    unsigned long max_comp_len;
-    unsigned long file_sys_flags;
+    DWORD vol_ser_num;
+    DWORD max_comp_len;
+    DWORD file_sys_flags;
 
     if (this->prog_info->verify_cd == 0)
         return 1;
@@ -2305,7 +2303,6 @@ void RGE_Base_Game::mouse_on() {
             return;
         }
         surface_set_cursor(this->mouse_cursor);
-        surface_set_cursor((HCURSOR) (LONG) this->mouse_cursor);
         this->is_mouse_on = 1;
     }
 }
@@ -2342,7 +2339,6 @@ void RGE_Base_Game::set_windows_mouse(int val) {
     this->mouse_pointer->off();
     if (this->is_mouse_on != 0) {
         surface_set_cursor(this->mouse_cursor);
-        surface_set_cursor((HCURSOR) (LONG) this->mouse_cursor);
     } else {
         surface_set_cursor(NULL);
         surface_set_cursor((HCURSOR) 0);
@@ -2366,7 +2362,6 @@ void RGE_Base_Game::set_mouse_cursor(HCURSOR val) {
     }
 
     surface_set_cursor(this->mouse_cursor);
-    surface_set_cursor((HCURSOR) (LONG) this->mouse_cursor);
 }
 
 void RGE_Base_Game::set_mouse_facet(long facet) {
@@ -2954,7 +2949,6 @@ paint_done:
             if (this->is_mouse_on != 0) {
                 if (this->custom_mouse == 0 || this->windows_mouse != 0) {
                     surface_set_cursor(this->mouse_cursor);
-                    surface_set_cursor((HCURSOR) (LONG) this->mouse_cursor);
                 } else {
                     this->mouse_pointer->on();
                     this->mouse_pointer->draw(1);

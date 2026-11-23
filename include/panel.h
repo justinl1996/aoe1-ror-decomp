@@ -1,6 +1,7 @@
 #ifndef AOE1_PANEL_H
 #define AOE1_PANEL_H
 
+#include <stdint.h>
 #include <windows.h>
 #include "game_globals.h"
 #include "basegame.h"
@@ -176,7 +177,7 @@ class TPanel {
     virtual long char_action(long, short) {
         return 0;
     }
-    virtual long action(TPanel*, long, unsigned long, unsigned long);
+    virtual long action(TPanel*, long, uintptr_t, uintptr_t);
     virtual void get_true_render_rect(tagRECT&);
     virtual int is_inside(long, long);
     virtual void set_focus(int);
@@ -287,7 +288,11 @@ class TPanel {
     unsigned char need_restore;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char panel_tpanel_size_check[(sizeof(TPanel) == 0xF4) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char panel_node_size_check[(sizeof(PanelNode) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

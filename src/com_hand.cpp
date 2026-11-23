@@ -346,7 +346,7 @@ TCommunications_Handler::~TCommunications_Handler() {
 void TCommunications_Handler::KillAnyMissingPlayers() {
     MSGFORMAT_KILL_PLAYER kp;
     long hr;
-    unsigned long dwSize;
+    DWORD dwSize;
     char* buf;
     unsigned int i = 1;
 
@@ -699,7 +699,7 @@ void TCommunications_Handler::ReceiveGameMessages() {
     }
 
     if (local_player_dpid != 0) {
-        unsigned long wait_count = zero;
+        DWORD wait_count = zero;
         long result = direct_play_interface->GetMessageCount(local_player_dpid, &wait_count);
         if (result != zero) {
             this->Err->ShowReturn(result, "MsgWait");
@@ -730,11 +730,11 @@ void TCommunications_Handler::ShutdownGameMessages() {
 typedef unsigned long ulong;
 
 void TCommunications_Handler::GetDPLAYMessages() {
-    ulong dcoFromID;
-    ulong dcoReceiveID;
-    ulong dwCount;
-    ulong dwPreSize;
-    ulong dwSize;
+    DPID dcoFromID;
+    DPID dcoReceiveID;
+    DWORD dwCount;
+    DWORD dwPreSize;
+    DWORD dwSize;
     ulong loopStartTime;
     long hr;
     IDirectPlay3* guard_dplay = direct_play_interface;
@@ -2756,7 +2756,6 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
-typedef long HRESULT;
 
 long TCommunications_Handler::CommOut(ulong To, uchar MsgType, void* Msg, int Length, uchar ResendSeq) {
     uint FullLength;
@@ -3726,7 +3725,7 @@ char* TCommunications_Handler::GetCommInfo(unsigned char LineNum) {
     sprintf(buffer + 0x100, "%s ", this->Speed->GetLatencyInfo());
     sprintf(buffer + 0x200, "%s  Speed Adjusts=%d ", this->Speed->GetMachineSpeedInfo(), this->Speed->GetAdjustmentCount());
 
-    ulong dwCount = 0;
+    DWORD dwCount = 0;
     direct_play_interface->GetMessageCount(local_player_dpid, &dwCount);
     sprintf(buffer + 0x300, "%s  DPMsgs%d ", this->Speed->GetSelfPlayerOptimalSpeedStr(), dwCount);
     sprintf(buffer + 0x400, "%s ", this->Speed->GetPlayerSpeedStatusStr(0));
@@ -4076,7 +4075,9 @@ int TCommunications_Handler::AddSelfPlayer() {
         return 0;
     }
 
-    long retval = dp->CreatePlayer(&local_player_dpid, &dpid, 0, 0, 0, 0);
+    DPID created_id = local_player_dpid;
+    long retval = dp->CreatePlayer(&created_id, &dpid, 0, 0, 0, 0);
+    local_player_dpid = created_id;
     this->Err->ShowReturn(retval, "Add SELF PLAYER");
 
     if (retval != 0) {
@@ -4325,7 +4326,7 @@ void TCommunications_Handler::UpdatePlayer(unsigned int PlayerNo, int Notify) {
         return;
     }
 
-    unsigned long dwSize = 0;
+    DWORD dwSize = 0;
     direct_play_interface->GetPlayerName(dcoID, 0, &dwSize);
     void* lpData = calloc(dwSize, 1);
     long result = direct_play_interface->GetPlayerName(dcoID, lpData, &dwSize);
@@ -4463,7 +4464,7 @@ int TCommunications_Handler::AllPlayersReady() {
 }
 
 long TCommunications_Handler::DPlayGetSessionDesc() {
-    unsigned long dwSize;
+    DWORD dwSize;
     long result;
     void* buf;
 
@@ -4489,8 +4490,6 @@ long TCommunications_Handler::DPlayGetSessionDesc() {
     free(buf);
     return result;
 }
-
-typedef long HRESULT;
 
 static char s_get_caps[] = "Get Caps";
 static char s_get_guaranteed_caps[] = "Get guaranteed Caps";

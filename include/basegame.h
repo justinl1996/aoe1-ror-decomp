@@ -247,7 +247,9 @@ struct RGE_Font {
     long font_hgt;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_font_size_check[(sizeof(RGE_Font) == 0x0C) ? 1 : -1];
+#endif
 
 class RGE_Timing_Info {
   public:
@@ -261,7 +263,9 @@ class RGE_Timing_Info {
     unsigned long last_max_time;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_timing_info_size_check[(sizeof(RGE_Timing_Info) == 0x20) ? 1 : -1];
+#endif
 
 class RGE_Base_Game {
     friend class RGE_Action_Gather;
@@ -745,7 +749,11 @@ class RGE_Base_Game {
     TDrawArea* map_save_area;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_game_options_size_check[(sizeof(RGE_Base_Game::RGE_Game_Options) == 0xA8) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_base_game_size_check[(sizeof(RGE_Base_Game) == 0xA24) ? 1 : -1];
+#endif
 
 #endif

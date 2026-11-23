@@ -25,7 +25,7 @@ class TListDialog : public TDialogPanel {
         long btn_y_in, long btn_wid_in, long btn_hgt_in
     );
     virtual long key_down_action(long key, short count, int alt_key, int ctrl_key, int shift_key);
-    virtual long action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2);
+    virtual long action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2);
     virtual short get_list_id() {
         return list_id;
     }
@@ -43,6 +43,8 @@ class TListDialog : public TDialogPanel {
     char* list_name;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dlg_list_dialog_size_check[(sizeof(TListDialog) == 0x4AC) ? 1 : -1];
+#endif
 
 #endif

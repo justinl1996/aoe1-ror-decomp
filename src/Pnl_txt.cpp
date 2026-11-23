@@ -684,7 +684,7 @@ long TTextPanel::key_down_action(long key, short count, int alt_key, int ctrl_ke
     }
 }
 
-long TTextPanel::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TTextPanel::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     if (this->scbar_panel && from_panel == this->scbar_panel) {
         switch (action_in) {
             case 0:
@@ -1093,7 +1093,7 @@ void TTextPanel::set_line_by_id(long id_in) {
         return;
 
     while (node) {
-        if ((long) node[2] == id_in) {
+        if ((intptr_t) node[2] == id_in) {
             this->set_line(index);
             return;
         }

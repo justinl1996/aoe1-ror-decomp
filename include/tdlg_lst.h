@@ -16,6 +16,8 @@ class TRIBE_Dialog_List : public RGE_Dialog_List {
     virtual short get_cur_id();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tdlg_lst_dialog_size_check[(sizeof(TRIBE_Dialog_List) == 0x4BC) ? 1 : -1];
+#endif
 
 #endif

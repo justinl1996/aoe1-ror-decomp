@@ -81,7 +81,9 @@ class Path {
     float distanceToNextWaypoint() const;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char path_size_check[(sizeof(Path) == 0x34) ? 1 : -1];
+#endif
 
 // VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
 #ifndef AOE_LINUX

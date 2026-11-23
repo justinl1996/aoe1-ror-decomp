@@ -47,6 +47,8 @@ class TRIBE_Panel_Time : public TPanel {
     int render_to_image_buffer();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_panel_time_size_check[(sizeof(TRIBE_Panel_Time) == 0x174) ? 1 : -1];
+#endif
 
 #endif

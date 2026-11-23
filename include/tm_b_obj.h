@@ -50,10 +50,16 @@ class TRIBE_Master_Building_Object : public TRIBE_Master_Combat_Object {
     short on_build_make_tech;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_master_building_object_size_check[(sizeof(TRIBE_Master_Building_Object) == 0x17C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_master_building_object_sound_offset_check
     [(offsetof(TRIBE_Master_Building_Object, construction_sound) == 0x164) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_master_building_object_factory_slot_check
     [(offsetof(TRIBE_Master_Building_Object, on_build_make_tech) == 0x178) ? 1 : -1];
+#endif
 
 #endif // AOE1_TM_B_OBJ_H

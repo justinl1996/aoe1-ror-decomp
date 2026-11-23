@@ -17,6 +17,8 @@ class TRIBE_Screen_Status_Message : public TScreenPanel {
     void set_text(long message_in);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_stms_screen_size_check[(sizeof(TRIBE_Screen_Status_Message) == 0x47C) ? 1 : -1];
+#endif
 
 #endif

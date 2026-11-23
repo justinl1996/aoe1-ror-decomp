@@ -28,6 +28,8 @@ class RGE_Master_Animated_Object : public RGE_Master_Static_Object {
     float speed;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char m_an_obj_animated_size[(sizeof(RGE_Master_Animated_Object) == 0xBC) ? 1 : -1];
+#endif
 
 #endif

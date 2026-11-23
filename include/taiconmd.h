@@ -26,6 +26,8 @@ class TribeConstructionAIModule : public ConstructionAIModule {
     TribeMainDecisionAIModule* md;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taiconmd_tribe_construction_size[(sizeof(TribeConstructionAIModule) == 0x318) ? 1 : -1];
+#endif
 
 #endif

@@ -1,4 +1,5 @@
 #include <windows.h>
+#include "../include/rge_fio.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,16 +22,173 @@
 #include "../include/game_globals.h"
 #include "../include/rge_base_game_global.h"
 
-void __cdecl rge_read(int file, void* data, int size);
-void __cdecl rge_write(int file, void* data, int size);
 extern void __cdecl addstring(char** dst, char* base, char* ext);
 extern void __cdecl convert_us(char* text);
 int __cdecl debug_rand(char* file, int line);
 void __cdecl debug_srand(char* file, int line, unsigned int seed);
 
+#include <stddef.h>
+#include <stdint.h>
+
+struct RGE_Tile_Set_Disk {
+    unsigned char loaded;
+    unsigned char random;
+    char name[13];
+    char pict_name[13];
+    int32_t resource_id;
+    uint32_t shape;
+    int32_t sound;
+    unsigned char map_hi_color;
+    unsigned char map_med_color;
+    unsigned char map_low_color;
+    unsigned char map_lt_cliff_color;
+    unsigned char map_rt_cliff_color;
+    unsigned char passable_terrain;
+    unsigned char impassable_terrain;
+    unsigned char is_animated;
+    short animation_frames;
+    short pause_frames;
+    float interval;
+    float pause_between_loops;
+    short frame;
+    short draw_frame;
+    float animate_last;
+    unsigned char frame_changed;
+    unsigned char drawn;
+    RGE_TOB_Picts tiles[19];
+    short terrain_to_draw;
+    short rows;
+    short cols;
+    short borders[32];
+    short obj_types[30];
+    short obj_density[30];
+    unsigned char obj_placement_flag[30];
+    short num_obj_type;
+};
+typedef char rge_tile_set_disk_check[(sizeof(RGE_Tile_Set_Disk) == 0x198) ? 1 : -1];
+
+struct RGE_Border_Set_Disk {
+    unsigned char loaded;
+    unsigned char random;
+    char name[13];
+    char pict_name[13];
+    int32_t resource_id;
+    uint32_t shape;
+    int32_t sound;
+    unsigned char map_hi_color;
+    unsigned char map_med_color;
+    unsigned char map_low_color;
+    unsigned char is_animated;
+    short animation_frames;
+    short pause_frames;
+    float interval;
+    float pause_between_loops;
+    short frame;
+    short draw_frame;
+    float animate_last;
+    unsigned char frame_changed;
+    unsigned char drawn;
+    RGE_TOB_Picts borders[19][12];
+    unsigned char draw_tile;
+    short underlay_terrain;
+    short border_style;
+};
+typedef char rge_border_set_disk_check[(sizeof(RGE_Border_Set_Disk) == 0x5A0) ? 1 : -1];
+
+struct RGE_Map_Disk {
+    uint32_t vptr_unused;
+    uint32_t map_ptr;
+    int32_t map_width;
+    int32_t map_height;
+    int32_t world_width;
+    int32_t world_height;
+    RGE_Tile_Size tilesizes[19];
+    RGE_Tile_Set_Disk terrain_types[32];
+    RGE_Border_Set_Disk border_types[16];
+    uint32_t map_row_offset_ptr;
+    short num_terrain;
+    short num_borders;
+    short max_terrain;
+    short tile_width;
+    short tile_height;
+    short tile_half_height;
+    short tile_half_width;
+    short elev_height;
+    short cur_row;
+    short cur_col;
+    short block_beg_row;
+    short block_end_row;
+    short block_beg_col;
+    short block_end_col;
+    unsigned char any_frame_change;
+    uint32_t search_map_ptr;
+    uint32_t search_map_rows_ptr;
+    unsigned char map_visible_flag;
+    unsigned char fog_flag;
+    uint32_t random_map_ptr;
+    uint32_t game_world_ptr;
+    uint32_t map_zones_ptr;
+    uint32_t unified_vis_map_ptr;
+    uint32_t unit_manager_ptr;
+};
+typedef char rge_map_disk_check[(sizeof(RGE_Map_Disk) == 36304) ? 1 : -1];
+
 RGE_Map::RGE_Map(int infile, RGE_Sound** sounds, unsigned char setup) {
     this->map_zones = 0;
-    rge_read(infile, this, 36304);
+    RGE_Map_Disk* disk = (RGE_Map_Disk*) calloc(1, sizeof(RGE_Map_Disk));
+    rge_read(infile, disk, sizeof(RGE_Map_Disk));
+
+    this->map_width = disk->map_width;
+    this->map_height = disk->map_height;
+    this->world_width = disk->world_width;
+    this->world_height = disk->world_height;
+    memcpy(this->tilesizes, disk->tilesizes, sizeof(this->tilesizes));
+    for (int i = 0; i < 32; ++i) {
+        RGE_Tile_Set* dst = &this->terrain_types[i];
+        RGE_Tile_Set_Disk* src = &disk->terrain_types[i];
+        memcpy(dst, src, offsetof(RGE_Tile_Set_Disk, resource_id));
+        dst->resource_id = src->resource_id;
+        dst->shape = 0;
+        dst->sound = (RGE_Sound*) (intptr_t) src->sound;
+        memcpy(
+            &dst->map_hi_color, &src->map_hi_color,
+            sizeof(RGE_Tile_Set_Disk) - offsetof(RGE_Tile_Set_Disk, map_hi_color)
+        );
+    }
+    for (int i = 0; i < 16; ++i) {
+        RGE_Border_Set* dst = &this->border_types[i];
+        RGE_Border_Set_Disk* src = &disk->border_types[i];
+        memcpy(dst, src, offsetof(RGE_Border_Set_Disk, resource_id));
+        dst->resource_id = src->resource_id;
+        dst->shape = 0;
+        dst->sound = (RGE_Sound*) (intptr_t) src->sound;
+        memcpy(
+            &dst->map_hi_color, &src->map_hi_color,
+            sizeof(RGE_Border_Set_Disk) - offsetof(RGE_Border_Set_Disk, map_hi_color)
+        );
+    }
+    this->num_terrain = disk->num_terrain;
+    this->num_borders = disk->num_borders;
+    this->max_terrain = disk->max_terrain;
+    this->tile_width = disk->tile_width;
+    this->tile_height = disk->tile_height;
+    this->tile_half_height = disk->tile_half_height;
+    this->tile_half_width = disk->tile_half_width;
+    this->elev_height = disk->elev_height;
+    this->cur_row = disk->cur_row;
+    this->cur_col = disk->cur_col;
+    this->block_beg_row = disk->block_beg_row;
+    this->block_end_row = disk->block_end_row;
+    this->block_beg_col = disk->block_beg_col;
+    this->block_end_col = disk->block_end_col;
+    this->any_frame_change = disk->any_frame_change;
+    this->map_visible_flag = disk->map_visible_flag;
+    this->fog_flag = disk->fog_flag;
+    this->random_map = 0;
+    this->unified_vis_map = 0;
+    this->unit_manager = 0;
+    free(disk);
+
     RGE_Game_World* world = rge_base_game->world;
     this->game_world = world;
     this->map = 0;
@@ -1239,19 +1397,13 @@ void RGE_Map::load_map(int infile) {
             } while (row_index < this->map_height);
         }
     } else {
-        rge_read(infile, this->map, this->map_width * this->map_height * 24);
-        long row_index = 0;
-        if (this->map_height > 0) {
-            do {
-                int column_index = 0;
-                if (this->map_width > 0) {
-                    do {
-                        this->map_row_offset[row_index][column_index].objects.list = 0;
-                        ++column_index;
-                    } while (column_index < this->map_width);
-                }
-                ++row_index;
-            } while (row_index < this->map_height);
+        int tile_count = this->map_width * this->map_height;
+        unsigned char dummy_obj[12];
+        for (int ti = 0; ti < tile_count; ++ti) {
+            rge_read(infile, &this->map[ti], 12);
+            rge_read(infile, dummy_obj, 12);
+            this->map[ti].objects.list = 0;
+            this->map[ti].objects.number_of_objects = 0;
         }
     }
 
@@ -1299,62 +1451,95 @@ void RGE_Map::save_map(int outfile) {
             } while (y < *height);
         }
     } else {
-        int tile_count = *height;
-        tile_count *= this->map_width;
-        rge_write(handle, this->map, tile_count * 24);
+        int tile_count = (*height) * this->map_width;
+        unsigned char dummy_obj[12];
+        memset(dummy_obj, 0, sizeof(dummy_obj));
+        for (int ti = 0; ti < tile_count; ++ti) {
+            rge_write(handle, &this->map[ti], 12);
+            rge_write(handle, dummy_obj, 12);
+        }
     }
 
     map->unified_vis_map->save(handle);
 }
 
 void RGE_Map::save(int outfile) {
-    RGE_Map* copy = (RGE_Map*) calloc(1, sizeof(RGE_Map));
-    memcpy(copy, this, sizeof(RGE_Map));
-    int i;
+    RGE_Map_Disk* disk = (RGE_Map_Disk*) calloc(1, sizeof(RGE_Map_Disk));
+    disk->map_width = (int32_t) this->map_width;
+    disk->map_height = (int32_t) this->map_height;
+    disk->world_width = (int32_t) this->world_width;
+    disk->world_height = (int32_t) this->world_height;
+    memcpy(disk->tilesizes, this->tilesizes, sizeof(this->tilesizes));
 
-    for (i = 0; i < 32; ++i) {
-        if (this->terrain_types[i].loaded != 0) {
-            if (this->terrain_types[i].sound != 0) {
-                copy->terrain_types[i].sound = (RGE_Sound*) this->terrain_types[i].sound->id;
-            } else {
-                copy->terrain_types[i].sound = (RGE_Sound*) -1;
-            }
-        }
-    }
-
-    for (i = 0; i < 16; ++i) {
-        if (this->border_types[i].sound == 0 || this->border_types[i].loaded == 0) {
-            copy->border_types[i].sound = (RGE_Sound*) -1;
+    for (int i = 0; i < 32; ++i) {
+        RGE_Tile_Set* src = &this->terrain_types[i];
+        RGE_Tile_Set_Disk* dst = &disk->terrain_types[i];
+        memcpy(dst, src, offsetof(RGE_Tile_Set_Disk, resource_id));
+        dst->resource_id = (int32_t) src->resource_id;
+        dst->shape = (src->shape != 0) ? 1u : 0u;
+        if (src->loaded != 0) {
+            dst->sound = (src->sound != 0) ? (int32_t) src->sound->id : -1;
         } else {
-            copy->border_types[i].sound = (RGE_Sound*) this->border_types[i].sound->id;
+            dst->sound = (int32_t) (intptr_t) src->sound;
         }
+        memcpy(
+            &dst->map_hi_color, &src->map_hi_color,
+            sizeof(RGE_Tile_Set_Disk) - offsetof(RGE_Tile_Set_Disk, map_hi_color)
+        );
     }
 
-    rge_write(outfile, copy, 36304);
+    for (int i = 0; i < 16; ++i) {
+        RGE_Border_Set* src = &this->border_types[i];
+        RGE_Border_Set_Disk* dst = &disk->border_types[i];
+        memcpy(dst, src, offsetof(RGE_Border_Set_Disk, resource_id));
+        dst->resource_id = (int32_t) src->resource_id;
+        dst->shape = (src->shape != 0) ? 1u : 0u;
+        dst->sound = (src->sound == 0 || src->loaded == 0) ? -1 : (int32_t) src->sound->id;
+        memcpy(
+            &dst->map_hi_color, &src->map_hi_color,
+            sizeof(RGE_Border_Set_Disk) - offsetof(RGE_Border_Set_Disk, map_hi_color)
+        );
+    }
+
+    disk->num_terrain = this->num_terrain;
+    disk->num_borders = this->num_borders;
+    disk->max_terrain = this->max_terrain;
+    disk->tile_width = this->tile_width;
+    disk->tile_height = this->tile_height;
+    disk->tile_half_height = this->tile_half_height;
+    disk->tile_half_width = this->tile_half_width;
+    disk->elev_height = this->elev_height;
+    disk->cur_row = this->cur_row;
+    disk->cur_col = this->cur_col;
+    disk->block_beg_row = this->block_beg_row;
+    disk->block_end_row = this->block_end_row;
+    disk->block_beg_col = this->block_beg_col;
+    disk->block_end_col = this->block_end_col;
+    disk->any_frame_change = this->any_frame_change;
+    disk->map_visible_flag = this->map_visible_flag;
+    disk->fog_flag = this->fog_flag;
+
+    rge_write(outfile, disk, sizeof(RGE_Map_Disk));
     this->random_map->save(outfile);
-    free(copy);
+    free(disk);
 }
 
 void RGE_Map::load_terrain_types(RGE_Sound** sounds) {
     char* filename2 = 0;
-    long* resource_id = &this->terrain_types[31].resource_id;
-    int count = 0x20;
-
-    do {
-        RGE_Tile_Set* tile_set = (RGE_Tile_Set*) (resource_id - 7);
+    for (int i = 31; i >= 0; --i) {
+        RGE_Tile_Set* tile_set = &this->terrain_types[i];
         if (tile_set->loaded != 0) {
             addstring(&filename2, tile_set->pict_name, (char*) ".shp");
-            tile_set->shape = new TShape(filename2, *resource_id);
+            tile_set->shape = new TShape(filename2, tile_set->resource_id);
             if (tile_set->shape->is_loaded() == 0)
                 tile_set->loaded = 0;
-            if ((long) tile_set->sound >= 0)
-                tile_set->sound = sounds[(long) tile_set->sound];
+            intptr_t sound_id = (intptr_t) tile_set->sound;
+            if (sound_id >= 0)
+                tile_set->sound = sounds[sound_id];
             else
                 tile_set->sound = 0;
         }
-        resource_id -= 0x66;
-        --count;
-    } while (count != 0);
+    }
 
     if (filename2 != 0)
         free(filename2);
@@ -1463,25 +1648,21 @@ void RGE_Map::load_terrain_types(char* terrain_table, RGE_Sound** sounds) {
 
 void RGE_Map::load_border_types(RGE_Sound** sounds) {
     char* filename2 = 0;
-    long* resource_id = &this->border_types[15].resource_id;
-    int count = 16;
-
-    do {
-        RGE_Border_Set* border = (RGE_Border_Set*) (resource_id - 7);
+    for (int i = 15; i >= 0; --i) {
+        RGE_Border_Set* border = &this->border_types[i];
         if (border->loaded != 0) {
             addstring(&filename2, border->pict_name, (char*) ".shp");
-            TShape* shape = new TShape(filename2, *resource_id);
+            TShape* shape = new TShape(filename2, border->resource_id);
             border->shape = shape;
             if (shape->is_loaded() == 0)
                 border->loaded = 0;
-            if ((long) border->sound >= 0)
-                border->sound = sounds[(long) border->sound];
+            intptr_t sound_id = (intptr_t) border->sound;
+            if (sound_id >= 0)
+                border->sound = sounds[sound_id];
             else
                 border->sound = 0;
         }
-        resource_id -= 0x168;
-        --count;
-    } while (count != 0);
+    }
 
     if (filename2 != 0)
         free(filename2);

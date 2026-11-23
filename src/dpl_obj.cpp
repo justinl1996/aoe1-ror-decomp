@@ -187,31 +187,33 @@ int RGE_Doppleganger_Object::setup(int infile, RGE_Game_World* gworld) {
     return 1;
 }
 
+#include <stdint.h>
+
 void RGE_Doppleganger_Object::rehook() {
     RGE_Player* player;
     int player_index;
 
     RGE_Static_Object::rehook();
 
-    if ((long) this->doppled_object >= 0) {
-        this->doppled_object = this->get_object_pointer((long) this->doppled_object);
+    if ((intptr_t) this->doppled_object >= 0) {
+        this->doppled_object = this->get_object_pointer((int) (intptr_t) this->doppled_object);
         if (this->doppled_object == 0) {
             goto second_part;
         }
         this->doppledObjectID = this->doppled_object->id;
         this->draw_color = this->doppled_object->owner->color_table;
     } else {
-        player_index = -1 - (long) this->doppled_object;
+        player_index = -1 - (int) (intptr_t) this->doppled_object;
         this->doppled_object = 0;
         this->doppledObjectID = -1;
         this->draw_color = this->owner->world->players[player_index]->color_table;
     }
 
 second_part:
-    if ((long) this->doppled_master_obj >= 0) {
+    if ((intptr_t) this->doppled_master_obj >= 0) {
         player = this->owner->world->players[this->doppled_player];
-        if ((long) this->doppled_master_obj < player->master_object_num) {
-            this->doppled_master_obj = player->master_objects[(long) this->doppled_master_obj];
+        if ((intptr_t) this->doppled_master_obj < player->master_object_num) {
+            this->doppled_master_obj = player->master_objects[(intptr_t) this->doppled_master_obj];
             return;
         }
     }
@@ -310,10 +312,10 @@ void RGE_Doppleganger_Object::validate() {
 }
 
 RGE_Doppleganger_Creator::RGE_Doppleganger_Creator(RGE_Player* player, int initial_size) {
-    this->Objects = (RGE_Static_Object**) calloc(initial_size, 4);
-    this->Map_Addresses = (unsigned long**) calloc(initial_size, 4);
-    this->Last_Map_Value = (unsigned long*) calloc(initial_size, 4);
-    this->Object_ids = (int*) calloc(initial_size, 4);
+    this->Objects = (RGE_Static_Object**) calloc(initial_size, sizeof(RGE_Static_Object*));
+    this->Map_Addresses = (unsigned long**) calloc(initial_size, sizeof(unsigned long*));
+    this->Last_Map_Value = (unsigned long*) calloc(initial_size, sizeof(unsigned long));
+    this->Object_ids = (int*) calloc(initial_size, sizeof(int));
     this->allocated_size = initial_size;
     this->active_size = 0;
     this->owner = player;
@@ -459,15 +461,15 @@ void RGE_Doppleganger_Creator::expand_allocations(int grow_size) {
 
     this->allocated_size += grow_size;
 
-    void* new_objects = calloc(this->allocated_size, 4);
-    void* new_map_addresses = calloc(this->allocated_size, 4);
-    void* TLast_Map_Value = calloc(this->allocated_size, 4);
-    void* TObject_ids = calloc(this->allocated_size, 4);
+    void* new_objects = calloc(this->allocated_size, sizeof(RGE_Static_Object*));
+    void* new_map_addresses = calloc(this->allocated_size, sizeof(unsigned long*));
+    void* TLast_Map_Value = calloc(this->allocated_size, sizeof(unsigned long));
+    void* TObject_ids = calloc(this->allocated_size, sizeof(int));
 
-    memcpy(new_objects, this->Objects, this->active_size * 4);
-    memcpy(new_map_addresses, this->Map_Addresses, this->active_size * 4);
-    memcpy(TLast_Map_Value, this->Last_Map_Value, this->active_size * 4);
-    memcpy(TObject_ids, this->Object_ids, this->active_size * 4);
+    memcpy(new_objects, this->Objects, this->active_size * sizeof(RGE_Static_Object*));
+    memcpy(new_map_addresses, this->Map_Addresses, this->active_size * sizeof(unsigned long*));
+    memcpy(TLast_Map_Value, this->Last_Map_Value, this->active_size * sizeof(unsigned long));
+    memcpy(TObject_ids, this->Object_ids, this->active_size * sizeof(int));
 
     free(this->Objects);
     free(this->Map_Addresses);

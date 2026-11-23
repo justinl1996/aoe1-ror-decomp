@@ -88,7 +88,7 @@ int RGE_Diamond_Map::set_bitmap(char* map_bmp, long res_id) {
     }
     pic_hgt = (short) picture->Height;
     pic_wid = (short) picture->Width;
-    this->map_image_lines = (RGE_Map_Image_Line*) calloc(pic_hgt, 6);
+    this->map_image_lines = (RGE_Map_Image_Line*) calloc(pic_hgt, sizeof(RGE_Map_Image_Line));
 
     if (picture->Orien == 1) {
         pic_line = picture->Bits;
@@ -165,7 +165,7 @@ void RGE_Diamond_Map::set_world(RGE_Game_World* world_in) {
         if (this->map_tile_rows != 0) {
             free(this->map_tile_rows);
         }
-        this->map_tile_rows = (RGE_Map_Tile_Row*) calloc(this->map_tile_row_cnt, 36);
+        this->map_tile_rows = (RGE_Map_Tile_Row*) calloc(this->map_tile_row_cnt, sizeof(RGE_Map_Tile_Row));
 
         tile_row = 0;
         this->map_row_step = (float) this->map_tile_row_cnt / (float) this->map_image_hgt;

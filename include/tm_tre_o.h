@@ -20,6 +20,8 @@ class TRIBE_Master_Tree_Object : public RGE_Master_Static_Object {
     virtual RGE_Master_Static_Object* make_new_master();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_master_tree_object_size_check[(sizeof(TRIBE_Master_Tree_Object) == 0xB8) ? 1 : -1];
+#endif
 
 #endif

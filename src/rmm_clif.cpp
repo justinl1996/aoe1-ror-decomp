@@ -41,25 +41,22 @@ void RGE_RMM_Cliffs_Generator::setup_cliff_maps() {
 
     long cliff_y = 0;
     if (cliff_height > 0) {
-        long row_offset = 0;
         do {
             long cliff_x = 0;
             if (terrain_width > 0) {
-                long column_offset = 0;
                 do {
                     long area = -1;
                     unsigned char valid = 1;
                     unsigned char water_area = 0;
-                    RGE_Tile** tile_row = (RGE_Tile**) ((char*) this->map_row_offset + row_offset);
+                    RGE_Tile** tile_row = this->map_row_offset + cliff_y * 3;
                     long tile_rows = 3;
                     do {
                         long tile_columns = 3;
-                        unsigned char* tile = (unsigned char*) *tile_row + 5 + column_offset;
+                        RGE_Tile* tile = *tile_row + cliff_x * 3;
                         do {
-                            unsigned char value = *tile;
-                            unsigned char terrain = value & 0x1f;
+                            unsigned char terrain = tile->terrain_type;
                             if (terrain == 0 || terrain == 6) {
-                                unsigned char elevation = value >> 5;
+                                unsigned char elevation = tile->height;
                                 if (area < 0) {
                                     area = elevation;
                                 } else if (area != elevation) {
@@ -71,7 +68,7 @@ void RGE_RMM_Cliffs_Generator::setup_cliff_maps() {
                                     water_area = 1;
                                 }
                             }
-                            tile += 24;
+                            tile++;
                             tile_columns--;
                         } while (tile_columns != 0);
                         tile_row++;
@@ -91,11 +88,9 @@ void RGE_RMM_Cliffs_Generator::setup_cliff_maps() {
                         this->search_map_rows[cliff_y][cliff_x] = 0;
                     }
                     cliff_x++;
-                    column_offset += 72;
                 } while (cliff_x < terrain_width);
             }
             cliff_y++;
-            row_offset += 12;
         } while (cliff_y < cliff_height);
     }
 

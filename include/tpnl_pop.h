@@ -41,6 +41,8 @@ class TRIBE_Panel_Pop : public TPanel {
     int render_to_image_buffer();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tpnl_pop_panel_size_check[(sizeof(TRIBE_Panel_Pop) == 0x164) ? 1 : -1];
+#endif
 
 #endif

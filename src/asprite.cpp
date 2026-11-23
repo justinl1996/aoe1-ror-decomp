@@ -1,9 +1,8 @@
 #include "../include/game_globals.h"
+#include "../include/rge_fio.h"
 #include "../include/asprite.h"
 #include "../include/view.h"
 
-extern void __cdecl rge_read(int handle, void* buffer, int size);
-extern void __cdecl rge_write(int handle, void* buffer, int size);
 extern int __cdecl debug_rand(char* file, int line);
 
 RGE_Active_Sprite::RGE_Active_Sprite(RGE_Sprite* new_sprite) {

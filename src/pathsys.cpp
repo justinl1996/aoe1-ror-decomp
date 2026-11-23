@@ -62,7 +62,7 @@ PathingSystem::PathingSystem(int x, int y, int aiPS, RGE_Map* map, RGE_Game_Worl
         *distance = (int) (g_path_diagonal_base - (float) aiPS * g_path_diagonal_scale * g_path_diagonal_sign);
         ++aiPS;
         ++distance;
-    } while ((int) distance < (int) (DiagionalDistance + 256));
+    } while (distance < DiagionalDistance + 256);
 }
 
 PathingSystem::~PathingSystem() {
@@ -1109,14 +1109,14 @@ int PathingSystem::passable(RGE_Moving_Object* obj, float newX, float newY, int 
         if (height < 0x18
             && (minX > this->maxTarget.x || minY > this->maxTarget.y || maxX < this->minTarget.x || maxY < this->minTarget.y)) {
             int maskIndex = (minY & 3) + height * 4;
-            unsigned long maskA = ObstructionMasks[maskIndex * 2];
-            unsigned long maskB = ObstructionMasks[maskIndex * 2 + 1];
+            uint32_t maskA = (uint32_t) ObstructionMasks[maskIndex * 2];
+            uint32_t maskB = (uint32_t) ObstructionMasks[maskIndex * 2 + 1];
             int column = minX;
             if (column < maxX) {
                 unsigned char* obstruction = this->obstructionValue[column] + (minY >> 2);
                 if (maskB == 0) {
                     do {
-                        if ((*(unsigned long*) obstruction & maskA) != 0) {
+                        if ((*(uint32_t*) obstruction & maskA) != 0) {
                             goto obstruction_found;
                         }
                         ++column;
@@ -1124,7 +1124,7 @@ int PathingSystem::passable(RGE_Moving_Object* obj, float newX, float newY, int 
                     } while (column < maxX);
                 } else {
                     do {
-                        if ((*(unsigned long*) obstruction & maskA) != 0 || (*(unsigned long*) (obstruction + 4) & maskB) != 0) {
+                        if ((*(uint32_t*) obstruction & maskA) != 0 || (*(uint32_t*) (obstruction + 4) & maskB) != 0) {
                             goto obstruction_found;
                         }
                         ++column;

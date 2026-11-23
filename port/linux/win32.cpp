@@ -502,6 +502,18 @@ LONG WINAPI SetWindowLongA(HWND, INT, LONG) {
     return 0;
 }
 
+#ifndef GetWindowLongPtrA
+LONG_PTR WINAPI GetWindowLongPtrA(HWND, INT) {
+    return 0;
+}
+#endif
+
+#ifndef SetWindowLongPtrA
+LONG_PTR WINAPI SetWindowLongPtrA(HWND, INT, LONG_PTR) {
+    return 0;
+}
+#endif
+
 HWND WINAPI GetParent(HWND) {
     return 0;
 }

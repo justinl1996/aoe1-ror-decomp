@@ -19,7 +19,11 @@ class RGE_Sound_List {
     short frame[3];
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char sprite_records_picture_list_size_check[(sizeof(RGE_Picture_List) == 0x10) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char sprite_records_sound_list_size_check[(sizeof(RGE_Sound_List) == 0x14) ? 1 : -1];
+#endif
 
 #endif

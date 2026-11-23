@@ -120,7 +120,7 @@ int TRIBE_Master_Combat_Object::setup(FILE* infile, RGE_Sprite** sprites, RGE_So
     fscanf(infile, "%hd %hd %hd", &build_pts_required, &id_of_building_obj, &sounds);
 
     armor_count = (int) armor_num;
-    button_location = (unsigned char) (unsigned long) sounds;
+    button_location = (unsigned char) (uintptr_t) sounds;
     orig_pierce_armor = 0;
     if (armor_count > 0) {
         RGE_Armor_Weapon_Info* entry = armor;

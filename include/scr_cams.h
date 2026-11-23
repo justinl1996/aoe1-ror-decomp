@@ -40,13 +40,15 @@ class TRIBE_Screen_Campaign_Selection : public TScreenPanel {
     virtual long handle_idle();
 
   protected:
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     void init_vars();
     void fillCampaigns();
     void fillScenarios();
     void startGame();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_cams_screen_size_check[(sizeof(TRIBE_Screen_Campaign_Selection) == 0x4CC) ? 1 : -1];
+#endif
 
 #endif

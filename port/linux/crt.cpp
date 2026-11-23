@@ -198,9 +198,15 @@ int linux_stat_buf(const char* path, struct linux_stat_buf* buf) {
                                      (info.st_mode & 0700));
     buf->st_nlink = (short) info.st_nlink;
     buf->st_size = (long) info.st_size;
+#ifdef __APPLE__
+    buf->st_atimespec = info.st_atimespec;
+    buf->st_mtimespec = info.st_mtimespec;
+    buf->st_ctimespec = info.st_ctimespec;
+#else
     buf->st_atim = info.st_atim;
     buf->st_mtim = info.st_mtim;
     buf->st_ctim = info.st_ctim;
+#endif
     return 0;
 }
 

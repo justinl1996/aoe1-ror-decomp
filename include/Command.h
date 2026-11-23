@@ -169,12 +169,24 @@ struct RGE_Command_Group_Waypoint {
     unsigned char y;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_command_order_size_check[(sizeof(RGE_Command_Order) == 0x14) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_command_stop_size_check[(sizeof(RGE_Command_Stop) == 0x02) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_command_pause_size_check[(sizeof(RGE_Command_Pause) == 0x02) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_command_group_ai_order_size_check[(sizeof(RGE_Command_Group_AI_Order) == 0x24) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_command_formation_size_check[(sizeof(RGE_Command_Formation) == 0x0C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_command_group_waypoint_size_check[(sizeof(RGE_Command_Group_Waypoint) == 0x04) ? 1 : -1];
+#endif
 
 class RGE_Command {
   protected:
@@ -252,6 +264,8 @@ class RGE_Command {
     void command_group_waypoint(RGE_Static_Object** unit, short unit_count, unsigned char location_x, unsigned char location_y);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_command_size_check[(sizeof(RGE_Command) == 0x18) ? 1 : -1];
+#endif
 
 #endif

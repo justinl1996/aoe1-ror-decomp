@@ -251,7 +251,7 @@ class TDrawSystem {
 
     TDrawSystem();
     ~TDrawSystem();
-    static long __stdcall CheckAvailModesCallback(_DDSURFACEDESC* lpDDSurfaceDesc, void* lpContext);
+    static HRESULT __stdcall CheckAvailModesCallback(_DDSURFACEDESC* lpDDSurfaceDesc, void* lpContext);
     void CheckAvailModes(int full_screen);
     int IsModeAvail(long wid_in, long hgt_in, int color_bits);
     int Init(

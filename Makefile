@@ -19,14 +19,18 @@ VC6_WIN   = Z:$(subst /,\,$(VC6_DIR))
 WINE_ENV  = VC5_DIR='$(VC6_WIN)' AOE_TOOLCHAIN=$(VC6_TOOLCHAIN) AOE_ASSEMBLER=$(ASSEMBLER)
 LATEST_CLANG = $$(ls -d build/clang/2*/ 2>/dev/null | tail -1)
 
-.PHONY: all help clang linux web vc6 harness test play clean
+.PHONY: all help clang win64 linux linux64 macos web web64 vc6 harness test play clean
 
 all: clang
 
 help:
-	@echo "make clang      native clang-cl/lld-link build with SDL2 (default) -> build/clang/<time>/empiresx.exe + SDL2.dll"
-	@echo "make linux      native 32-bit Linux build with SDL2        -> build/linux/<time>/empiresx"
-	@echo "make web        browser build with Emscripten (needs emsdk) -> build/web/<time>/index.html"
+	@echo "make clang      native 32-bit Windows build with SDL2       -> build/clang/<time>/empiresx.exe + SDL2.dll"
+	@echo "make win64      native 64-bit Windows build with SDL2       -> build/win64/<time>/empiresx.exe + SDL2.dll"
+	@echo "make linux      native 32-bit Linux build with SDL2         -> build/linux/<time>/empiresx"
+	@echo "make linux64    native 64-bit Linux build with SDL2         -> build/linux64/<time>/empiresx"
+	@echo "make macos      native 64-bit macOS build with SDL2         -> build/macos/<time>/empiresx"
+	@echo "make web        browser build (wasm32) with Emscripten      -> build/web/<time>/index.html"
+	@echo "make web64      browser build (wasm64) with Emscripten      -> build/web64/<time>/index.html"
 	@echo "make vc6      VC6 under Wine                               -> build/executable/vc6/<time>/"
 	@echo "make harness    check the C++ ports against the assembly (VC6 + ml.exe under Wine)"
 	@echo "make test       tool tests for the port harness and build scripts"
@@ -37,11 +41,23 @@ help:
 clang:
 	VC6_DIR=$(VC6_DIR) $(PYTHON) tools/build_clang.py
 
+win64:
+	$(PYTHON) tools/build_win64.py
+
 linux:
 	$(PYTHON) tools/build_linux.py
 
+linux64:
+	$(PYTHON) tools/build_linux.py --arch x86_64 --output-dir build/linux64
+
+macos:
+	$(PYTHON) tools/build_macos.py
+
 web:
 	$(PYTHON) tools/build_web.py
+
+web64:
+	$(PYTHON) tools/build_web.py --memory64 --output-dir build/web64
 
 vc6:
 	$(WINE_ENV) $(PYTHON) tools/build_executable.py --output-dir build/executable/vc6 --no-icon

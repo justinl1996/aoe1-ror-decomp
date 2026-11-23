@@ -32,6 +32,8 @@ class TPicturePanel : public TPanel {
     void free_pic();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_pic_picture_panel_size_check[(sizeof(TPicturePanel) == 0x11C) ? 1 : -1];
+#endif
 
 #endif

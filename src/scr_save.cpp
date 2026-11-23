@@ -163,7 +163,7 @@ void TribeSaveGameScreen::fillList() {
     }
 }
 
-long TribeSaveGameScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeSaveGameScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     char tempFileName[260];
     char text[556];
     uchar exist_flag;

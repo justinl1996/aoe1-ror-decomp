@@ -1822,7 +1822,7 @@ long TRIBE_Screen_Sed::key_down_action(long key, short count, int alt_key, int c
     return 0;
 }
 
-long TRIBE_Screen_Sed::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TRIBE_Screen_Sed::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     int i;
     int map_size;
     int player_count;

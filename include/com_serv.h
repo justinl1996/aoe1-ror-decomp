@@ -11,7 +11,9 @@ struct SPs {
     int Active;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_serv_sp_size_check[(sizeof(SPs) == 0x60) ? 1 : -1];
+#endif
 
 class TCommunications_Services {
   protected:
@@ -35,6 +37,8 @@ class TCommunications_Services {
 
 BOOL __stdcall DPEnumCallback(LPGUID pid, LPSTR szName, DWORD major_ver, DWORD minor_ver, LPVOID lpx);
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_serv_services_size_check[(sizeof(TCommunications_Services) == 0x2584) ? 1 : -1];
+#endif
 
 #endif

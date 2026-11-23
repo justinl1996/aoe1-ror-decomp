@@ -310,7 +310,7 @@ static int device_type_of(DWORD flags, const MCI_OPEN_PARMSA* open) {
     if ((flags & MCI_OPEN_TYPE) == 0)
         return 0;
     if ((flags & MCI_OPEN_TYPE_ID) != 0)
-        return LOWORD((DWORD) open->lpstrDeviceType);
+        return LOWORD((uintptr_t) open->lpstrDeviceType);
     if (open->lpstrDeviceType == 0)
         return 0;
     if (SDL_strcasecmp(open->lpstrDeviceType, "cdaudio") == 0)
@@ -480,7 +480,7 @@ static MCIERROR mci_status(MciDevice* device, DWORD flags, MCI_STATUS_PARMS* sta
     return result;
 }
 
-static MCIERROR mci_own_command(MciDevice* device, UINT msg, DWORD flags, DWORD params) {
+static MCIERROR mci_own_command(MciDevice* device, UINT msg, DWORD flags, DWORD_PTR params) {
     switch (msg) {
         case MCI_CLOSE:
             mix_audio_lock();
@@ -537,7 +537,7 @@ static MCIERROR mci_own_command(MciDevice* device, UINT msg, DWORD flags, DWORD 
     return MCIERR_UNSUPPORTED_FUNCTION;
 }
 
-extern "C" MCIERROR WINAPI surface_mci_send_command(MCIDEVICEID id, UINT msg, DWORD flags, DWORD params) {
+extern "C" MCIERROR WINAPI surface_mci_send_command(MCIDEVICEID id, UINT msg, DWORD flags, DWORD_PTR params) {
     static int source_set = 0;
     if (source_set == 0 && mix_audio_open() != 0) {
         mix_set_music_source(player_fill);

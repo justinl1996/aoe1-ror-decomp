@@ -120,7 +120,7 @@ long TMessageDialog::setup(
     return setup(parent_panel_in, info_file_in, info_id_in, wid_in, hgt_in, dlg_type_in, str, btn_wid_in, btn_hgt_in);
 }
 
-long TMessageDialog::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TMessageDialog::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     if (parent_panel != 0 && action_in == 1) {
         if (from_panel == button[0]) {
             parent_panel->action(this, 0, 0, 0);

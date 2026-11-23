@@ -148,7 +148,9 @@ struct Tech_Tree {
     long hotkey_id;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tech_tree_size_check[(sizeof(Tech_Tree) == 0x3C) ? 1 : -1];
+#endif
 
 // CodeView record: struct Tech_Player_Tree, size 0x08.
 struct Tech_Player_Tree {
@@ -157,7 +159,9 @@ struct Tech_Player_Tree {
     short state;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tech_player_tree_size_check[(sizeof(Tech_Player_Tree) == 0x08) ? 1 : -1];
+#endif
 
 class TRIBE_Tech {
   public:
@@ -176,7 +180,9 @@ class TRIBE_Tech {
     long get_hotkey(short);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_tech_size_check[(sizeof(TRIBE_Tech) == 0x0C) ? 1 : -1];
+#endif
 
 class TRIBE_Player_Tech {
   public:
@@ -213,6 +219,8 @@ class TRIBE_Player_Tech {
     long get_hotkey(short);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_player_tech_size_check[(sizeof(TRIBE_Player_Tech) == 0x10) ? 1 : -1];
+#endif
 
 #endif

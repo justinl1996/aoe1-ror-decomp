@@ -105,6 +105,8 @@ class RGE_Action {
     float targetZ() const;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char action_size_check[(sizeof(RGE_Action) == 0x40) ? 1 : -1];
+#endif
 
 #endif

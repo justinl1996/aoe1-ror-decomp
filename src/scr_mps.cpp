@@ -610,7 +610,7 @@ long TribeMPSetupScreen::key_down_action(long key, short count, int alt_key, int
     return 0;
 }
 
-long TribeMPSetupScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeMPSetupScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel != 0) {
         if (fromPanel == this->startButton && actionIn == 1) {
             if (this->chatInput != 0 && this->chatInput->active != 0) {
@@ -2562,7 +2562,7 @@ void TRIBE_Screen_Wait::set_text(long message_in) {
     this->message->set_text(message_in);
 }
 
-long TRIBE_Screen_Wait::action(TPanel* from_panel, long action_in, unsigned long val1, unsigned long val2) {
+long TRIBE_Screen_Wait::action(TPanel* from_panel, long action_in, uintptr_t val1, uintptr_t val2) {
     if ((from_panel != 0) && (from_panel == this->close_button) && (action_in == 1)) {
         rge_base_game->close();
         return 1;
@@ -2605,7 +2605,7 @@ void TRIBE_Screen_Disconnect::set_text(long message_in) {
     this->message->set_text(message_in);
 }
 
-long TRIBE_Screen_Disconnect::action(TPanel* from_panel, long action_in, unsigned long val1, unsigned long val2) {
+long TRIBE_Screen_Disconnect::action(TPanel* from_panel, long action_in, uintptr_t val1, uintptr_t val2) {
     if (from_panel != 0) {
         if (from_panel == this->cancel_button && action_in == 1) {
             ((TRIBE_Game*) rge_base_game)->quit_game();

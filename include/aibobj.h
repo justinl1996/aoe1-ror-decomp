@@ -85,7 +85,9 @@ class BaseObject {
     void setCurrentTargetPosition(float x, float y, float z);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aibobj_size_check[(sizeof(BaseObject) == 0xA0) ? 1 : -1];
+#endif
 
 int __cdecl operator==(const BaseObject& one, const BaseObject& two);
 int __cdecl operator!=(const BaseObject& one, const BaseObject& two);

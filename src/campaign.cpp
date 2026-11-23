@@ -22,7 +22,7 @@ RGE_Campaign::RGE_Campaign(char* in_filename) {
     if (handle >= 0) {
         read(handle, this, 264);
         if (this->campaign_header.scenario_num > 0) {
-            this->scenario_offsets = (RGE_Scenario_Offset*) calloc(this->campaign_header.scenario_num, 520);
+            this->scenario_offsets = (RGE_Scenario_Offset*) calloc(this->campaign_header.scenario_num, sizeof(RGE_Scenario_Offset));
             read(handle, this->scenario_offsets, this->campaign_header.scenario_num * 520);
         } else {
             this->scenario_offsets = 0;
@@ -47,7 +47,7 @@ RGE_Campaign::RGE_Campaign(
     this->campaign_header.scenario_num = scenario_num;
 
     if (scenario_num > 0) {
-        this->scenario_offsets = (RGE_Scenario_Offset*) calloc(scenario_num, 520);
+        this->scenario_offsets = (RGE_Scenario_Offset*) calloc(scenario_num, sizeof(RGE_Scenario_Offset));
         for (long i = 0; i < scenario_num; ++i) {
             strcpy(this->scenario_offsets[i].name, scenarios_name[i]);
             strcpy(this->scenario_offsets[i].file_name, scenarios[i]);
@@ -129,7 +129,7 @@ long RGE_Campaign::scenario_number() {
 }
 
 long RGE_Campaign::scenario_info(char*** scenario_names) {
-    char** strings = (char**) calloc((unsigned int) this->campaign_header.scenario_num, 4);
+    char** strings = (char**) calloc((unsigned int) this->campaign_header.scenario_num, sizeof(char*));
     *scenario_names = strings;
 
     int i = 0;

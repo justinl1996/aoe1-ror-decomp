@@ -81,9 +81,17 @@ class TribeSoldierUnitAIModule : public UnitAIModule {
     virtual ~TribeSoldierUnitAIModule();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_unit_ai_module_size_check[(sizeof(UnitAIModule) == 0x134) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_hunted_animal_unit_ai_size_check[(sizeof(TribeHuntedAnimalUnitAIModule) == 0x134) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_preditor_unit_ai_size_check[(sizeof(TribePreditorUnitAIModule) == 0x134) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_soldier_unit_ai_size_check[(sizeof(TribeSoldierUnitAIModule) == 0x134) ? 1 : -1];
+#endif
 
 #endif // AOE1_TRIBE_UNIT_AI_H

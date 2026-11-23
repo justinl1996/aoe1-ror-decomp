@@ -16,7 +16,7 @@ static const char READ_MODE[] = "r";
 
 #define MUSIC_STREAM_END_MESSAGE 0x500
 
-typedef MCIERROR(WINAPI* MCI_SEND_COMMAND_PROC)(MCIDEVICEID, UINT, DWORD, DWORD);
+typedef MCIERROR(WINAPI* MCI_SEND_COMMAND_PROC)(MCIDEVICEID, UINT, DWORD, DWORD_PTR);
 
 extern unsigned long debug_timeGetTime(char* file, int line);
 
@@ -74,14 +74,14 @@ int TMusic_System::open_device() {
         case 1: {
             MCI_SEND_COMMAND_PROC mci = surface_mci_send_command;
             open_info.lpstrDeviceType = MAKEINTRESOURCEA(MCI_DEVTYPE_CD_AUDIO);
-            if (mci(0, MCI_OPEN, MCI_OPEN_TYPE_ID | MCI_OPEN_TYPE | MCI_OPEN_SHAREABLE | MCI_WAIT, (DWORD) &open_info) == 0) {
+            if (mci(0, MCI_OPEN, MCI_OPEN_TYPE_ID | MCI_OPEN_TYPE | MCI_OPEN_SHAREABLE | MCI_WAIT, (DWORD_PTR) &open_info) == 0) {
                 this->device_open = 1;
                 this->device_id = open_info.wDeviceID;
                 set_info.dwTimeFormat = MCI_FORMAT_TMSF;
-                mci(this->device_id, MCI_SET, MCI_SET_TIME_FORMAT | MCI_WAIT, (DWORD) &set_info);
+                mci(this->device_id, MCI_SET, MCI_SET_TIME_FORMAT | MCI_WAIT, (DWORD_PTR) &set_info);
 
                 status_info.dwItem = MCI_STATUS_NUMBER_OF_TRACKS;
-                if (mci(this->device_id, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD) &status_info) == 0) {
+                if (mci(this->device_id, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD_PTR) &status_info) == 0) {
                     this->track_count = status_info.dwReturn;
                 }
 
@@ -346,13 +346,13 @@ int TMusic_System::play(
         case 1: {
             MCIERROR result;
             mci = surface_mci_send_command;
-            this->play_info.dwCallback = (unsigned long) this->window;
+            this->play_info.dwCallback = (DWORD_PTR) this->window;
             unsigned int flags = MCI_NOTIFY;
 
             if (set_pos_in > 0) {
                 seek_info.dwCallback = 0;
                 seek_info.dwTo = set_pos_in;
-                mci(this->device_id, MCI_SEEK, MCI_TO | MCI_WAIT, (unsigned long) &seek_info);
+                mci(this->device_id, MCI_SEEK, MCI_TO | MCI_WAIT, (DWORD_PTR) &seek_info);
             } else {
                 flags = MCI_NOTIFY | MCI_FROM;
                 this->play_info.dwFrom = (unsigned char) this->current_track;
@@ -363,7 +363,7 @@ int TMusic_System::play(
                 this->play_info.dwTo = (unsigned char) (end_track_in + 1);
             }
 
-            result = mci(this->device_id, MCI_PLAY, flags, (unsigned long) &this->play_info);
+            result = mci(this->device_id, MCI_PLAY, flags, (DWORD_PTR) &this->play_info);
             if (!result) {
                 this->playing_track = 1;
                 ++this->notify_waiting;
@@ -393,7 +393,7 @@ int TMusic_System::play(
                 mci = surface_mci_send_command;
                 open_info.lpstrDeviceType = MAKEINTRESOURCEA(MCI_DEVTYPE_SEQUENCER);
                 open_info.lpstrElementName = track_name;
-                result = mci(0, MCI_OPEN, MCI_OPEN_TYPE_ID | MCI_OPEN_TYPE | MCI_OPEN_ELEMENT, (unsigned long) &open_info);
+                result = mci(0, MCI_OPEN, MCI_OPEN_TYPE_ID | MCI_OPEN_TYPE | MCI_OPEN_ELEMENT, (DWORD_PTR) &open_info);
                 if (result) {
                     if (!surface_mci_get_error_string(result, szErrorMsg, sizeof(szErrorMsg))) {
                         strcpy(szErrorMsg, MUSIC_ERROR);
@@ -407,11 +407,11 @@ int TMusic_System::play(
                 if (set_pos_in > 0) {
                     seek_info.dwCallback = 0;
                     seek_info.dwTo = set_pos_in;
-                    mci((unsigned int) open_info.wDeviceID, MCI_SEEK, MCI_TO, (unsigned long) &seek_info);
+                    mci((unsigned int) open_info.wDeviceID, MCI_SEEK, MCI_TO, (DWORD_PTR) &seek_info);
                 }
 
-                this->play_info.dwCallback = (unsigned long) this->window;
-                result = mci(this->device_id, MCI_PLAY, MCI_NOTIFY, (unsigned long) &this->play_info);
+                this->play_info.dwCallback = (DWORD_PTR) this->window;
+                result = mci(this->device_id, MCI_PLAY, MCI_NOTIFY, (DWORD_PTR) &this->play_info);
                 if (!result) {
                     this->playing_track = 1;
                     ++this->notify_waiting;
@@ -497,14 +497,14 @@ int TMusic_System::resume_play() {
 
     switch (this->music_type) {
         case 1: {
-            int result = surface_mci_send_command(this->device_id, MCI_PLAY, 0, (unsigned long) &this->play_info);
+            int result = surface_mci_send_command(this->device_id, MCI_PLAY, 0, (DWORD_PTR) &this->play_info);
             if (result == 0) {
                 this->notify_waiting++;
             }
             break;
         }
         case 2: {
-            int result = surface_mci_send_command(this->device_id, MCI_PLAY, 0, (unsigned long) &this->play_info);
+            int result = surface_mci_send_command(this->device_id, MCI_PLAY, 0, (DWORD_PTR) &this->play_info);
             if (result == 0) {
                 this->notify_waiting++;
             }
@@ -729,14 +729,14 @@ int TMusic_System::get_play_info(
     switch (this->music_type) {
         case 2: {
             status_info.dwItem = MCI_STATUS_POSITION;
-            int result = surface_mci_send_command(this->device_id, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (unsigned long) &status_info);
+            int result = surface_mci_send_command(this->device_id, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD_PTR) &status_info);
             if (result == 0)
                 *pos_in = status_info.dwReturn;
             break;
         }
         case 1: {
             status_info.dwItem = MCI_STATUS_POSITION;
-            int result = surface_mci_send_command(this->device_id, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (unsigned long) &status_info);
+            int result = surface_mci_send_command(this->device_id, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD_PTR) &status_info);
             if (result == 0)
                 *pos_in = status_info.dwReturn;
             break;

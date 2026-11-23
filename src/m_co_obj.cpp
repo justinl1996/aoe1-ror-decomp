@@ -46,7 +46,7 @@ int RGE_Master_Combat_Object::setup(RGE_Master_Combat_Object* other_object) {
 
     weapon_num = other_object->weapon_num;
     if (weapon_num > 0) {
-        weapon = (RGE_Armor_Weapon_Info*) calloc(weapon_num, 4);
+        weapon = (RGE_Armor_Weapon_Info*) calloc(weapon_num, sizeof(RGE_Armor_Weapon_Info));
         memcpy(weapon, other_object->weapon, weapon_num * 4);
     } else {
         weapon = (RGE_Armor_Weapon_Info*) 0;
@@ -54,7 +54,7 @@ int RGE_Master_Combat_Object::setup(RGE_Master_Combat_Object* other_object) {
 
     armor_num = other_object->armor_num;
     if (armor_num > 0) {
-        armor = (RGE_Armor_Weapon_Info*) calloc(armor_num, 4);
+        armor = (RGE_Armor_Weapon_Info*) calloc(armor_num, sizeof(RGE_Armor_Weapon_Info));
         memcpy(armor, other_object->armor, armor_num * 4);
     } else {
         armor = (RGE_Armor_Weapon_Info*) 0;
@@ -91,7 +91,7 @@ int RGE_Master_Combat_Object::setup(int infile, RGE_Sprite** sprites, RGE_Sound*
     rge_read(infile, &base_armor, 1);
     rge_read(infile, &weapon_num, 2);
     if (weapon_num > 0) {
-        weapon = (RGE_Armor_Weapon_Info*) calloc((int) weapon_num, 4);
+        weapon = (RGE_Armor_Weapon_Info*) calloc((int) weapon_num, sizeof(RGE_Armor_Weapon_Info));
         rge_read(infile, weapon, (int) weapon_num << 2);
     } else {
         weapon = (RGE_Armor_Weapon_Info*) 0;
@@ -99,7 +99,7 @@ int RGE_Master_Combat_Object::setup(int infile, RGE_Sprite** sprites, RGE_Sound*
 
     rge_read(infile, &armor_num, 2);
     if (armor_num > 0) {
-        armor = (RGE_Armor_Weapon_Info*) calloc((int) armor_num, 4);
+        armor = (RGE_Armor_Weapon_Info*) calloc((int) armor_num, sizeof(RGE_Armor_Weapon_Info));
         rge_read(infile, armor, (int) armor_num << 2);
     } else {
         armor = (RGE_Armor_Weapon_Info*) 0;
@@ -191,7 +191,7 @@ int RGE_Master_Combat_Object::setup(FILE* infile, RGE_Sprite** sprites, RGE_Soun
     armor_count_value = &armor_num;
     index = 0;
     if (*armor_count_value > 0) {
-        armor = (RGE_Armor_Weapon_Info*) calloc((int) *armor_count_value, 4);
+        armor = (RGE_Armor_Weapon_Info*) calloc((int) *armor_count_value, sizeof(RGE_Armor_Weapon_Info));
         if (0 < armor_num) {
             do {
                 fscanf(input, "%hd %hd", &armor[index].type, &armor[index].value);
@@ -204,7 +204,7 @@ int RGE_Master_Combat_Object::setup(FILE* infile, RGE_Sprite** sprites, RGE_Soun
 
     index = 0;
     if (weapon_num > 0) {
-        weapon = (RGE_Armor_Weapon_Info*) calloc((int) weapon_num, 4);
+        weapon = (RGE_Armor_Weapon_Info*) calloc((int) weapon_num, sizeof(RGE_Armor_Weapon_Info));
         if (0 < weapon_num) {
             do {
                 fscanf(input, "%hd %hd", &weapon[index].type, &weapon[index].value);
@@ -221,8 +221,8 @@ int RGE_Master_Combat_Object::setup(FILE* infile, RGE_Sprite** sprites, RGE_Soun
         selected_sprite = (RGE_Sprite*) 0;
     fight_sprite = selected_sprite;
     break_off_combat = (unsigned char) temp_break_off_combat;
-    area_effect_level = (unsigned char) (unsigned long) sounds;
-    base_armor = (unsigned char) (unsigned long) infile;
+    area_effect_level = (unsigned char) (uintptr_t) sounds;
+    base_armor = (unsigned char) (uintptr_t) infile;
     // the shipped parser stores the low byte of this value.
     fire_missile_at_frame = (unsigned char) temp_fire_missile_at_frame;
     orig_armor = (unsigned char) base_armor;
@@ -298,7 +298,7 @@ void RGE_Master_Combat_Object::copy_obj(RGE_Master_Static_Object* source) {
     if (weapon != 0)
         free(weapon);
     if (weapon_num > 0) {
-        weapon = (RGE_Armor_Weapon_Info*) calloc(weapon_num, 4);
+        weapon = (RGE_Armor_Weapon_Info*) calloc(weapon_num, sizeof(RGE_Armor_Weapon_Info));
         memcpy(weapon, other->weapon, weapon_num * 4);
     } else {
         weapon = (RGE_Armor_Weapon_Info*) 0;
@@ -308,7 +308,7 @@ void RGE_Master_Combat_Object::copy_obj(RGE_Master_Static_Object* source) {
     if (armor != 0)
         free(armor);
     if (armor_num > 0) {
-        armor = (RGE_Armor_Weapon_Info*) calloc(armor_num, 4);
+        armor = (RGE_Armor_Weapon_Info*) calloc(armor_num, sizeof(RGE_Armor_Weapon_Info));
         memcpy(armor, other->armor, armor_num * 4);
     } else {
         armor = (RGE_Armor_Weapon_Info*) 0;

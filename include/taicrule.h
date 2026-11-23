@@ -18,8 +18,12 @@ class CombatRuleSystem {
     int bestUnitTypeToDefendAgainst(int tType);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taicrule_combat_rule_system_size[(sizeof(CombatRuleSystem) == 0x9C8) ? 1 : -1];
+#endif
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taicrule_combat_rule_system_vptr[(sizeof(void*) == 4) ? 1 : -1];
+#endif
 
 #endif

@@ -76,7 +76,11 @@ class RGE_Communications_Queue {
     void TestShowQueue();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_q_msg_queue_size_check[(sizeof(MsgQueue) == 0x1C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_q_size_check[(sizeof(RGE_Communications_Queue) == 0x118) ? 1 : -1];
+#endif
 
 #endif

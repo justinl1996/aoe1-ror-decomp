@@ -27,6 +27,8 @@ class RGE_Master_Doppleganger_Object : public RGE_Master_Animated_Object {
     int setup(FILE* infile, RGE_Sprite** sprites, RGE_Sound** sounds, short in_id);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char m_dg_master_doppleganger_size[(sizeof(RGE_Master_Doppleganger_Object) == 0xBC) ? 1 : -1];
+#endif
 
 #endif

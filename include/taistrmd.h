@@ -61,8 +61,12 @@ class TribeStrategyAIModule : public StrategyAIModule {
     int isRuleIdle(int ruleNumber);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taistrmd_strategy_size[(sizeof(TribeStrategyAIModule) == 0x5F8) ? 1 : -1];
+#endif
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taistrmd_rule_set_name_size[(sizeof(((TribeStrategyAIModule*) 0)->ruleSetNameValue) == 257) ? 1 : -1];
+#endif
 
 #endif

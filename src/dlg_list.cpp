@@ -104,7 +104,7 @@ long TListDialog::key_down_action(long key, short count, int alt_key, int ctrl_k
     return 0;
 }
 
-long TListDialog::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TListDialog::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     if (from_panel != 0) {
         if (from_panel == ok_btn) {
             if (action_in == 1) {

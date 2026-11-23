@@ -23,6 +23,8 @@ class TTaunt {
     int RestartSoundSystem(TSound_Driver* driver);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taunt_size_check[(sizeof(TTaunt) == 0x198) ? 1 : -1];
+#endif
 
 #endif

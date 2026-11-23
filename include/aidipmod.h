@@ -34,6 +34,8 @@ class DiplomacyAIModule : public AIModule {
     unsigned char changeableTable[10];
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aidipmod_diplomacy_ai_module_size[(sizeof(DiplomacyAIModule) == 0x150) ? 1 : -1];
+#endif
 
 #endif

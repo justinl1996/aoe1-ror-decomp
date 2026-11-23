@@ -47,6 +47,8 @@ class RGE_Action_Attack : public RGE_Action {
     void do_attack();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_action_attack_size_check[(sizeof(RGE_Action_Attack) == 0x5C) ? 1 : -1];
+#endif
 
 #endif

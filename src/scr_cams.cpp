@@ -150,7 +150,7 @@ long TRIBE_Screen_Campaign_Selection::handle_idle() {
     return TPanel::handle_idle();
 }
 
-long TRIBE_Screen_Campaign_Selection::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TRIBE_Screen_Campaign_Selection::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel != 0 && campaignsLoaded != 0) {
         TPanel* ok = okButton;
         if (fromPanel == ok && actionIn == 1) {

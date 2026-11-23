@@ -20,6 +20,8 @@ class TRIBE_Action_List : public RGE_Action_List {
     TRIBE_Action_List(RGE_Action_Object* obj_in);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tact_lst_action_list_size_check[(sizeof(TRIBE_Action_List) == 0x0C) ? 1 : -1];
+#endif
 
 #endif // AOE1_TACT_LST_H

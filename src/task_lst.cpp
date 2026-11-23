@@ -24,7 +24,7 @@ void RGE_Task_List::copy(RGE_Task_List* other_list) {
 
     list_num = other_list->list_num;
     if (list_num > 0) {
-        list = (RGE_Task**) calloc((int) list_num, 4);
+        list = (RGE_Task**) calloc((int) list_num, sizeof(RGE_Task*));
         for (short i = 0; i < list_num; i++) {
             list[i] = create_task(other_list->list[i]->task_type, i);
             list[i]->copy(other_list->list[i]);
@@ -43,7 +43,7 @@ void RGE_Task_List::load(int infile, RGE_Sprite** sprites, RGE_Sound** sounds) {
     if (self->list_num <= 0)
         return;
 
-    self->list = (RGE_Task**) calloc(self->list_num, 4);
+    self->list = (RGE_Task**) calloc(self->list_num, sizeof(RGE_Task*));
     for (int i = 0; (short) i < self->list_num; i++) {
         rge_read(infile, &task_type, 2);
         self->list[(short) i] = self->create_task(task_type, i);
@@ -59,7 +59,7 @@ void RGE_Task_List::load(FILE* infile, RGE_Sprite** sprites, RGE_Sound** sounds)
 
     fscanf(infile, "%hd", &list_num);
     if (list_num > 0) {
-        list = (RGE_Task**) calloc((int) list_num, 4);
+        list = (RGE_Task**) calloc((int) list_num, sizeof(RGE_Task*));
         for (int i = 0; (short) i < list_num; i++) {
             fscanf(infile, "%hd", &task_type);
             list[(short) i] = create_task(task_type, i);

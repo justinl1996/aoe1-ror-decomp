@@ -674,7 +674,7 @@ long RGE_Main_View::mouse_left_up_action(long x, long y, int ctrl_key, int shift
         case TRIBE_GAME_MODE_SELECT_OBJECT:
             if (this->pick1(0x29, 1, x, y, &pick_info, this->player->selected_obj, 1) == 0x34) {
                 if (this->curr_child != 0) {
-                    this->curr_child->action(this, 0x10, (unsigned long) pick_info.object, 0);
+                    this->curr_child->action(this, 0x10, (uintptr_t) pick_info.object, 0);
                     this->player->select_one_object(pick_info.object, 1);
                     this->set_redraw(TPanel::RedrawNormal);
                 }

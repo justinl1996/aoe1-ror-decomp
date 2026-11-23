@@ -32,6 +32,8 @@ class TPicture {
     unsigned char GetPixel(long x, long y, int Mirror, int Flip);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char picture_size_check[(sizeof(TPicture) == 0x20) ? 1 : -1];
+#endif
 
 #endif

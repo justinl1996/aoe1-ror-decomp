@@ -10,7 +10,9 @@ class RGE_Scenario_File_Entry {
     char name[260];
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_scenario_file_entry_size_check[(sizeof(RGE_Scenario_File_Entry) == 0x10C) ? 1 : -1];
+#endif
 
 class RGE_Scenario_File_Info {
   public:
@@ -26,6 +28,8 @@ class RGE_Scenario_File_Info {
     RGE_Scenario_Header* get_scenario_info(long id);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_scenario_file_info_size_check[(sizeof(RGE_Scenario_File_Info) == 0x10C) ? 1 : -1];
+#endif
 
 #endif // AOE1_SCENINFO_H

@@ -33,6 +33,8 @@ class TRIBE_Panel_Button : public TButtonPanel {
     int get_garrison_number();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tpnl_btn_button_size_check[(sizeof(TRIBE_Panel_Button) == 0x3D4) ? 1 : -1];
+#endif
 
 #endif

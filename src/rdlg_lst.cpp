@@ -26,7 +26,7 @@ int RGE_Dialog_List::setup(TScreenPanel* parent_screen, char* info_file_in, long
     this->sort_list();
     this->calc_list_line();
 
-    this->list_text = (char**) calloc((unsigned int) this->list_size, 4);
+    this->list_text = (char**) calloc((unsigned int) this->list_size, sizeof(char*));
     if (this->list_text == 0)
         return 0;
 
@@ -105,7 +105,7 @@ int RGE_Dialog_List::create_object_list() {
     if (this->list_size == 0)
         return 0;
 
-    this->list_info = (rdlg_list_info*) calloc(this->list_size, 102);
+    this->list_info = (rdlg_list_info*) calloc(this->list_size, sizeof(rdlg_list_info));
     if (!this->list_info)
         return 0;
 

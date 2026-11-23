@@ -543,6 +543,8 @@ class RGE_Master_Static_Object {
     float outline_radius_z;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char m_s_obj_master_size_check[(sizeof(RGE_Master_Static_Object) == 0xB8) ? 1 : -1];
+#endif
 
 #endif

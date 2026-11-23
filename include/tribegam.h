@@ -95,7 +95,9 @@ struct MouseClickInfo {
     int enemy_text_id;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_mouse_click_info_size_check[(sizeof(MouseClickInfo) == 44) ? 1 : -1];
+#endif
 
 class TRIBE_Screen_Game;
 
@@ -326,10 +328,18 @@ struct TRIBE_Game_Combined_Options {
     TRIBE_Game::TRIBE_Game_Options tribe;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_game_combined_options_size_check[(sizeof(TRIBE_Game_Combined_Options) == 0x114) ? 1 : -1];
+#endif
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char mouse_click_info_size_check[(sizeof(MouseClickInfo) == 0x2C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_game_options_size_check[(sizeof(TRIBE_Game::TRIBE_Game_Options) == 0x6C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_game_size_check[(sizeof(TRIBE_Game) == 0x1254) ? 1 : -1];
+#endif
 
 #endif

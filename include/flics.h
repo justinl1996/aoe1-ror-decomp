@@ -31,7 +31,9 @@ class FlicHead {
     char reserved3[40];      // +0x5C
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char flic_head_size_check[(sizeof(FlicHead) == 0x84) ? 1 : -1];
+#endif
 
 class FrameHead {
   public:
@@ -41,7 +43,9 @@ class FrameHead {
     char reserved[8]; // +0x08
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char frame_head_size_check[(sizeof(FrameHead) == 0x10) ? 1 : -1];
+#endif
 
 class PalettePacket {
   public:
@@ -87,6 +91,8 @@ class RGE_Flic_Player {
     void byte_run();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char flic_player_size_check[(sizeof(RGE_Flic_Player) == 0xBC) ? 1 : -1];
+#endif
 
 #endif // AOE1_FLICS_H

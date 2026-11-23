@@ -124,7 +124,7 @@ TribeMenuDialog::~TribeMenuDialog() {
     } while (count != 0);
 }
 
-long TribeMenuDialog::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeMenuDialog::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel != 0) {
         if (actionIn == 1) {
             if (a1 == 1) {

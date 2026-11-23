@@ -23,10 +23,12 @@ class TRIBE_Screen_Main_Menu : public TScreenPanel {
     virtual ~TRIBE_Screen_Main_Menu();
     virtual long handle_idle();
     virtual long key_down_action(long key, short count, int alt_key, int ctrl_key, int shift_key);
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_main_menu_size_check[(sizeof(TRIBE_Screen_Main_Menu) == 0x4B0) ? 1 : -1];
+#endif
 
 class TRIBE_Screen_Main_Error : public TScreenPanel {
   public:
@@ -38,10 +40,12 @@ class TRIBE_Screen_Main_Error : public TScreenPanel {
     virtual ~TRIBE_Screen_Main_Error();
     void set_text(char* message_in);
     void set_text(long message_in);
-    virtual long action(TPanel* from_panel, long action_in, unsigned long val1, unsigned long val2);
+    virtual long action(TPanel* from_panel, long action_in, uintptr_t val1, uintptr_t val2);
     virtual long handle_idle();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_main_error_size_check[(sizeof(TRIBE_Screen_Main_Error) == 0x484) ? 1 : -1];
+#endif
 
 #endif

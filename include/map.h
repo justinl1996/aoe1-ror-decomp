@@ -233,11 +233,23 @@ class RGE_Map {
     void get_point(short& screen_x, short& screen_y, float x, float y, float z, short x_offset, short y_offset);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_tob_picts_size_check[(sizeof(RGE_TOB_Picts) == 0x06) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_tile_size_check[(sizeof(RGE_Tile_Size) == 0x06) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_tile_struct_size_check[(sizeof(RGE_Tile) == 0x18) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_tile_set_size_check[(sizeof(RGE_Tile_Set) == 0x198) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_border_set_size_check[(sizeof(RGE_Border_Set) == 0x5A0) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_map_size_check[(sizeof(RGE_Map) == 0x8DD0) ? 1 : -1];
+#endif
 
 #endif

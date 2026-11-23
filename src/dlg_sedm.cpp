@@ -84,7 +84,7 @@ TRIBE_Dialog_Sed_Menu::~TRIBE_Dialog_Sed_Menu() {
     } while (count != 0);
 }
 
-long TRIBE_Dialog_Sed_Menu::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TRIBE_Dialog_Sed_Menu::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     TRIBE_Screen_Sed* sed = this->scenario_editor;
     if (action_in == 1) {
         if (from_panel == this->buttons[0]) {

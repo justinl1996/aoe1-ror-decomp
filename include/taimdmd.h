@@ -15,8 +15,12 @@
 class TribeMainDecisionAIModule;
 class TRIBE_Player;
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taimdmd_information_size[(sizeof(TribeInformationAIModule) == 0x10090) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taimdmd_strategy_size[(sizeof(TribeStrategyAIModule) == 0x5F8) ? 1 : -1];
+#endif
 
 class TribeMainDecisionAIModule : public MainDecisionAIModule {
   public:
@@ -74,6 +78,8 @@ class TribeMainDecisionAIModule : public MainDecisionAIModule {
     void detask(int uID);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taimdmd_tribe_main_size[(sizeof(TribeMainDecisionAIModule) == 0x125C8) ? 1 : -1];
+#endif
 
 #endif // AOE1_TAIMDMD_H

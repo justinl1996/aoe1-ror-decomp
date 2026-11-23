@@ -754,7 +754,7 @@ long TribeAchievementsScreen::handle_mouse_down(unsigned char mouse_button_in, l
     return result;
 }
 
-long TribeAchievementsScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeAchievementsScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel == this->okButton && actionIn == 1) {
         if (this->end_game_flag != 0) {
             ((TRIBE_Game*) rge_base_game)->quit_game();

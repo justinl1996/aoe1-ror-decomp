@@ -82,7 +82,7 @@ TribeEndScreen::~TribeEndScreen() {
     delete background;
 }
 
-long TribeEndScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeEndScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel == 0 || actionIn != 1) {
         return TEasy_Panel::action(fromPanel, actionIn, a1, a2);
     }

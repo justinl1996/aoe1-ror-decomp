@@ -1,11 +1,10 @@
 
 #include "../include/effects.h"
+#include "../include/rge_fio.h"
 #include "../include/player.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-void __cdecl rge_read(int fd, void* buf, int size);
-void __cdecl rge_write(int fd, void* buf, int size);
 void convert_us(char* s);
 
 // The original constructor keeps the first record name as the name-read base
@@ -16,7 +15,7 @@ RGE_Effects::RGE_Effects(int infile) {
     int index;
     rge_read(input_file, effect_num_ptr, 4);
     if (*effect_num_ptr > 0) {
-        this->effects = (RGE_Effect*) calloc(*effect_num_ptr, 44);
+        this->effects = (RGE_Effect*) calloc(*effect_num_ptr, sizeof(RGE_Effect));
         index = 0;
         if (index < *effect_num_ptr) {
             do {
@@ -29,7 +28,7 @@ RGE_Effects::RGE_Effects(int infile) {
                 if (effect_record->effect_list_num > 0) {
                     int command_index;
                     RGE_Effect_Command*& effect_list = effect_record->effect_list;
-                    RGE_Effect_Command* allocated = (RGE_Effect_Command*) calloc(effect_record->effect_list_num, 12);
+                    RGE_Effect_Command* allocated = (RGE_Effect_Command*) calloc(effect_record->effect_list_num, sizeof(RGE_Effect_Command));
                     command_index = 0;
                     effect_list = allocated;
                     if (command_index < effect_record->effect_list_num) {
@@ -65,7 +64,7 @@ RGE_Effects::RGE_Effects(char* effect_file) {
     fp = fopen(effect_file, "r");
     if (fp != 0) {
         if (fscanf(fp, "%d %d", &effect_num, &count) != -1) {
-            effects = (RGE_Effect*) calloc(effect_num, 44);
+            effects = (RGE_Effect*) calloc(effect_num, sizeof(RGE_Effect));
             for (index = 0; index < count; index++) {
                 short command_index = 0;
                 fscanf(fp, "%d", &this_effect_num);
@@ -74,7 +73,7 @@ RGE_Effects::RGE_Effects(char* effect_file) {
                 effects[this_effect_num].id = (short) this_effect_num;
                 if (effects[this_effect_num].effect_list_num > 0) {
                     effects[this_effect_num].effect_list =
-                        (RGE_Effect_Command*) calloc(effects[this_effect_num].effect_list_num, 12);
+                        (RGE_Effect_Command*) calloc(effects[this_effect_num].effect_list_num, sizeof(RGE_Effect_Command));
                     if (effects[this_effect_num].effect_list_num > 0) {
                         while (effects[this_effect_num].effect_list_num > command_index) {
                             RGE_Effect_Command* command = &effects[this_effect_num].effect_list[command_index];

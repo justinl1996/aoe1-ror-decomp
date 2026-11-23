@@ -163,7 +163,7 @@ TribeSelectTribeScreen::~TribeSelectTribeScreen() {
     free(screenText);
 }
 
-long TribeSelectTribeScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeSelectTribeScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel == (TPanel*) this->okButton || fromPanel == (TPanel*) this->cancelButton) {
         if (actionIn == 1) {
             panel_system.setCurrentPanel("MP Setup Screen", 0);

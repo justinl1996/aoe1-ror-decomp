@@ -19,6 +19,8 @@ class TScreenPanel : public TEasy_Panel {
     virtual void set_focus(int have_focus_in);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_scr_tscreen_size_check[(sizeof(TScreenPanel) == 0x478) ? 1 : -1];
+#endif
 
 #endif

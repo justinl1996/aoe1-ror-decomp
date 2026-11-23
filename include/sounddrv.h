@@ -84,8 +84,14 @@ class TDigital {
     int add_to_play_list();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char sounddrv_tdigital_size_check[(sizeof(TDigital) == 0x3C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char sounddrv_tsound_driver_main_wnd_offset_check[(offsetof(TSound_Driver, main_wnd) == 0x04) ? 1 : -1];
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char sounddrv_tdigital_resource_id_offset_check[(offsetof(TDigital, resource_id) == 0x18) ? 1 : -1];
+#endif
+#endif
 
 #endif

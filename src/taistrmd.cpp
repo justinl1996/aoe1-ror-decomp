@@ -1000,7 +1000,6 @@ void TribeStrategyAIModule::setMainDecisionAI(TribeMainDecisionAIModule* m) {
 
 #include <string.h>
 
-void __cdecl rge_write(int fd, void* data, int size);
 void __cdecl operator delete(void* p);
 
 int TribeStrategyAIModule::save(int outfile) {
@@ -1094,7 +1093,7 @@ char* TribeStrategyAIModule::ruleSetName() {
 
 int TribeStrategyAIModule::loadRules(char* rName) {
     if (rName == 0) {
-        return (int) rName;
+        return 0;
     }
     if (rName != this->ruleSetNameValue)  // a reload passes the stored name
         strncpy(this->ruleSetNameValue, rName, 255);

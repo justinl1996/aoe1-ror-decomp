@@ -1,9 +1,7 @@
 
 #include "../include/zone_map.h"
 #include "../include/game_globals.h"
-
-void rge_read(int handle, void* buffer, int count);
-void rge_write(int file, void* data, int size);
+#include "../include/rge_fio.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,7 +24,7 @@ unsigned char __cdecl zone_pop(Zone_Queue** zone_queue, Zone_Queue** zone_end, l
 }
 
 void __cdecl zone_push(Zone_Queue** zone_queue, Zone_Queue** zone_end, long x, long y) {
-    Zone_Queue* node = (Zone_Queue*) calloc(1, 12);
+    Zone_Queue* node = (Zone_Queue*) calloc(1, sizeof(Zone_Queue));
 
     if (*zone_end != 0) {
         (*zone_end)->next = node;
@@ -45,7 +43,7 @@ RGE_Zone_Map::RGE_Zone_Map(int infile, RGE_Map* new_map) {
     this->map = new_map;
 
     this->zone_map = (uchar*) calloc(new_map->map_width * new_map->map_height, 1);
-    this->zone_map_rows = (uchar**) calloc(this->map->map_height, 4);
+    this->zone_map_rows = (uchar**) calloc(this->map->map_height, sizeof(uchar*));
 
     for (int i = 0; i < this->map->map_height; i++) {
         this->zone_map_rows[i] = this->zone_map + this->map->map_width * i;
@@ -58,7 +56,7 @@ RGE_Zone_Map::RGE_Zone_Map(int infile, RGE_Map* new_map) {
 
     rge_read(infile, &this->terrain_passability_rules_num, 4);
     if (this->terrain_passability_rules_num > 0) {
-        this->terrain_passability_rules = (float*) calloc(this->terrain_passability_rules_num, 4);
+        this->terrain_passability_rules = (float*) calloc(this->terrain_passability_rules_num, sizeof(float));
         rge_read(infile, this->terrain_passability_rules, this->terrain_passability_rules_num * 4);
     } else {
         this->terrain_passability_rules = NULL;
@@ -71,7 +69,7 @@ RGE_Zone_Map::RGE_Zone_Map(RGE_Map* new_map, float* new_terrain_rules, long new_
     this->map = new_map;
     this->zone_map = (uchar*) calloc(this->map->map_width * this->map->map_height, 1);
     memset(this->zone_map, 0xFF, this->map->map_width * this->map->map_height);
-    this->zone_map_rows = (uchar**) calloc(this->map->map_height, 4);
+    this->zone_map_rows = (uchar**) calloc(this->map->map_height, sizeof(uchar*));
 
     for (i = 0; i < this->map->map_height; i++) {
         this->zone_map_rows[i] = this->zone_map + this->map->map_width * i;
@@ -83,7 +81,7 @@ RGE_Zone_Map::RGE_Zone_Map(RGE_Map* new_map, float* new_terrain_rules, long new_
     }
 
     this->terrain_passability_rules_num = new_terrain_rules_num;
-    this->terrain_passability_rules = (float*) calloc(this->terrain_passability_rules_num, 4);
+    this->terrain_passability_rules = (float*) calloc(this->terrain_passability_rules_num, sizeof(float));
     memcpy(this->terrain_passability_rules, new_terrain_rules, this->terrain_passability_rules_num * 4);
     this->do_zone_map();
 }
@@ -369,7 +367,7 @@ RGE_Zone_Map_List::RGE_Zone_Map_List(int infile, RGE_Map* in_map) {
     rge_read(infile, &this->zone_map_num, 4);
 
     if (this->zone_map_num > 0) {
-        this->zone_maps = (RGE_Zone_Map**) calloc(this->zone_map_num, 4);
+        this->zone_maps = (RGE_Zone_Map**) calloc(this->zone_map_num, sizeof(RGE_Zone_Map*));
         for (int i = 0; i < this->zone_map_num; i++) {
             this->zone_maps[i] = new RGE_Zone_Map(infile, this->map);
         }
@@ -438,9 +436,9 @@ RGE_Zone_Map* RGE_Zone_Map_List::get_zone_map(float* new_terrain_rules, long new
         }
     }
 
-    new_zone_maps = (RGE_Zone_Map**) calloc(this->zone_map_num + 1, 4);
+    new_zone_maps = (RGE_Zone_Map**) calloc(this->zone_map_num + 1, sizeof(RGE_Zone_Map*));
     if (this->zone_maps != 0) {
-        memcpy(new_zone_maps, this->zone_maps, this->zone_map_num * 4);
+        memcpy(new_zone_maps, this->zone_maps, this->zone_map_num * sizeof(RGE_Zone_Map*));
         free(this->zone_maps);
     }
     new_zone_maps[this->zone_map_num] = new RGE_Zone_Map(this->map, new_terrain_rules, new_terrain_rules_num);

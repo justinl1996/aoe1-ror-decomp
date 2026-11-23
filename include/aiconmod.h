@@ -49,9 +49,17 @@ class ConstructionAIModule : public AIModule {
 
 int __cdecl operator==(const ConstructionItem& one, const ConstructionItem& two);
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiconmod_aimodule_size[(sizeof(AIModule) == 0xF0) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiconmod_base_item_size[(sizeof(BaseItem) == 0x6C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiconmod_construction_item_size[(sizeof(ConstructionItem) == 0x80) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiconmod_module_size[(sizeof(ConstructionAIModule) == 0x314) ? 1 : -1];
+#endif
 
 #endif

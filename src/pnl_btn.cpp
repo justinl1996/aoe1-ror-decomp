@@ -656,7 +656,6 @@ long TButtonPanel::mouse_left_move_action(long x, long y, int ctrl_key, int shif
 }
 
 // 00473310_mouse_left_up_action.cpp
-extern "C" __declspec(dllimport) long __stdcall SendMessageA(void* hwnd, unsigned int msg, unsigned int wparam, long lparam);
 
 long TButtonPanel::mouse_left_up_action(long x, long y, int ctrl_key, int shift_key) {
     release_mouse();
@@ -829,7 +828,6 @@ long TButtonPanel::key_down_action(long key, short count, int alt_key, int ctrl_
 
 // 00473890_wnd_proc.cpp
 
-extern "C" __declspec(dllimport) long __stdcall SendMessageA(void* hwnd, unsigned msg, unsigned wparam, long lparam);
 
 long TButtonPanel::wnd_proc(void* hwnd, unsigned msg, unsigned wParam, long lParam) {
     if (msg == WM_KEYUP && this->key_down != 0 && wParam == this->key_down) {
@@ -875,7 +873,6 @@ int TButtonPanel::hit_button(long x, long y) {
 // 004739B0_do_action.cpp
 // Pnl_btn.cpp
 
-extern "C" __declspec(dllimport) long __stdcall SendMessageA(void* hwnd, unsigned int msg, unsigned int wparam, long lparam);
 
 void TButtonPanel::do_action(void) {
     if (this->buttonTypeValue == TButtonPanel::State) {

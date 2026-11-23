@@ -18,9 +18,11 @@ class TRIBE_Dialog_Sed_Menu : public TDialogPanel {
 
     TRIBE_Dialog_Sed_Menu(TRIBE_Screen_Sed* scenario_editor_in);
     virtual ~TRIBE_Dialog_Sed_Menu();
-    virtual long action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2);
+    virtual long action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dlg_sedm_dialog_size_check[(sizeof(TRIBE_Dialog_Sed_Menu) == 0x4B4) ? 1 : -1];
+#endif
 
 #endif

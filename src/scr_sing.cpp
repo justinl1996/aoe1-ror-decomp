@@ -78,7 +78,7 @@ long TribeSPMenuScreen::handle_idle() {
     return TPanel::handle_idle();
 }
 
-long TribeSPMenuScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeSPMenuScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel != 0 && actionIn == 1) {
         if (fromPanel == button[0]) {
             rge_base_game->setCampaignGame(0);

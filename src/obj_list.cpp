@@ -1,4 +1,5 @@
 #include "../include/act_obj.h"
+#include "../include/rge_fio.h"
 #include "../include/ani_obj.h"
 #include "../include/dpl_obj.h"
 #include "../include/m_s_obj.h"
@@ -57,7 +58,7 @@ void RGE_Object_List::removeAllObjects() {
 RGE_Object_Node* RGE_Object_List::add_node(RGE_Static_Object* obj) {
     RGE_Object_Node* node;
 
-    node = (RGE_Object_Node*) calloc(1, 16);
+    node = (RGE_Object_Node*) calloc(1, sizeof(RGE_Object_Node));
     node->next = this->list;
     node->prev = 0;
     if (this->list != 0) {
@@ -270,7 +271,7 @@ RGE_Object_Node* RGE_Object_List::sort() {
                 insertion = &scan->next;
             }
 
-            scan = (RGE_Object_Node*) calloc(1, 16);
+            scan = (RGE_Object_Node*) calloc(1, sizeof(RGE_Object_Node));
             scan->next = *insertion;
             if (*insertion != 0) {
                 scan->prev = (*insertion)->prev;
@@ -493,7 +494,6 @@ RGE_Static_Object* RGE_Object_List::find_by_type(
     return best_object;
 }
 
-extern void rge_write(int file, void* data, int size);
 
 void RGE_Object_List::save(int outfile) {
     unsigned char finished;
@@ -510,7 +510,6 @@ void RGE_Object_List::save(int outfile) {
     rge_write(outfile, &finished, 1);
 }
 
-extern void rge_read(int file, void* data, int size);
 
 void RGE_Object_List::load_list(int infile, RGE_Game_World* world) {
     unsigned char object_type;

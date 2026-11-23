@@ -24,7 +24,9 @@ class TechnologyItem {
     ResourceItem* resourceCostValue;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aitchitm_technology_item_size[(sizeof(TechnologyItem) == 0x54) ? 1 : -1];
+#endif
 
 int __cdecl operator==(const TechnologyItem& one, const TechnologyItem& two);
 int __cdecl operator!=(const TechnologyItem& one, const TechnologyItem& two);

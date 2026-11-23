@@ -25,6 +25,8 @@ class TRIBE_Scenario_Editor_Panel_Object : public TRIBE_Panel_Object {
     int master_culture_id;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char spnl_obj_panel_size_check[(sizeof(TRIBE_Scenario_Editor_Panel_Object) == 0x21C) ? 1 : -1];
+#endif
 
 #endif // AOE1_SPNL_OBJ_H

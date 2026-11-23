@@ -25,6 +25,8 @@ class TribeResourceAIModule : public AIModule {
     int numberResourcesValue;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char verify_tairesmd_TribeResourceAIModule_size[sizeof(TribeResourceAIModule) == 0xF8 ? 1 : -1];
+#endif
 
 #endif

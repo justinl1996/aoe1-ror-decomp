@@ -27,7 +27,7 @@ class TribeMPStartupScreen : public TScreenPanel {
   public:
     virtual ~TribeMPStartupScreen();
     TribeMPStartupScreen();
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     virtual long handle_idle();
     virtual long handle_user_command(unsigned int wParam, long lParam);
 
@@ -35,6 +35,8 @@ class TribeMPStartupScreen : public TScreenPanel {
     void fillList();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_mp_startup_screen_size_check[(sizeof(TribeMPStartupScreen) == 0x6A0) ? 1 : -1];
+#endif
 
 #endif

@@ -52,6 +52,8 @@ int __cdecl operator!=(const BaseItem& one, const BaseItem& two);
 int __cdecl operator<(const BaseItem& one, const BaseItem& two);
 int __cdecl operator>(const BaseItem& one, const BaseItem& two);
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aibitm_base_item_size[(sizeof(BaseItem) == 0x6C) ? 1 : -1];
+#endif
 
 #endif

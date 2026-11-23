@@ -38,7 +38,9 @@ class TRIBE_Action_Repair : public RGE_Action {
 // The Linux build's C++ ABI (Itanium) places a derived class's first members in its
 // base class's tail padding; MSVC does not. These layout checks are MSVC's.
 #ifndef AOE_LINUX
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tact_rep_action_size_check[(sizeof(TRIBE_Action_Repair) == 0x44) ? 1 : -1];
+#endif
 #endif
 
 #endif

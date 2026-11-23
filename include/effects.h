@@ -9,7 +9,9 @@ struct RGE_Effect_Command {
     float change_amount;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char effects_command_size_check[(sizeof(RGE_Effect_Command) == 0x0C) ? 1 : -1];
+#endif
 
 struct RGE_Effect {
     short id;
@@ -19,7 +21,9 @@ struct RGE_Effect {
     RGE_Effect_Command* effect_list;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char effects_record_size_check[(sizeof(RGE_Effect) == 0x2C) ? 1 : -1];
+#endif
 
 class RGE_Player;
 
@@ -36,6 +40,8 @@ class RGE_Effects {
     RGE_Effects(char* effect_file);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char effects_object_size_check[(sizeof(RGE_Effects) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

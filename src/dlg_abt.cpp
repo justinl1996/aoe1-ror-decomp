@@ -137,7 +137,7 @@ TribeAboutDialog::~TribeAboutDialog() {
     this->delete_panel((TPanel**) &this->background);
 }
 
-long TribeAboutDialog::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeAboutDialog::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (actionIn == 1) {
         if (fromPanel == this->close_button) {
             TPanel* game_screen = panel_system.panel("Game Screen");

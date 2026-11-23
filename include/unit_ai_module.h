@@ -156,4 +156,6 @@ class UnitAIModule {
     void processMisc();
     void setTaskedByPlayer();
 };
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char unit_ai_module_size_check[(sizeof(UnitAIModule) == 0x134) ? 1 : -1];
+#endif

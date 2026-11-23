@@ -30,7 +30,9 @@ class RGE_Color_Table {
     void save(int outfile);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char color_table_size_check[(sizeof(RGE_Color_Table) == 0x128) ? 1 : -1];
+#endif
 
 void __cdecl color_log(unsigned char c1, unsigned char c2, int pos);
 

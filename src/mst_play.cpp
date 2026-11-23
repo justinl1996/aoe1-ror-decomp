@@ -16,7 +16,7 @@ RGE_Master_Player::RGE_Master_Player(FILE* infile) {
     fscanf(infile, "%s %hd %hd", name, &tribe_effect, &attribute_num);
 
     if (attribute_num > 0) {
-        attributes = (float*) calloc((int) attribute_num, 4);
+        attributes = (float*) calloc((int) attribute_num, sizeof(float));
     } else {
         attributes = 0;
     }
@@ -38,7 +38,7 @@ RGE_Master_Player::RGE_Master_Player(int infile) {
     rge_read(infile, &attribute_num, 2);
     rge_read(infile, &tribe_effect, 2);
     if (attribute_num > 0) {
-        attributes = (float*) calloc(attribute_num, 4);
+        attributes = (float*) calloc(attribute_num, sizeof(float));
         rge_read(infile, attributes, attribute_num * 4);
     } else {
         attributes = 0;
@@ -73,7 +73,7 @@ void RGE_Master_Player::finish_init(int infile, RGE_Sprite** sprites, RGE_Sound*
     rge_read(infile, &this->master_object_num, 2);
 
     if (this->master_object_num > 0) {
-        this->master_objects = (RGE_Master_Static_Object**) calloc((int) this->master_object_num, 4);
+        this->master_objects = (RGE_Master_Static_Object**) calloc((int) this->master_object_num, sizeof(RGE_Master_Static_Object*));
         rge_read(infile, this->master_objects, (int) this->master_object_num * 4);
 
         for (int i = 0; (short) i < this->master_object_num; i++) {
@@ -126,7 +126,7 @@ void RGE_Master_Player::load_master_object(
 void RGE_Master_Player::create_master_object_space(short count) {
     this->master_object_num = count;
     if (count > 0) {
-        this->master_objects = (RGE_Master_Static_Object**) calloc((int) count, 4);
+        this->master_objects = (RGE_Master_Static_Object**) calloc((int) count, sizeof(RGE_Master_Static_Object*));
     }
 }
 

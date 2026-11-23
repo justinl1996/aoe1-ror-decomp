@@ -1,7 +1,7 @@
 #include "../include/path.h"
 #include "../include/game_globals.h"
 // VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
-#ifndef AOE_LINUX
+#if !defined(AOE_LINUX) && !defined(__MINGW32__)
 #include <iostream.h>
 #endif
 #include <math.h>
@@ -46,7 +46,7 @@ Path::~Path() {
 }
 
 // VC6 iostream debugging helpers; the Linux build has no pre-standard iostream.
-#ifndef AOE_LINUX
+#if !defined(AOE_LINUX) && !defined(__MINGW32__)
 ostream& __cdecl operator<<(ostream& out, const Path& p) {
     for (int i = 0; i < p.currentSizeValue; i++) {
         ostream* stream = &out;

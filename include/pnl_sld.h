@@ -31,7 +31,11 @@ class THorizontalSliderPanel : public TVerticalSliderPanel {
     virtual void draw();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_sld_vertical_size_check[(sizeof(TVerticalSliderPanel) == 0x1CC) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_sld_horizontal_size_check[(sizeof(THorizontalSliderPanel) == 0x1CC) ? 1 : -1];
+#endif
 
 #endif

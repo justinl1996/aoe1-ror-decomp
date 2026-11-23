@@ -20,6 +20,8 @@ class VictoryConditionRuleSystem {
     int sn[226];
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aivcrule_victory_condition_rule_system_size[(sizeof(VictoryConditionRuleSystem) == 0x38C) ? 1 : -1];
+#endif
 
 #endif

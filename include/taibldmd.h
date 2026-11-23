@@ -47,6 +47,8 @@ class TribeBuildAIModule : public BuildAIModule {
     TribeMainDecisionAIModule* md;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taibldmd_tribe_build_size[(sizeof(TribeBuildAIModule) == 0x5C0) ? 1 : -1];
+#endif
 
 #endif // AOE1_TAIBLDMD_H

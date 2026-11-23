@@ -17,7 +17,9 @@ class XYZ {
     XYZ operator-(const XYZ& p) const;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char point_xyz_size_check[(sizeof(XYZ) == 0x0C) ? 1 : -1];
+#endif
 
 int __cdecl operator==(const XYZ& one, const XYZ& two);
 int __cdecl operator!=(const XYZ& one, const XYZ& two);

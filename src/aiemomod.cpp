@@ -1,9 +1,8 @@
 #include "../include/game_globals.h"
+#include "../include/rge_fio.h"
 #include <string.h>
 #include "../include/aiemomod.h"
 
-void __cdecl rge_read(int handle, void* buf, int size);
-void __cdecl rge_write(int file, void* data, int size);
 
 EmotionalAIModule::EmotionalAIModule(void* pW, int playerID) : AIModule("Emotional AI", 0x3EC, playerID, pW), md(0) {
     for (int i = 0; i < 6; i++)

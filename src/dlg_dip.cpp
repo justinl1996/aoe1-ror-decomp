@@ -416,7 +416,7 @@ TribeDiplomacyDialog::~TribeDiplomacyDialog() {
     delete this->backgroundPics;
 }
 
-long TribeDiplomacyDialog::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeDiplomacyDialog::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     char temp_str[256];
     float cost;
 

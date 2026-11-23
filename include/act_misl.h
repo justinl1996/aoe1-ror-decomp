@@ -26,6 +26,8 @@ class RGE_Action_Missile : public RGE_Action {
     float ballistic_acceleration;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_action_missile_size_check[(sizeof(RGE_Action_Missile) == 0x54) ? 1 : -1];
+#endif
 
 #endif // AOE1_ACT_MISL_H

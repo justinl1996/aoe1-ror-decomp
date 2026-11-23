@@ -18,6 +18,8 @@ class RGE_Action_Bird : public RGE_Action {
     virtual void set_state(unsigned char new_state);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_action_bird_size_check[(sizeof(RGE_Action_Bird) == 0x40) ? 1 : -1];
+#endif
 
 #endif // AOE1_ACT_BIRD_H

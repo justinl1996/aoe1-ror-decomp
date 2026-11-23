@@ -74,7 +74,7 @@ class TEasy_Panel : public TPanel {
     virtual void draw_setup(int);
     virtual void draw();
     virtual long handle_mouse_down(unsigned char, long, long, int, int);
-    virtual long action(TPanel*, long, unsigned long, unsigned long);
+    virtual long action(TPanel*, long, uintptr_t, uintptr_t);
     virtual void set_focus(int);
     virtual void draw_background(int);
 
@@ -176,6 +176,8 @@ class TEasy_Panel : public TPanel {
     void set_system_colors();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char panel_ez_teasy_size_check[(sizeof(TEasy_Panel) == 0x478) ? 1 : -1];
+#endif
 
 #endif

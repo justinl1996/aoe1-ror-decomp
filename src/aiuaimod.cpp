@@ -1,4 +1,5 @@
 #include "../include/aiuaimod.h"
+#include "../include/rge_fio.h"
 #include "../include/game_globals.h"
 #include "../include/rge_base_game_global.h"
 #include "../include/act_obj.h"
@@ -61,7 +62,6 @@ UnitAIModule::~UnitAIModule() {
     }
 }
 
-void __cdecl rge_write(int fd, void* data, int size);
 
 void UnitAIModule::save(int outfile) {
     int i;
@@ -126,7 +126,6 @@ void UnitAIModule::save(int outfile) {
     rge_write(outfile, &stopAfterTargetKilledValue, 1);
 }
 
-void __cdecl rge_read(int fd, void* data, int size);
 
 void UnitAIModule::load(int infile) {
     int numberOrders;
@@ -3909,11 +3908,15 @@ RGE_Static_Object* UnitAIModule::lookupObject(int id) {
 
 // at aiuaimod.cpp lines 5932-5942. Its body ends at 0041A14E; the next bytes
 // are padding. Keep the preceding 0041A020 purgeNotifyQueue owner separate.
+#include <stdarg.h>
+
 void UnitAIModule::logDebug(char* textIn, ...) {
     char textOut[1024];
     if (this->objectValue != 0) {
-        // The variadic receiver uses caller cleanup. Keep the
-        vsprintf(textOut, textIn, (char*) &textIn + 4);
+        va_list ap;
+        va_start(ap, textIn);
+        vsprintf(textOut, textIn, ap);
+        va_end(ap);
         this->objectValue->logDebug(textOut);
     }
 }

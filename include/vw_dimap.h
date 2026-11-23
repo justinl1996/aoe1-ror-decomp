@@ -23,6 +23,8 @@ class RGE_Diamond_Map_View : public RGE_Diamond_Map {
     int right_click2(long, long);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char vw_dimap_view_size_check[(sizeof(RGE_Diamond_Map_View) == 0x16C) ? 1 : -1];
+#endif
 
 #endif

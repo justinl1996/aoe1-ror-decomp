@@ -192,6 +192,8 @@ class RGE_Game_World {
     int difficultyLevelValue;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_game_world_size_check[(sizeof(RGE_Game_World) == 0x104) ? 1 : -1];
+#endif
 
 #endif

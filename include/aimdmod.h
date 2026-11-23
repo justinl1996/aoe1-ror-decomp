@@ -38,6 +38,8 @@ class MainDecisionAIModule : public AIModule {
     RGE_Static_Object* mostDamaged(int oGroup, int oType);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aimdmod_main_decision_size[(sizeof(MainDecisionAIModule) == 0x104) ? 1 : -1];
+#endif
 
 #endif

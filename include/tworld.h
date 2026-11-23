@@ -15,7 +15,9 @@ struct TRIBE_Zone_High_Score_Info {
     unsigned char num_allies;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_zone_high_score_info_size_check[(sizeof(TRIBE_Zone_High_Score_Info) == 0x18) ? 1 : -1];
+#endif
 
 class TRIBE_Zone_Player_Info {
   public:
@@ -32,7 +34,9 @@ class TRIBE_Zone_Player_Info {
     long iron_time;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_zone_player_info_size_check[(sizeof(TRIBE_Zone_Player_Info) == 0x28) ? 1 : -1];
+#endif
 
 class TRIBE_Zone_Map_Info {
   public:
@@ -48,7 +52,9 @@ class TRIBE_Zone_Map_Info {
     unsigned char Death_Match;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_zone_map_info_size_check[(sizeof(TRIBE_Zone_Map_Info) == 0x0C) ? 1 : -1];
+#endif
 
 class TRIBE_Zone_Info {
   public:
@@ -70,7 +76,9 @@ class TRIBE_Zone_Info {
     unsigned long program_version;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_zone_info_size_check[(sizeof(TRIBE_Zone_Info) == 0x1FC) ? 1 : -1];
+#endif
 
 class TRIBE_World : public RGE_Game_World {
   public:
@@ -127,6 +135,8 @@ class TRIBE_World : public RGE_Game_World {
     void send_zone_score_info();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_world_size_check[(sizeof(TRIBE_World) == 0x124) ? 1 : -1];
+#endif
 
 #endif

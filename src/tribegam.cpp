@@ -633,7 +633,7 @@ int TRIBE_Game::setup_sounds() {
     int i;
 
     this->sound_num = 17;
-    this->sounds = (TDigital**) calloc(17, 4);
+    this->sounds = (TDigital**) calloc(17, sizeof(TDigital*));
     if (this->sounds == 0) {
         return 0;
     }
@@ -1095,7 +1095,7 @@ static long __stdcall video_sub_wnd_proc(void* wnd, unsigned int msg, unsigned i
 int TRIBE_Game::start_video(int video_num, char* video_file) {
     if (this->video_window != 0) {
         char str[100];
-        surface_send_message(this->video_window, TRIBE_MCIWNDM_GETMODEA, sizeof(str), (long) str);
+        surface_send_message(this->video_window, TRIBE_MCIWNDM_GETMODEA, sizeof(str), (LPARAM) str);
         if (str[0] != 0 && strcmp(str, "stopped") != 0) {
             surface_send_message(this->video_window, MCI_STOP, 0, 0);
         }
@@ -1125,8 +1125,16 @@ int TRIBE_Game::start_video(int video_num, char* video_file) {
                 MCIWndCreateA(this->prog_window, (HINSTANCE) this->prog_info->instance, TRIBE_MCIWND_STYLE, temp_name);
             if (this->video_window != 0) {
                 RECT video_rect;
+#if defined(_WIN64) || defined(__LP64__) || defined(__wasm64__)
+#ifndef GWLP_WNDPROC
+#define GWLP_WNDPROC (-4)
+#endif
+                this->old_video_wnd_proc = (int(__stdcall*)()) GetWindowLongPtrA(this->video_window, GWLP_WNDPROC);
+                SetWindowLongPtrA(this->video_window, GWLP_WNDPROC, (LONG_PTR) ::video_sub_wnd_proc);
+#else
                 this->old_video_wnd_proc = (int(__stdcall*)()) GetWindowLongA(this->video_window, GWL_WNDPROC);
                 SetWindowLongA(this->video_window, GWL_WNDPROC, (long) ::video_sub_wnd_proc);
+#endif
 
                 if (this->video_hi_color == 0) {
                     void* palette = (void*) surface_send_message(this->video_window, TRIBE_MCIWNDM_GETPALETTE, 0, 0);
@@ -1165,7 +1173,7 @@ int TRIBE_Game::start_video(int video_num, char* video_file) {
 #include <string.h>
 #include <windows.h>
 
-typedef long(__stdcall* SendMessageFn)(void* hwnd, unsigned int message, unsigned int wparam, long lparam);
+typedef LRESULT(__stdcall* SendMessageFn)(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
 
 void TRIBE_Game::stop_video(unsigned char goto_next_video) {
     int save_vid_num;
@@ -1178,7 +1186,7 @@ void TRIBE_Game::stop_video(unsigned char goto_next_video) {
     if (this->video_window != 0) {
         SendMessageFn send_message = SendMessageA;
 
-        send_message(this->video_window, TRIBE_MCIWNDM_GETMODEA, sizeof(str), (long) str);
+        send_message(this->video_window, TRIBE_MCIWNDM_GETMODEA, sizeof(str), (LPARAM) str);
         if (str[0] != 0 && strcmp(str, "stopped") != 0) {
             send_message(this->video_window, MCI_STOP, 0, 0);
         }
@@ -3839,7 +3847,7 @@ int TRIBE_Game::handle_idle() {
     if (this->prog_mode == ProgModeVideo && this->video_window != 0) {
         unsigned long now = debug_timeGetTime("C:\\msdev\\work\\age1_x1\\tribegam.cpp", 4993);
         if (now - this->last_video_time >= 1000) {
-            surface_send_message(this->video_window, TRIBE_MCIWNDM_GETMODEA, sizeof(str), (long) str);
+            surface_send_message(this->video_window, TRIBE_MCIWNDM_GETMODEA, sizeof(str), (LPARAM) str);
             if (str[0] == 0 || strcmp(str, "stopped") == 0) {
                 this->stop_video(1);
             } else if (this->video_paused == 0 && strcmp(str, "paused") == 0) {

@@ -41,7 +41,8 @@
 #include <string.h>
 
 typedef unsigned char u8;
-typedef unsigned long u32;
+#include <stdint.h>
+typedef uint32_t u32;
 
 extern "C" int Inf32_port_address_dependent = 0;
 
@@ -565,17 +566,17 @@ int run_input_step(Call* c)
     return 1;
 }
 
-void store_counts(Call* c, long* input_size, long* output_size)
+void store_counts(Call* c, int32_t* input_size, int32_t* output_size)
 {
-    *input_size = c->input_given - c->input_left;
-    *output_size = c->output_given - c->output_left;
+    *input_size = (int32_t)(c->input_given - c->input_left);
+    *output_size = (int32_t)(c->output_given - c->output_left);
 }
 
 } // namespace
 
 extern "C" int __cdecl Inf32BufSize()
 {
-    return kStateSize;
+    return (int)sizeof(State) > (int)kStateSize ? (int)sizeof(State) : (int)kStateSize;
 }
 
 extern "C" int __cdecl Inf32Decode(
@@ -586,8 +587,8 @@ extern "C" int __cdecl Inf32Decode(
     Call call;
     Call* c = &call;
     State* s = (State*)state;
-    long* in_size = (long*)input_size;
-    long* out_size = (long*)output_size;
+    int32_t* in_size = (int32_t*)input_size;
+    int32_t* out_size = (int32_t*)output_size;
     c->s = s;
     c->input = (const u8*)input + input_offset;
     c->input_given = *in_size;

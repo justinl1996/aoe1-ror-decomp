@@ -28,12 +28,12 @@ unsigned long CCDAudio::Open(void* Wnd) {
     }
     mciOpenParms.lpstrDeviceType = MAKEINTRESOURCEA(MCI_DEVTYPE_CD_AUDIO);
     result =
-        surface_mci_send_command(0, MCI_OPEN, MCI_OPEN_TYPE_ID | MCI_OPEN_TYPE | MCI_OPEN_SHAREABLE | MCI_WAIT, (DWORD) &mciOpenParms);
+        surface_mci_send_command(0, MCI_OPEN, MCI_OPEN_TYPE_ID | MCI_OPEN_TYPE | MCI_OPEN_SHAREABLE | MCI_WAIT, (DWORD_PTR) &mciOpenParms);
     if (result == 0) {
         this->m_bOpened = 1;
         this->m_nDeviceID = mciOpenParms.wDeviceID;
         mciSetInfo.dwTimeFormat = MCI_FORMAT_TMSF;
-        result = surface_mci_send_command(mciOpenParms.wDeviceID, MCI_SET, MCI_SET_TIME_FORMAT | MCI_WAIT, (DWORD) &mciSetInfo);
+        result = surface_mci_send_command(mciOpenParms.wDeviceID, MCI_SET, MCI_SET_TIME_FORMAT | MCI_WAIT, (DWORD_PTR) &mciSetInfo);
     }
     return DisplayErrorMsg(result);
 }
@@ -62,8 +62,8 @@ unsigned long CCDAudio::Play(unsigned char nTrack) {
     devID = m_nDeviceID;
     m_mciPlayParms.dwFrom = nTrack;
     m_mciPlayParms.dwTo = (unsigned char) (nTrack + 1);
-    m_mciPlayParms.dwCallback = (unsigned long) m_Wnd;
-    return DisplayErrorMsg(surface_mci_send_command(devID, MCI_PLAY, MCI_NOTIFY | MCI_FROM | MCI_TO, (DWORD) &m_mciPlayParms));
+    m_mciPlayParms.dwCallback = (DWORD_PTR) m_Wnd;
+    return DisplayErrorMsg(surface_mci_send_command(devID, MCI_PLAY, MCI_NOTIFY | MCI_FROM | MCI_TO, (DWORD_PTR) &m_mciPlayParms));
 }
 
 unsigned long CCDAudio::Pause(void) {
@@ -71,7 +71,7 @@ unsigned long CCDAudio::Pause(void) {
 }
 
 unsigned long CCDAudio::ResumePlay(void) {
-    return DisplayErrorMsg(surface_mci_send_command(m_nDeviceID, MCI_PLAY, 0, (DWORD) &m_mciPlayParms));
+    return DisplayErrorMsg(surface_mci_send_command(m_nDeviceID, MCI_PLAY, 0, (DWORD_PTR) &m_mciPlayParms));
 }
 
 unsigned long CCDAudio::Eject(void) {
@@ -83,7 +83,7 @@ unsigned long CCDAudio::GetNumberOfTracks(unsigned char& nNumTracks) {
     tagMCI_STATUS_PARMS mciStatusInfo;
 
     mciStatusInfo.dwItem = MCI_STATUS_NUMBER_OF_TRACKS;
-    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD) &mciStatusInfo);
+    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD_PTR) &mciStatusInfo);
     nNumTracks = (unsigned char) mciStatusInfo.dwReturn;
     return DisplayErrorMsg(result);
 }
@@ -93,7 +93,7 @@ unsigned long CCDAudio::IsMediaPresent(int& bPresent) {
     tagMCI_STATUS_PARMS mciStatusParms;
 
     mciStatusParms.dwItem = MCI_STATUS_MEDIA_PRESENT;
-    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD) &mciStatusParms);
+    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD_PTR) &mciStatusParms);
     bPresent = mciStatusParms.dwReturn != 0;
     return DisplayErrorMsg(result);
 }
@@ -103,11 +103,11 @@ unsigned long CCDAudio::IsPlaying(int& bPlaying) {
     tagMCI_STATUS_PARMS mciStatusParms;
 
     mciStatusParms.dwItem = MCI_STATUS_MODE;
-    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD) &mciStatusParms);
+    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD_PTR) &mciStatusParms);
     bPlaying = mciStatusParms.dwReturn == MCI_MODE_PLAY;
     if (bPlaying != 0) {
         mciStatusParms.dwItem = MCI_STATUS_CURRENT_TRACK;
-        result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD) &mciStatusParms);
+        result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD_PTR) &mciStatusParms);
         bPlaying = mciStatusParms.dwReturn;
     }
     return DisplayErrorMsg(result);
@@ -119,7 +119,7 @@ unsigned long CCDAudio::GetLength(unsigned char& nMinutes, unsigned char& nSecon
     unsigned short item;
 
     mciStatusParms.dwItem = MCI_STATUS_LENGTH;
-    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD) &mciStatusParms);
+    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD_PTR) &mciStatusParms);
     item = (unsigned short) mciStatusParms.dwReturn;
     nMinutes = (unsigned char) item;
     nSeconds = (unsigned char) (item >> 8);
@@ -135,7 +135,7 @@ unsigned long CCDAudio::GetTrackLength(unsigned char nTrack, unsigned char& nMin
     track_local = nTrack & 0xFF;
     mciStatusParms.dwItem = MCI_STATUS_LENGTH;
     mciStatusParms.dwTrack = track_local;
-    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT | MCI_TRACK, (DWORD) &mciStatusParms);
+    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT | MCI_TRACK, (DWORD_PTR) &mciStatusParms);
     item = (unsigned short) mciStatusParms.dwReturn;
     nMinutes = (unsigned char) item;
     nSeconds = (unsigned char) (item >> 8);
@@ -149,7 +149,7 @@ unsigned long CCDAudio::GetPosition(unsigned char& nTrack, unsigned char& nMinut
     unsigned short time;
 
     mciStatusParms.dwItem = MCI_STATUS_POSITION;
-    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD) &mciStatusParms);
+    result = surface_mci_send_command(this->m_nDeviceID, MCI_STATUS, MCI_STATUS_ITEM | MCI_WAIT, (DWORD_PTR) &mciStatusParms);
     item = mciStatusParms.dwReturn;
     time = (unsigned short) item;
     nTrack = (unsigned char) time;

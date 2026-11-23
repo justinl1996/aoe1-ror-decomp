@@ -177,7 +177,7 @@ long TribeSelectScenarioScreen::handle_idle() {
     return TPanel::handle_idle();
 }
 
-long TribeSelectScenarioScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeSelectScenarioScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel != 0 && this->scenariosLoaded != 0) {
         if (fromPanel == this->okButton && actionIn == 1) {
             this->set_curr_child(this->scenarioList);

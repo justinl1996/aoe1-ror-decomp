@@ -267,8 +267,8 @@ void __cdecl TransDibBlt(
 }
 
 int __cdecl ClipDibBlt(
-    BITMAPINFO256* DestInfo, RECT* ClipRect, LONG& DestX, LONG& DestY, LONG& DestWid, LONG& DestHgt, LONG& SrcX, LONG& SrcY,
-    LONG& SrcWid, LONG& SrcHgt, int Mirror, int Flip
+    BITMAPINFO256* DestInfo, RECT* ClipRect, long& DestX, long& DestY, long& DestWid, long& DestHgt, long& SrcX, long& SrcY,
+    long& SrcWid, long& SrcHgt, int Mirror, int Flip
 ) {
     LONG left;
     LONG top;

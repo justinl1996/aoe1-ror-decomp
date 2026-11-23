@@ -20,6 +20,8 @@ class TRIBE_Panel_Text_Line : public TPanel {
     TRIBE_Panel_Text_Line(TDrawArea* render_area_in, TPanel* parent_panel_in, void* font_in);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tpnl_txl_line_size_check[(sizeof(TRIBE_Panel_Text_Line) == 0x1C8) ? 1 : -1];
+#endif
 
 #endif

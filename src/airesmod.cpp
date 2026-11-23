@@ -11,7 +11,7 @@ ResourceAIModule::ResourceAIModule(void* pW, int playerID, int n, int iV, int mi
     this->resourceValue = (int*) operator new(bytes);
     this->minValue = (int*) operator new(this->numberResourcesValue * 4);
     this->maxValue = (int*) operator new(this->numberResourcesValue * 4);
-    this->resourceTypesValue = (int**) operator new(this->numberResourcesValue * 4);
+    this->resourceTypesValue = (int**) operator new(this->numberResourcesValue * sizeof(int*));
     this->numberResourceTypesValue = (int*) operator new(this->numberResourcesValue * 4);
 
     for (int i = 0; i < this->numberResourcesValue; i++) {

@@ -16,6 +16,8 @@ class TRIBE_Master_Player : public RGE_Master_Player {
     TRIBE_Master_Player(int infile);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_master_player_size_check[(sizeof(TRIBE_Master_Player) == 0x2C) ? 1 : -1];
+#endif
 
 #endif // AOE1_TMPLAYER_H

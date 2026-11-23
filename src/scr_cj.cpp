@@ -205,7 +205,7 @@ void TribeJoinScreen::fillList() {
     this->listFilled = 1;
 }
 
-long TribeJoinScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeJoinScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     char temp[256];
     char string[256];
 
@@ -332,7 +332,7 @@ TribeMPCreateDialog::~TribeMPCreateDialog() {
     this->delete_panel((TPanel**) &this->cancelButton);
 }
 
-long TribeMPCreateDialog::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeMPCreateDialog::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel != 0) {
         if ((fromPanel == this->okButton && actionIn == 1) || (fromPanel == this->inputGamename && actionIn == 0)) {
             if (this->inputGamename->is_blank()) {

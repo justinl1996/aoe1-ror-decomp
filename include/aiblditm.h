@@ -75,8 +75,12 @@ int __cdecl operator!=(const BuildItem& one, const BuildItem& two);
 int __cdecl operator<(const BuildItem& one, const BuildItem& two);
 int __cdecl operator>(const BuildItem& one, const BuildItem& two);
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiblditm_build_item_size[(sizeof(BuildItem) == 0xB0) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiblditm_terrain_values_offset
     [(sizeof(BaseItem) + sizeof(BuildItem*) + sizeof(BuildItem*) + sizeof(int) * 7 == 0x90) ? 1 : -1];
+#endif
 
 #endif

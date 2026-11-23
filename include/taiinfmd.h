@@ -180,10 +180,6 @@ class TribeInformationAIModule : public InformationAIModule {
         unsigned char type, unsigned char x1, unsigned char y1, unsigned char x2, unsigned char y2, unsigned char attackingOwner,
         unsigned char targetOwner, short kills, unsigned char success, unsigned long timeStamp, int play
     );
-    int storeAttackMemory(
-        unsigned char p1, unsigned char p2, unsigned char p3, unsigned char p4, unsigned char p5, unsigned char p6,
-        unsigned char p7, short p8, unsigned char p9, unsigned int p10, int p11
-    );
     void removeAttackMemory(int id);
     AttackMemory* attackMemory(int id);
     void setSaveLearnInformation(int v);
@@ -244,8 +240,12 @@ class TribeInformationAIModule : public InformationAIModule {
     void addResourceType(int r, int t);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taiinfmd_information_size[(sizeof(TribeInformationAIModule) == 0x10090) ? 1 : -1];
+#endif
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taiinfmd_managed_array_size[(sizeof(ManagedArray<int>) == 0x10) ? 1 : -1];
+#endif
 
 #endif

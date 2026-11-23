@@ -44,12 +44,12 @@ void RGE_Action_Missile::first_in_stack(unsigned char first_time) {
 
 void RGE_Action_Missile::intercept(float& tx, float& ty, float& tz) {
     if (!this->target_obj) {
-        *(long*) &tx = *(long*) &this->target_x;
-        *(long*) &ty = *(long*) &this->target_y;
-        *(long*) &tz = *(long*) &this->target_z;
+        tx = this->target_x;
+        ty = this->target_y;
+        tz = this->target_z;
     } else {
-        *(long*) &tx = *(long*) &this->target_obj->world_x;
-        *(long*) &ty = *(long*) &this->target_obj->world_y;
+        tx = this->target_obj->world_x;
+        ty = this->target_obj->world_y;
         tz = (this->target_obj->master_obj->radius_z * 0.5f) + this->target_obj->world_z;
     }
 }

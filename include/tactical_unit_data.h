@@ -10,6 +10,8 @@ struct UnitData {
     unsigned long lastTaskTime;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tactical_unit_data_size_check[(sizeof(UnitData) == 0x18) ? 1 : -1];
+#endif
 
 #endif

@@ -47,7 +47,11 @@ class RGE_Communications_Addresses {
     char* GetAlias(unsigned int Num);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_addr_size_check[(sizeof(RGE_Communications_Addresses) == 0x224) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char ipad_size_check[(sizeof(IPAD) == 0x0A0) ? 1 : -1];
+#endif
 
 #endif

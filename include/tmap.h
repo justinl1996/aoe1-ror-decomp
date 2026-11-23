@@ -83,8 +83,14 @@ class TRIBE_Map : public RGE_Map {
     void tribe_clean_terrain(long x1, long y1, long x2, long y2, unsigned char check_terrain, unsigned char replacement_terrain);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_cliff_info_size_check[(sizeof(TRIBE_Cliff_Info) == 0x10) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_master_cliff_info_size_check[(sizeof(TRIBE_Master_Cliff_Info) == 0x28) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_map_size_check[(sizeof(TRIBE_Map) == 0xB5F8) ? 1 : -1];
+#endif
 
 #endif

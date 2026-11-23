@@ -256,7 +256,9 @@ struct RGE_Tile_List_Node {
     int row;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_tile_list_node_size_check[(sizeof(RGE_Tile_List_Node) == 0x08) ? 1 : -1];
+#endif
 
 class RGE_Tile_List {
   public:
@@ -274,7 +276,9 @@ class RGE_Tile_List {
     RGE_Tile_List_Node* list;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_tile_list_size_check[(sizeof(RGE_Tile_List) == 0x14) ? 1 : -1];
+#endif
 
 class RGE_Player {
   public:
@@ -491,6 +495,8 @@ class RGE_Player {
     unsigned char groups_used[127];
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_player_size_check[(sizeof(RGE_Player) == 0x220) ? 1 : -1];
+#endif
 
 #endif

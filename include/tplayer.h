@@ -27,7 +27,9 @@ struct Item_Avail {
     long help_page_id;      // +0x24
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char item_avail_size_check[(sizeof(Item_Avail) == 0x28) ? 1 : -1];
+#endif
 
 struct Trade_Avail {
   public:
@@ -36,7 +38,9 @@ struct Trade_Avail {
     float inventory;         // +0x08
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char trade_avail_size_check[(sizeof(Trade_Avail) == 0x0C) ? 1 : -1];
+#endif
 
 class TRIBE_Player : public RGE_Player {
   public:
@@ -186,7 +190,9 @@ class TRIBE_Player : public RGE_Player {
     float artifact_held_time;            // +0x844
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_player_size_check[(sizeof(TRIBE_Player) == 0x848) ? 1 : -1];
+#endif
 
 class TRIBE_Gaia : public TRIBE_Player {
   public:
@@ -207,6 +213,8 @@ class TRIBE_Gaia : public TRIBE_Player {
     long animal_max;    // +0x854
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_gaia_size_check[(sizeof(TRIBE_Gaia) == 0x858) ? 1 : -1];
+#endif
 
 #endif

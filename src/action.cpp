@@ -113,15 +113,17 @@ RGE_Action_List* RGE_Action::create_action_list(RGE_Action_Object* obj_in) {
     return new RGE_Action_List(this->obj);
 }
 
+#include <stdint.h>
+
 void RGE_Action::rehook(void) {
     if (this->target_obj != 0) {
-        this->target_obj = ((RGE_Static_Object*) this->obj)->get_object_pointer((int) this->target_obj);
+        this->target_obj = ((RGE_Static_Object*) this->obj)->get_object_pointer((int) (intptr_t) this->target_obj);
         if (this->target_obj != 0) {
             this->targetID = this->target_obj->id;
         }
     }
     if (this->target_obj2 != 0) {
-        this->target_obj2 = ((RGE_Static_Object*) this->obj)->get_object_pointer((int) this->target_obj2);
+        this->target_obj2 = ((RGE_Static_Object*) this->obj)->get_object_pointer((int) (intptr_t) this->target_obj2);
         if (this->target_obj2 != 0) {
             this->target2ID = this->target_obj2->id;
         }

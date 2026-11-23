@@ -1207,7 +1207,7 @@ int TEasy_Panel::create_drop_down(
         rge_base_game->get_font(font_num);
     else
         rge_base_game->get_font(RGE_FONT_ARIAL_10_NORMAL_ALT);
-    char** list = (char**) calloc(1, 4);
+    char** list = (char**) calloc(1, sizeof(char*));
     if (list == 0) {
         this->error_code = 1;
         return 0;
@@ -1606,7 +1606,7 @@ long TEasy_Panel::command_do_popup_help(unsigned char mouse_button_in, long mous
     return 0;
 }
 
-long TEasy_Panel::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TEasy_Panel::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel) {
         if (fromPanel->panelName() && strcmp(fromPanel->panelName(), "OKDialog") == 0) {
             if (actionIn == 0 || actionIn == 1) {

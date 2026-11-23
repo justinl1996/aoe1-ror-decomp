@@ -170,7 +170,7 @@ void TRIBE_Mission_Screen::draw() {
     }
 }
 
-long TRIBE_Mission_Screen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TRIBE_Mission_Screen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (actionIn == 1) {
         if (fromPanel == this->text_buttons[0]) {
             this->list->set_text(rge_base_game->world->scenario->Get_message(4));

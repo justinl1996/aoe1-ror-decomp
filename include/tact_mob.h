@@ -34,11 +34,15 @@ class TRIBE_Action_Make_Obj : public RGE_Action {
     void get_info(short& id, short& progress, char* name, short name_size);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tact_mob_action_size[(sizeof(RGE_Action) == 0x40) ? 1 : -1];
+#endif
 // The Linux build's C++ ABI (Itanium) places a derived class's first members in its
 // base class's tail padding; MSVC does not. These layout checks are MSVC's.
 #ifndef AOE_LINUX
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tact_mob_make_obj_size[(sizeof(TRIBE_Action_Make_Obj) == 0x50) ? 1 : -1];
+#endif
 #endif
 
 #endif

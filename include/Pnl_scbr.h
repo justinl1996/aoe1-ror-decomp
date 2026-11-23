@@ -88,7 +88,11 @@ class TScrollBarPanel : public TPanel {
     void draw_button_pic(int frame, int down, tagRECT* rect);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_scbr_tpanel_size_check[(sizeof(TPanel) == 0xF4) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_scbr_scrollbar_size_check[(sizeof(TScrollBarPanel) == 0x1C4) ? 1 : -1];
+#endif
 
 #endif

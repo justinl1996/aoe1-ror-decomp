@@ -790,7 +790,7 @@ void RGE_Victory_Conditions::handle_victory_points(RGE_Victory_Entry* node) {
 }
 
 RGE_Victory_Entry* RGE_Victory_Conditions::add(unsigned char v_group, unsigned char alliance) {
-    RGE_Victory_Entry* entry = (RGE_Victory_Entry*) calloc(1, 52);
+    RGE_Victory_Entry* entry = (RGE_Victory_Entry*) calloc(1, sizeof(RGE_Victory_Entry));
     if (entry != 0) {
         entry->state = 0;
         entry->victory_group = v_group;
@@ -1098,7 +1098,7 @@ unsigned char RGE_Victory_Conditions::remove_condition(long condition) {
 }
 
 RGE_Victory_Point_Entry* RGE_Victory_Conditions::add_point(unsigned char id, unsigned char group) {
-    RGE_Victory_Point_Entry* entry = (RGE_Victory_Point_Entry*) calloc(1, 28);
+    RGE_Victory_Point_Entry* entry = (RGE_Victory_Point_Entry*) calloc(1, sizeof(RGE_Victory_Point_Entry));
     if (entry != 0) {
         entry->state = 0;
         entry->attribute = -1;

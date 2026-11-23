@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "../include/com_q.h"
 #include "../include/game_globals.h"
 #include "../include/debuglog.h"
@@ -91,7 +92,7 @@ unsigned char RGE_Communications_Queue::ExpectedNextSequence(unsigned long TurnI
     } while (i <= this->HighQueueDepth);
 
     {
-        unsigned int c = (unsigned int) this;
+        uintptr_t c = (uintptr_t) this;
         c |= 0xff;
         if ((unsigned char) c >= seq) {
             return Count;

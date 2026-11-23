@@ -53,7 +53,7 @@ long TRIBE_Screen_Info::mouse_left_down_action(long x, long y, int ctrl_key, int
     return 0;
 }
 
-long TRIBE_Screen_Info::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TRIBE_Screen_Info::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     return TEasy_Panel::action(fromPanel, actionIn, a1, a2);
 }
 

@@ -1345,7 +1345,7 @@ void RGE_Static_Object::rehook(void) {
     obj = this->inside_obj;
     if (obj != 0) {
         this->inside_obj = 0;
-        obj = this->get_object_pointer((long) obj);
+        obj = this->get_object_pointer((int) (intptr_t) obj);
         if (obj != 0) {
             this->enter_obj(obj);
         }

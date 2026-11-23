@@ -20,6 +20,8 @@ class AIPlayGroup {
     void initialize();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char ai_play_group_size_check[(sizeof(AIPlayGroup) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

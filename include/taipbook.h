@@ -15,6 +15,8 @@ class TribeAIPlayBook : public AIPlayBook {
     TribeAIPlayBook();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taipbook_tribe_size[(sizeof(TribeAIPlayBook) == 0x50) ? 1 : -1];
+#endif
 
 #endif

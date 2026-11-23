@@ -20,7 +20,9 @@ struct RGE_Cliffs_Info {
     long hot_spot_num;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char RMM_Clif_Info_Size_Check[(sizeof(RGE_Cliffs_Info) == 0x4C0) ? 1 : -1];
+#endif
 
 class RGE_RMM_Cliffs_Generator : public RGE_Random_Map_Module {
   public:
@@ -38,6 +40,8 @@ class RGE_RMM_Cliffs_Generator : public RGE_Random_Map_Module {
     void invalidate_cliff_area(long x, long y, long radius);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char RMM_Clif_Generator_Size_Check[(sizeof(RGE_RMM_Cliffs_Generator) == 0x508) ? 1 : -1];
+#endif
 
 #endif

@@ -1,4 +1,5 @@
 
+#include <stdint.h>
 #include "../include/asp_list.h"
 #include <stdlib.h>
 #include "../include/sprite.h"
@@ -24,9 +25,9 @@ void RGE_Active_Sprite_List::load(int infile, RGE_Sprite** sprites) {
 
     sprites_copy = sprites;
     do {
-        // Preserve the original sprite-array pointer while reading the type byte.
-        rge_read(infile, &sprites, 1);
-        type = this->load_node(infile, (unsigned char) (unsigned long) sprites, sprites_copy);
+        unsigned char sprite_type = 0;
+        rge_read(infile, &sprite_type, 1);
+        type = this->load_node(infile, sprite_type, sprites_copy);
     } while (type != 0);
 
     reversed_list = 0;
@@ -47,7 +48,7 @@ unsigned char RGE_Active_Sprite_List::load_node(int infile, unsigned char type, 
 
     switch (type_value) {
         case 1:
-            node = (RGE_Active_Sprite_Node*) calloc(12, 1);
+            node = (RGE_Active_Sprite_Node*) calloc(1, sizeof(RGE_Active_Sprite_Node));
             sprite = new RGE_Active_Sprite(infile, sprites);
             node->node = sprite;
             node->next = this->list;
@@ -55,7 +56,7 @@ unsigned char RGE_Active_Sprite_List::load_node(int infile, unsigned char type, 
             break;
 
         case 2:
-            node = (RGE_Active_Sprite_Node*) calloc(12, 1);
+            node = (RGE_Active_Sprite_Node*) calloc(1, sizeof(RGE_Active_Sprite_Node));
             sprite = new RGE_Active_Animated_Sprite(infile, sprites);
             node->node = sprite;
             node->next = this->list;
@@ -156,7 +157,7 @@ void RGE_Active_Sprite_List::add_sprite(RGE_Sprite* sprite, unsigned char order,
         node = node->next;
     }
 
-    node = (RGE_Active_Sprite_Node*) calloc(12, 1);
+    node = (RGE_Active_Sprite_Node*) calloc(1, sizeof(RGE_Active_Sprite_Node));
     active_sprite = sprite->make_active_sprite();
     node->node = active_sprite;
     active_sprite->set_offset(x, y);

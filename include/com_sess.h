@@ -55,8 +55,14 @@ int __stdcall EnumSessionCallback(
     DPSESSIONDESC2* lpDPSessionDesc, unsigned long* lpdwTimeOut, unsigned long dwFlags, void* lpContext
 );
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_sess_guid_size_check[(sizeof(GUID) == 0x10) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_sess_entry_size_check[(sizeof(SEs) == 0x238) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_sess_size_check[(sizeof(TCommunications_Sessions) == 0x457B0) ? 1 : -1];
+#endif
 
 #endif

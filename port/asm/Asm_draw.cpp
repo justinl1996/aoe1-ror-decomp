@@ -17,7 +17,8 @@
 
 typedef unsigned char u8;
 typedef unsigned short u16;
-typedef unsigned long u32;
+#include <stdint.h>
+typedef uint32_t u32;
 
 // Engine state set by the ASMSet_* entry points (THIS_DAT in the assembly).
 static u8** surface_offsets;
@@ -172,7 +173,7 @@ static void draw_piece(int table, u8* dest, const u8* source, long count, u32 fi
 {
     int mirrored = table >= TABLE_MIRRORED, operation = table & 3;
     long index, j;
-    int row, align = (int)((unsigned long)dest & 3);
+    int row, align = (int)((uintptr_t)dest & 3);
     const CodeletShape* shape;
     int step = mirrored ? -1 : 1;
     if (count <= 0) return;
@@ -181,7 +182,7 @@ static void draw_piece(int table, u8* dest, const u8* source, long count, u32 fi
     shape = &kShadowShapes[table][row][align];
     for (j = 0; j < count; ++j) {
         u8* pixel = dest + j * step;
-        int position = (int)((unsigned long)pixel & 3);
+        int position = (int)((uintptr_t)pixel & 3);
         long source_index = j;
         u8 value;
         if (shadow_mode) {

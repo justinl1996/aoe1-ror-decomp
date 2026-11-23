@@ -16,6 +16,8 @@ class TRIBE_Action_Wonder : public RGE_Action {
     virtual void set_state(unsigned char new_state);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tact_wnd_action_wonder_size[(sizeof(TRIBE_Action_Wonder) == 0x40) ? 1 : -1];
+#endif
 
 #endif // AOE1_TACT_WND_H

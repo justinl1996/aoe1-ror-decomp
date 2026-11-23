@@ -24,11 +24,20 @@
 #define gethostbyname aoe_winsock_gethostbyname
 
 /* Game headers forward-declare FILE as Microsoft's struct _iobuf. */
+#ifdef __APPLE__
+#define _iobuf __sFILE
+#else
 #define _iobuf _IO_FILE
+#endif
 
 /* The game uses no min/max macros; without them the C++ library's
    headers stay usable. */
 #define NOMINMAX
+
+/* On 64-bit Unix/Wasm64, use the native ABI instead of Wine's ms_abi for __stdcall/__cdecl. */
+#if defined(__LP64__) || defined(__aarch64__) || defined(__wasm64__)
+#define WINE_UNIX_LIB 1
+#endif
 
 /* The build defines NO_STRICT (handles are plain pointers, as in the
    Windows build). Wine's winnls.h then leaves out one callback type it

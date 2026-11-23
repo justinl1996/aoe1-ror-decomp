@@ -24,10 +24,12 @@ class TRIBE_Mission_Screen : public TScreenPanel {
     virtual ~TRIBE_Mission_Screen();
     virtual long handle_idle();
     virtual void draw();
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     virtual long key_down_action(long key, short count, int alt_key, int ctrl_key, int shift_key);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_vc_screen_size_check[(sizeof(TRIBE_Mission_Screen) == 0x49C) ? 1 : -1];
+#endif
 
 #endif

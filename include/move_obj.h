@@ -138,6 +138,8 @@ class RGE_Moving_Object : public RGE_Animated_Object {
     void displayPath(int object_id);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_moving_object_size_check[(sizeof(RGE_Moving_Object) == 0x180) ? 1 : -1];
+#endif
 
 #endif

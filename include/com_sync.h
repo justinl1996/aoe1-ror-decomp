@@ -62,7 +62,11 @@ class RGE_Communications_Synchronize {
 
 typedef RGE_Communications_Synchronize::CHECKSUMARRAY RGE_Communications_Check;
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char comm_sync_check_size[(sizeof(RGE_Communications_Check) == 0x24) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char comm_sync_size_check[(sizeof(RGE_Communications_Synchronize) == 0x7EC) ? 1 : -1];
+#endif
 
 #endif

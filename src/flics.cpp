@@ -1,4 +1,5 @@
 
+#include <stdint.h>
 #include "../include/flics.h"
 #include <fcntl.h>
 #include <stdio.h>
@@ -56,8 +57,8 @@ void RGE_Flic_Player::palette(tagRGBQUAD* palette) {
     int color_index;
 
     if (this->flic_handle > -1) {
-        framehead = (FrameHead*) calloc(1, 16);
-        lseek(this->flic_handle, (int) this->flichead.oframe2, SEEK_SET);
+        framehead = (FrameHead*) calloc(1, sizeof(FrameHead));
+        lseek(this->flic_handle, (off_t) (intptr_t) this->flichead.oframe2, SEEK_SET);
         read(this->flic_handle, framehead, 16);
         chunk = (int*) calloc(framehead->size, 1);
         temp_buffer = chunk;
@@ -177,7 +178,7 @@ short RGE_Flic_Player::frames() {
 void RGE_Flic_Player::start() {
     switch (this->flichead.type) {
         case 0xAF12:
-            this->flichead.oframe1 += (long) this->flic_buffer;
+            this->flichead.oframe1 += (intptr_t) this->flic_buffer;
             break;
         case 0xAF11: {
             int s = this->flichead.speed;
@@ -204,7 +205,7 @@ unsigned char RGE_Flic_Player::draw(TDrawArea* drawarea_in, long flic_x, long fl
 
     if (this->flic_handle > -1) {
         frame = (FrameHead*) calloc(1, sizeof(FrameHead));
-        lseek(this->flic_handle, (long) this->flichead.oframe2, SEEK_SET);
+        lseek(this->flic_handle, (off_t) (intptr_t) this->flichead.oframe2, SEEK_SET);
         read(this->flic_handle, frame, sizeof(FrameHead));
         chunk_base = (char*) calloc(frame->size, 1);
         temp_buffer = chunk_base;

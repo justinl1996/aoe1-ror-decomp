@@ -181,7 +181,7 @@ long TRIBE_Screen_Name::handle_idle() {
     return TPanel::handle_idle();
 }
 
-long TRIBE_Screen_Name::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TRIBE_Screen_Name::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     long line;
     char str[256];
 
@@ -312,7 +312,7 @@ TRIBE_Dialog_Name::~TRIBE_Dialog_Name() {
     this->delete_panel((TPanel**) &this->cancel_button);
 }
 
-long TRIBE_Dialog_Name::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TRIBE_Dialog_Name::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     if (from_panel != 0) {
         if ((from_panel == this->ok_button && action_in == 1) || (from_panel == this->name_input && action_in == 0)) {
             if (this->name_input->get_text()[0] == 0) {

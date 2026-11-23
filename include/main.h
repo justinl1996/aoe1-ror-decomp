@@ -66,6 +66,8 @@ struct RGE_Prog_Info {
     char avi_dir[261];
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aoe1_main_prog_info_size_check[(sizeof(RGE_Prog_Info) == 0x1238) ? 1 : -1];
+#endif
 
 #endif

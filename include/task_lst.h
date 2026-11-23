@@ -8,7 +8,9 @@ class RGE_Sound;
 class RGE_Action_Object;
 class RGE_Static_Object;
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char task_lst_task_size_check[(sizeof(RGE_Task) == 0x4C) ? 1 : -1];
+#endif
 
 class RGE_Task_List {
   public:
@@ -36,6 +38,8 @@ class RGE_Task_List {
     short list_num;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char task_lst_task_list_size_check[(sizeof(RGE_Task_List) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

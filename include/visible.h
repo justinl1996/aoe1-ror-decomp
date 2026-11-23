@@ -123,9 +123,17 @@ class VC_LOG {
     int supress;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_lostbl_size_check[(sizeof(LOSTBL) == 0x0C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_visible_map_size_check[(sizeof(RGE_Visible_Map) == 0x38) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_unified_visible_map_size_check[(sizeof(RGE_Unified_Visible_Map) == 0x0C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char vc_log_size_check[(sizeof(VC_LOG) == 0x24) ? 1 : -1];
+#endif
 
 #endif

@@ -83,6 +83,8 @@ class TMessagePanel : public TPanel {
     virtual void set_font(void* font_in, long font_wid_in, long font_hgt_in);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_msg_message_panel_size_check[(sizeof(TMessagePanel) == 0x380) ? 1 : -1];
+#endif
 
 #endif

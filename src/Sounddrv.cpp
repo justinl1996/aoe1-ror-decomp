@@ -21,21 +21,25 @@ extern "C" int __cdecl ds_stream_stop(void);
 extern "C" unsigned int __cdecl ds_stream_messages(void* a, unsigned int b, unsigned int c, long d);
 extern void __cdecl color_log(unsigned char a, unsigned char b, int c);
 
+#include <stdint.h>
+
 struct _tag_wavheader {
     unsigned char szRIFF[4];
-    unsigned long dwFormatLength;
+    uint32_t dwFormatLength;
     unsigned char szWAVE[4];
     unsigned char szFMT[4];
-    unsigned long dwWaveFormatLength;
+    uint32_t dwWaveFormatLength;
     unsigned short wFormatTag;
     unsigned short nChannels;
-    unsigned long nSamplesPerSec;
-    unsigned long nAvgBytesPerSec;
+    uint32_t nSamplesPerSec;
+    uint32_t nAvgBytesPerSec;
     unsigned short nBlockAlign;
     unsigned short wBitsPerSample;
     unsigned char szDATA[4];
-    unsigned long dwDataLength;
+    uint32_t dwDataLength;
 };
+
+typedef char wavheader_size_check[(sizeof(_tag_wavheader) == 44) ? 1 : -1];
 
 TSound_Driver::TSound_Driver() {
     this->init_vars();
@@ -324,8 +328,8 @@ void TDigital::exit() {
 }
 
 int TDigital::load(char* file_name, long res_id) {
-    unsigned long size1;
-    unsigned long size2;
+    DWORD size1;
+    DWORD size2;
     void* mem2;
     void* mem1;
     int load_type;
@@ -571,7 +575,7 @@ done:
 }
 
 int TDigital::play() {
-    unsigned long status;
+    DWORD status;
     int loop_flag;
     int hr;
     TDigital* target = this->owner;
@@ -702,7 +706,7 @@ void TDigital::set_pan(long in_pan) {
 
 int TDigital::is_playing() {
     TDigital* target = this->owner;
-    unsigned long status;
+    DWORD status;
 
     if (target == 0) {
         target = this;

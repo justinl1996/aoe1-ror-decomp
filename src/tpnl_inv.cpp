@@ -163,7 +163,7 @@ void TRIBE_Panel_Inven::save_info() {
             this->save_attr = 0;
         }
         this->save_attr_num = this->player->attribute_num;
-        this->save_attr = (short*) calloc((int) this->save_attr_num, 2);
+        this->save_attr = (short*) calloc((int) this->save_attr_num, sizeof(short));
     }
 
     for (int i = 0; i < this->save_attr_num; ++i)

@@ -77,6 +77,8 @@ class AIPlayPhaseTrigger {
     char* convertToNameType(unsigned char t) const;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char ai_play_phase_trigger_size_check[(sizeof(AIPlayPhaseTrigger) == 0x14) ? 1 : -1];
+#endif
 
 #endif

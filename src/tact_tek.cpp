@@ -1,4 +1,5 @@
 #include "../include/tact_tek.h"
+#include "../include/rge_fio.h"
 #include "../include/act_obj.h"
 #include "../include/m_ac_obj.h"
 #include "../include/basegame.h"
@@ -8,8 +9,6 @@
 #include "../include/rge_base_game_global.h"
 #include <string.h>
 
-void __cdecl rge_read(int handle, void* buffer, int count);
-void __cdecl rge_write(int handle, void* buffer, int count);
 
 TRIBE_Action_Make_Tech::TRIBE_Action_Make_Tech(int infile, RGE_Action_Object* obj_in) : RGE_Action(infile, obj_in, 1) {
     this->action_type = TRIBE_ACTION_TYPE_MAKE_TECH;

@@ -42,7 +42,11 @@ class RGE_Master_Missile_Object : public RGE_Master_Combat_Object {
     float ballistics_ratio;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char m_mi_obj_master_missile_size_check[(sizeof(RGE_Master_Missile_Object) == 0x154) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char m_mi_obj_missile_type_offset_check[(offsetof(RGE_Master_Missile_Object, missile_type) == 0x148) ? 1 : -1];
+#endif
 
 #endif // AOE1_M_MI_OBJ_H

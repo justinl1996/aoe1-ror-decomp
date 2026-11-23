@@ -50,6 +50,8 @@ class RGE_Action_List {
     RGE_Task* get_task();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char action_list_size_check[(sizeof(RGE_Action_List) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

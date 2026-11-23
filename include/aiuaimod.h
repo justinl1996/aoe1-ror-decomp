@@ -36,13 +36,15 @@ struct OrderEvent {
     float range;
 };
 
+#include <stdint.h>
+
 struct NotifyEvent {
     int caller;
     int recipient;
     int mType;
-    long p1;
-    long p2;
-    long p3;
+    int32_t p1;
+    int32_t p2;
+    int32_t p3;
 };
 
 class UnitAIModule {
@@ -228,10 +230,18 @@ class UnitAIModule {
     void lookAround();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char verify_aiuaimod_UnitAIModule_size[(sizeof(UnitAIModule) == 0x134) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char verify_aiuaimod_OrderEvent_size[(sizeof(OrderEvent) == 0x24) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char verify_aiuaimod_NotifyEvent_size[(sizeof(NotifyEvent) == 0x18) ? 1 : -1];
+#endif
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char verify_aiuaimod_VisibleUnitRecord_size[(sizeof(VISIBLE_UNIT_REC) == 0x08) ? 1 : -1];
+#endif
 
 #endif

@@ -34,7 +34,9 @@ struct Special_Events {
     Special_Events* next;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char special_events_size_check[(sizeof(Special_Events) == 0xB0) ? 1 : -1];
+#endif
 
 class Time_Line_Panel : public TEasy_Panel {
   public:
@@ -129,6 +131,8 @@ class Time_Line_Panel : public TEasy_Panel {
     void draw_legend();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char time_line_panel_size_check[(sizeof(Time_Line_Panel) == 0x52C) ? 1 : -1];
+#endif
 
 #endif

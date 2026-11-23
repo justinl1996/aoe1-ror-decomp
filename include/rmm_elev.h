@@ -26,9 +26,15 @@ struct RGE_Elevation_Info {
     long hot_spot_num;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rmm_elev_info_line_size_check[(sizeof(RGE_Elevation_Info_Line) == 0x18) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rmm_elev_hot_spots_size_check[(sizeof(RGE_Elevation_Hot_Spots) == 0x10) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rmm_elev_info_size_check[(sizeof(RGE_Elevation_Info) == 0xF80) ? 1 : -1];
+#endif
 
 class RGE_RMM_Elevation_Generator : public RGE_Random_Map_Module {
   public:
@@ -48,6 +54,8 @@ class RGE_RMM_Elevation_Generator : public RGE_Random_Map_Module {
     RGE_Elevation_Info info;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rmm_elev_generator_size_check[(sizeof(RGE_RMM_Elevation_Generator) == 0xFB0) ? 1 : -1];
+#endif
 
 #endif

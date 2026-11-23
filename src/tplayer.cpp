@@ -1525,7 +1525,7 @@ void TRIBE_Player::removeObject(RGE_Static_Object* obj, int sleepFlag, int doppl
 }
 
 void TRIBE_Player::buildObject(int bi, int oi, float x, float y, int ui) {
-    int* objectId = (int*) calloc(1, 4);
+    int* objectId = (int*) calloc(1, sizeof(int));
     *objectId = bi;
     ((TRIBE_Command*) this->world->commands)->command_build(this->id, objectId, 1, oi, x, y, ui);
     free(objectId);
@@ -1588,14 +1588,14 @@ void TRIBE_Player::registerResearch(int rType, int location, int uniqueID) {
 }
 
 void TRIBE_Player::taskTrader(int tID, int oID, int ownerID, float x, float y) {
-    int* task = (int*) calloc(1, 4);
+    int* task = (int*) calloc(1, sizeof(int));
     *task = tID;
     ((TRIBE_Command*) this->world->commands)->command_work(this->id, task, 1, oID, ownerID, x, y);
     free(task);
 }
 
 void TRIBE_Player::taskResourceGatherer(int gID, int oID, int ownerID, float x, float y) {
-    int* task = (int*) calloc(1, 4);
+    int* task = (int*) calloc(1, sizeof(int));
     *task = gID;
     ((TRIBE_Command*) this->world->commands)->command_work(this->id, task, 1, oID, ownerID, x, y);
     free(task);

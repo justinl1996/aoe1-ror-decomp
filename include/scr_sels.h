@@ -43,7 +43,7 @@ class TribeSelectScenarioScreen : public TScreenPanel {
     virtual long handle_idle();
 
   protected:
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     void init_vars();
     void fillScenarios();
     void getSettings();
@@ -52,6 +52,8 @@ class TribeSelectScenarioScreen : public TScreenPanel {
     void activatePanels();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_sels_screen_size_check[(sizeof(TribeSelectScenarioScreen) == 0x4D8) ? 1 : -1];
+#endif
 
 #endif

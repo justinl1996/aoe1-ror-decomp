@@ -151,6 +151,8 @@ class TacticalAIGroup {
     int task(TribeTacticalAIModule*, TribeMainDecisionAIModule*, int, int, int);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tactical_group_size_check[(sizeof(TacticalAIGroup) == 0x330) ? 1 : -1];
+#endif
 
 #endif

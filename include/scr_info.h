@@ -14,10 +14,12 @@ class TRIBE_Screen_Info : public TScreenPanel {
     virtual long handle_idle();
     virtual long key_down_action(long key, short count, int alt_key, int ctrl_key, int shift_key);
     virtual long mouse_left_down_action(long x, long y, int ctrl_key, int shift_key);
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     void close_screen();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_info_screen_size_check[(sizeof(TRIBE_Screen_Info) == 0x484) ? 1 : -1];
+#endif
 
 #endif

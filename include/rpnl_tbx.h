@@ -30,11 +30,13 @@ class RGE_Panel_Tool_Box : public TPanel {
     );
     virtual ~RGE_Panel_Tool_Box();
     void game_mode_changed(int old_mode, int new_mode);
-    virtual long action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2);
+    virtual long action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2);
     virtual long key_down_action(long key, short count, int alt_key, int ctrl_key, int shift_key);
     virtual void draw();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rpnl_tbx_size_check[(sizeof(RGE_Panel_Tool_Box) == 0x120) ? 1 : -1];
+#endif
 
 #endif

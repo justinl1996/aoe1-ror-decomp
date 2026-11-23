@@ -33,12 +33,14 @@ class TribeSendMessageDialog : public TDialogPanel {
     virtual ~TribeSendMessageDialog();
 
   protected:
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     virtual void draw();
     void checkButtons();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dlg_smsg_message_size[(sizeof(TribeSendMessageDialog) == 0x54C) ? 1 : -1];
+#endif
 
 class TribeSendQuickMessageDialog : public TDialogPanel {
   public:
@@ -50,10 +52,12 @@ class TribeSendQuickMessageDialog : public TDialogPanel {
 
     TribeSendQuickMessageDialog(TScreenPanel* parentPanel, Mode m);
     virtual ~TribeSendQuickMessageDialog();
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     virtual long handle_mouse_down(unsigned char mouse_button_in, long x, long y, int ctrl_key, int shift_key);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dlg_smsg_quick_size[(sizeof(TribeSendQuickMessageDialog) == 0x49C) ? 1 : -1];
+#endif
 
 #endif

@@ -68,7 +68,7 @@ long TRIBE_Screen_Sed_Menu::handle_idle() {
     return TPanel::handle_idle();
 }
 
-long TRIBE_Screen_Sed_Menu::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TRIBE_Screen_Sed_Menu::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel != 0 && actionIn == 1) {
         if (fromPanel == button[0]) {
             ((TRIBE_Game*) rge_base_game)->start_scenario_editor(0, 0);

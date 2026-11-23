@@ -3,44 +3,55 @@
 
 #include "drawarea.h"
 #include "Res_file.h"
+#include <stdint.h>
 
 typedef unsigned char byte;
 
 typedef struct Shape_Header {
-    long bounds;
-    long origin;
-    long xmin;
-    long ymin;
-    long xmax;
-    long ymax;
+    int32_t bounds;
+    int32_t origin;
+    int32_t xmin;
+    int32_t ymin;
+    int32_t xmax;
+    int32_t ymax;
 } Shape_Header;
 
 typedef struct Shape_File_Header {
-    long version;
-    long shape_num;
+    int32_t version;
+    int32_t shape_num;
 } Shape_File_Header;
 
 typedef struct Shape_Offsets {
-    long shape;
-    long palette;
+    int32_t shape;
+    int32_t palette;
 } Shape_Offsets;
 
 typedef struct SLhape_File_Header {
     char Version[4];
-    long Num_Shapes;
+    int32_t Num_Shapes;
     char Comment[24];
 } SLhape_File_Header;
 
 typedef struct Shape_Info {
-    unsigned long Shape_Data_Offsets;
-    unsigned long Shape_Outline_Offset;
-    long Reserved1;
-    long Reserved2;
-    long Width;
-    long Height;
-    long Hotspot_X;
-    long Hotspot_Y;
+    uint32_t Shape_Data_Offsets;
+    uint32_t Shape_Outline_Offset;
+    int32_t Reserved1;
+    int32_t Reserved2;
+    int32_t Width;
+    int32_t Height;
+    int32_t Hotspot_X;
+    int32_t Hotspot_Y;
 } Shape_Info;
+
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
+typedef char shape_header_bin_check[(sizeof(Shape_Header) == 0x18) ? 1 : -1];
+typedef char shape_file_header_bin_check[(sizeof(Shape_File_Header) == 0x08) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
+typedef char shape_offsets_bin_check[(sizeof(Shape_Offsets) == 0x08) ? 1 : -1];
+typedef char slhape_file_header_bin_check[(sizeof(SLhape_File_Header) == 0x20) ? 1 : -1];
+#endif
+typedef char shape_info_bin_check[(sizeof(Shape_Info) == 0x20) ? 1 : -1];
 
 struct Shape_Payload {
     byte value;

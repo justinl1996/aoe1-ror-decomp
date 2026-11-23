@@ -47,7 +47,7 @@ TribeInformationAIModule::TribeInformationAIModule(void* pW, int pID) :
     int i;
     strcpy(this->unitHistoryFilename, "learn\\Default.uh");
 
-    this->resourceTypesValue = (int**) operator new(0x10);
+    this->resourceTypesValue = (int**) operator new(4 * sizeof(int*));
     this->numberResourceTypesValue = (int*) operator new(0x10);
     for (i = 0; i < 4; i++) {
         this->numberResourceTypesValue[i] = 0;
@@ -175,7 +175,7 @@ TribeInformationAIModule::TribeInformationAIModule(int pID, int infile) :
 
     strcpy(this->unitHistoryFilename, "learn\\Default.uh");
 
-    this->resourceTypesValue = (int**) operator new(0x10);
+    this->resourceTypesValue = (int**) operator new(4 * sizeof(int*));
     this->numberResourceTypesValue = (int*) operator new(0x10);
     for (int i0 = 0; i0 < 4; i0++) {
         this->numberResourceTypesValue[i0] = 0;
@@ -608,7 +608,6 @@ void TribeInformationAIModule::setMainDecisionAI(TribeMainDecisionAIModule* m) {
 #include <string.h>
 #include <stdlib.h>
 
-void rge_write(int file, void* data, int size);
 
 int TribeInformationAIModule::save(int outfile) {
     int tempInt;
@@ -4701,7 +4700,7 @@ void TribeInformationAIModule::loadLearnInfo(char* name) {
                 );
                 this->importantUnits.add(temp.id);
                 name = name + 1;
-            } while ((int) name < numToLoad);
+            } while ((int) (intptr_t) name < numToLoad);
         }
 
         for (int resource_index = 0; resource_index < 4; resource_index++) {
@@ -4719,7 +4718,7 @@ void TribeInformationAIModule::loadLearnInfo(char* name) {
                 rge_read(file, &object_id, 4);
                 this->importantMiscs.add(object_id);
                 name = name + 1;
-            } while ((int) name < tempInt);
+            } while ((int) (intptr_t) name < tempInt);
         }
 
         rge_read(file, &tempInt, 4);
@@ -4729,7 +4728,7 @@ void TribeInformationAIModule::loadLearnInfo(char* name) {
                 rge_read(file, &object_id, 4);
                 this->itemsToDefend.add(object_id);
                 name = name + 1;
-            } while ((int) name < tempInt);
+            } while ((int) (intptr_t) name < tempInt);
         }
 
         rge_close(file);

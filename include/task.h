@@ -46,6 +46,8 @@ class RGE_Task {
     void save(int outfile);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_task_size_check[(sizeof(RGE_Task) == 0x4C) ? 1 : -1];
+#endif
 
 #endif

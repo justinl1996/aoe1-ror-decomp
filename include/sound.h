@@ -41,7 +41,11 @@ class RGE_Sound {
     int is_playing();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char sound_rge_sound_size_check[(sizeof(RGE_Sound) == 0x10) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char sound_rge_sound_info_size_check[(sizeof(RGE_Sound_Info) == 0x24) ? 1 : -1];
+#endif
 
 #endif

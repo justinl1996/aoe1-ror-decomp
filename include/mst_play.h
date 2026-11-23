@@ -29,6 +29,8 @@ class RGE_Master_Player {
     RGE_Master_Player(int infile);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char mst_play_master_player_size[(sizeof(RGE_Master_Player) == 0x2C) ? 1 : -1];
+#endif
 
 #endif // AOE1_MST_PLAY_H

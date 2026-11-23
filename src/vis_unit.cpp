@@ -1,4 +1,5 @@
 #include "../include/vis_unit.h"
+#include "../include/rge_fio.h"
 #include "../include/map.h"
 #include "../include/world.h"
 #include "../include/player.h"
@@ -10,8 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern void rge_read(int handle, void* buffer, int size);
-extern void rge_write(int handle, void* buffer, int size);
 
 Visible_Unit_Manager::Visible_Unit_Manager(int Num_Players, int Num_Categories) {
     int i;
@@ -19,15 +18,15 @@ Visible_Unit_Manager::Visible_Unit_Manager(int Num_Players, int Num_Categories) 
     this->Player_Count = Num_Players;
     this->Category_Count = Num_Categories + 1;
     this->distanceTable = 0;
-    this->PlayerDataPtrs = (VISIBLE_UNIT_PTR**) calloc(Num_Players, 4);
+    this->PlayerDataPtrs = (VISIBLE_UNIT_PTR**) calloc(Num_Players, sizeof(VISIBLE_UNIT_PTR*));
 
     for (i = 0; i < this->Player_Count; i++) {
-        this->PlayerDataPtrs[i] = (VISIBLE_UNIT_PTR*) calloc(this->Category_Count, 8);
+        this->PlayerDataPtrs[i] = (VISIBLE_UNIT_PTR*) calloc(this->Category_Count, sizeof(VISIBLE_UNIT_PTR));
         VISIBLE_UNIT_PTR* row = this->PlayerDataPtrs[i];
         for (int j = 0; j < this->Category_Count; j++) {
             row[j].list_size = 0x20;
             row[j].used = 0;
-            row[j].unit_list = (VISIBLE_UNIT_REC*) calloc(32, 8);
+            row[j].unit_list = (VISIBLE_UNIT_REC*) calloc(32, sizeof(VISIBLE_UNIT_REC));
         }
     }
 
@@ -140,7 +139,7 @@ void Visible_Unit_Manager::Update_Unit_Info(
                     if ((NewUnifiedMap & 1) == 1) {
                         if (list->used == list->list_size) {
                             short list_size = list->list_size;
-                            VISIBLE_UNIT_REC* new_list = (VISIBLE_UNIT_REC*) calloc(list_size * 2, 8);
+                            VISIBLE_UNIT_REC* new_list = (VISIBLE_UNIT_REC*) calloc(list_size * 2, sizeof(VISIBLE_UNIT_REC));
                             memcpy(new_list, list->unit_list, list_size * 8);
                             free(list->unit_list);
                             list->unit_list = new_list;
@@ -283,9 +282,9 @@ int Visible_Unit_Manager::GetVisibleUnits(
 Visible_Resource_Manager::Visible_Resource_Manager(RGE_Player* list_owner, int num_lists) {
     this->num_visible_resource_lists = num_lists;
     if (num_lists > 0) {
-        this->VR_List = (VISIBLE_RESOURCE_REC**) calloc(num_lists, 4);
-        this->VR_ListSize = (int*) calloc(this->num_visible_resource_lists, 4);
-        this->VR_ListUsed = (int*) calloc(this->num_visible_resource_lists, 4);
+        this->VR_List = (VISIBLE_RESOURCE_REC**) calloc(num_lists, sizeof(VISIBLE_RESOURCE_REC*));
+        this->VR_ListSize = (int*) calloc(this->num_visible_resource_lists, sizeof(int));
+        this->VR_ListUsed = (int*) calloc(this->num_visible_resource_lists, sizeof(int));
         int i = 0;
         if (this->num_visible_resource_lists > 0) {
             do {
@@ -311,9 +310,9 @@ Visible_Resource_Manager::Visible_Resource_Manager(int infile, RGE_Player* list_
     }
 
     if (this->num_visible_resource_lists > 0) {
-        this->VR_List = (VISIBLE_RESOURCE_REC**) calloc(this->num_visible_resource_lists, 4);
-        this->VR_ListSize = (int*) calloc(this->num_visible_resource_lists, 4);
-        this->VR_ListUsed = (int*) calloc(this->num_visible_resource_lists, 4);
+        this->VR_List = (VISIBLE_RESOURCE_REC**) calloc(this->num_visible_resource_lists, sizeof(VISIBLE_RESOURCE_REC*));
+        this->VR_ListSize = (int*) calloc(this->num_visible_resource_lists, sizeof(int));
+        this->VR_ListUsed = (int*) calloc(this->num_visible_resource_lists, sizeof(int));
         int i = 0;
         if (this->num_visible_resource_lists > 0) {
             do {

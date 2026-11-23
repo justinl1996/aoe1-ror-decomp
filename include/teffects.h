@@ -12,6 +12,8 @@ class TRIBE_Effects : public RGE_Effects {
     void do_tech_effect(short current_effect, RGE_Player* player);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char teffects_tribe_effects_size_check[(sizeof(TRIBE_Effects) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

@@ -1,5 +1,6 @@
 
 #include "../include/scenario.h"
+#include "../include/rge_fio.h"
 #include <io.h>
 #include "../include/Picture.h"
 #include "../include/basegame.h"
@@ -18,10 +19,6 @@
 extern "C" {
 }
 
-void __cdecl rge_read_uncompressed(int fd, void* buffer, int count);
-void __cdecl rge_write_uncompressed(int fd, void* buffer, int count);
-void __cdecl rge_read(int fd, void* buffer, int count);
-void __cdecl rge_write(int fd, void* buffer, int count);
 void __cdecl getstring(char** destination, char* source);
 void __cdecl addstring(char** destination, char* old_text, char* append);
 void __cdecl operator delete(void* block);

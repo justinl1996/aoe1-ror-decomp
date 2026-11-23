@@ -57,6 +57,8 @@ class BuildAIModule : public AIModule {
     BuildItem* specificBuildListItem(int id);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aibldmod_module_size[(sizeof(BuildAIModule) == 0x5BC) ? 1 : -1];
+#endif
 
 #endif // AOE1_AIBLDMOD_H

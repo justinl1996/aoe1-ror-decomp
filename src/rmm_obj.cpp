@@ -53,12 +53,7 @@ unsigned char RGE_RMM_Object_Generator::generate() {
 
     this->clear_stack();
 
-    long* zero_ptr = (long*) this->terrain_table;
-    int zero_cnt = 8;
-    do {
-        *zero_ptr++ = 0;
-        zero_cnt--;
-    } while (zero_cnt != 0);
+    memset(this->terrain_table, 0, sizeof(this->terrain_table));
 
     for (int i = 0; i < this->info.object_num; i++) {
         this->generate_objects(this->info.objects[i]);
@@ -235,11 +230,10 @@ void RGE_RMM_Object_Generator::remove_area_from_lists(long x, long y, long spaci
 
     for (long cur_y = y_start; cur_y <= y_end; cur_y++) {
         if (x_start <= x_end) {
-            long offset = x_start * 24;
+            Map_Stack* node = &this->stack_offsets[cur_y][x_start];
             long count = x_end - x_start + 1;
             do {
-                this->remove_stack_node((Map_Stack*) ((char*) this->stack_offsets[cur_y] + offset));
-                offset += 24;
+                this->remove_stack_node(node++);
                 count--;
             } while (count != 0);
         }

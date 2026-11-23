@@ -44,7 +44,7 @@ class TDropDownPanel : public TPanel {
     virtual long handle_mouse_down(unsigned char, long, long, int, int);
     virtual long handle_mouse_up(unsigned char, long, long, int, int);
     virtual long handle_key_down(long, short, int, int, int);
-    virtual long action(TPanel*, long, unsigned long, unsigned long);
+    virtual long action(TPanel*, long, uintptr_t, uintptr_t);
     virtual void set_rect(long, long, long, long);
     virtual long handle_mouse_move(long, long, int, int);
     long setup(
@@ -81,7 +81,9 @@ class TDropDownPanel : public TPanel {
     void empty_list();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_drop_tdropdownpanel_size_check[(sizeof(TDropDownPanel) == 0x144) ? 1 : -1];
+#endif
 
 class TDropDownButtonPanel : public TButtonPanel {
   public:
@@ -90,6 +92,8 @@ class TDropDownButtonPanel : public TButtonPanel {
     virtual long handle_mouse_move(long, long, int, int);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_drop_tdropdownbuttonpanel_size_check[(sizeof(TDropDownButtonPanel) == 0x2BC) ? 1 : -1];
+#endif
 
 #endif

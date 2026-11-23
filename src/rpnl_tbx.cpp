@@ -159,7 +159,7 @@ RGE_Panel_Tool_Box::~RGE_Panel_Tool_Box() {
     delete this->command_button;
 }
 
-long RGE_Panel_Tool_Box::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long RGE_Panel_Tool_Box::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     if (from_panel != 0) {
         if ((from_panel == this->game_mode_button) && (action_in == 1)) {
             rge_base_game->set_game_mode(RGE_GAME_MODE_NORMAL, 0);

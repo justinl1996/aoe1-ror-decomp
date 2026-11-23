@@ -160,7 +160,7 @@ unsigned char RGE_Campaign_Info::verify_campaign_name(char* in_campaign_name) {
 
 long RGE_Campaign_Info::get_scenario_list(char*** list, long& curr_scenario) {
     if (campaign) {
-        *list = (char**) calloc(last_scenario + 1, 4);
+        *list = (char**) calloc(last_scenario + 1, sizeof(char*));
         for (int i = 0; i <= last_scenario; i++) {
             getstring((*list) + i, campaign->get_scenario_name(i));
         }
@@ -207,7 +207,7 @@ RGE_Person_Info::RGE_Person_Info(int infile, RGE_Campaign** in_campaigns, long i
     rge_read(infile, &campaign_info_num, 4);
 
     if (campaign_info_num > 0) {
-        campaign_info = (RGE_Campaign_Info**) calloc(campaign_info_num, 4);
+        campaign_info = (RGE_Campaign_Info**) calloc(campaign_info_num, sizeof(RGE_Campaign_Info*));
         for (int i = 0; i < campaign_info_num; i++) {
             campaign_info[i] = new RGE_Campaign_Info(infile, campaigns, campaign_num);
         }
@@ -279,9 +279,9 @@ unsigned char RGE_Person_Info::set_current_campaign(long num) {
         }
     }
 
-    RGE_Campaign_Info** new_campaign_info = (RGE_Campaign_Info**) calloc(campaign_info_num + 1, 4);
+    RGE_Campaign_Info** new_campaign_info = (RGE_Campaign_Info**) calloc(campaign_info_num + 1, sizeof(RGE_Campaign_Info*));
     if (campaign_info != 0) {
-        memcpy(new_campaign_info, campaign_info, campaign_info_num * 4);
+        memcpy(new_campaign_info, campaign_info, campaign_info_num * sizeof(RGE_Campaign_Info*));
     }
     free(campaign_info);
     campaign_info = new_campaign_info;
@@ -356,7 +356,8 @@ RGE_Game_Info::RGE_Game_Info(char* filename) {
     campaign_num = 0;
     campaigns = 0;
     find_campaigns();
-    strcpy(save_filename, filename);
+    if (save_filename != filename)
+        strcpy(save_filename, filename);
     int fd = rge_open(filename, _O_BINARY);
     if (fd > -1) {
         rge_read(fd, &version, 4);
@@ -364,7 +365,7 @@ RGE_Game_Info::RGE_Game_Info(char* filename) {
             rge_read(fd, this, 4);
             rge_read(fd, &people_num, 4);
             if (people_num > 0) {
-                people_info = (RGE_Person_Info**) calloc(people_num, 4);
+                people_info = (RGE_Person_Info**) calloc(people_num, sizeof(RGE_Person_Info*));
                 for (int i = 0; i < people_num; i++) {
                     people_info[i] = new RGE_Person_Info(fd, campaigns, campaign_num);
                 }
@@ -413,7 +414,8 @@ RGE_Game_Info::~RGE_Game_Info() {
 void RGE_Game_Info::save(char* filename) {
     L->Log("(PIF)Creating Player Info File");
 
-    strcpy(save_filename, filename);
+    if (save_filename != filename)
+        strcpy(save_filename, filename);
 
     int fd = rge_open(filename, _O_BINARY | _O_WRONLY | _O_CREAT | _O_APPEND | _O_TRUNC, _S_IREAD | _S_IWRITE);
     if (fd == -1)
@@ -473,7 +475,7 @@ void RGE_Game_Info::find_campaigns() {
     }
 
     if (campaign_num > 0) {
-        campaigns = (RGE_Campaign**) calloc(campaign_num, 4);
+        campaigns = (RGE_Campaign**) calloc(campaign_num, sizeof(RGE_Campaign*));
         i = 0;
 
         sprintf(file_name, "%s*.cpn", rge_base_game->prog_info->campaign_dir);
@@ -506,8 +508,8 @@ void RGE_Game_Info::find_campaigns() {
 }
 
 unsigned char RGE_Game_Info::add_new_person(char* name) {
-    RGE_Person_Info** newlist = (RGE_Person_Info**) calloc(people_num + 1, 4);
-    memcpy(newlist, people_info, people_num * 4);
+    RGE_Person_Info** newlist = (RGE_Person_Info**) calloc(people_num + 1, sizeof(RGE_Person_Info*));
+    memcpy(newlist, people_info, people_num * sizeof(RGE_Person_Info*));
     free(people_info);
     people_info = newlist;
     people_info[people_num] = new RGE_Person_Info(name, campaigns, campaign_num);
@@ -543,7 +545,7 @@ long RGE_Game_Info::get_people_list(char*** list, long& current_player) {
     char** new_list;
 
     if (0 < this->people_num) {
-        new_list = (char**) calloc(this->people_num, 4);
+        new_list = (char**) calloc(this->people_num, sizeof(char*));
         i = 0;
         *list = new_list;
         if (0 < this->people_num) {
@@ -560,7 +562,7 @@ long RGE_Game_Info::get_people_list(char*** list, long& current_player) {
 
 long RGE_Game_Info::get_campaign_list(char*** list, long& current_campaign) {
     if (campaign_num > 0) {
-        *list = (char**) calloc(campaign_num, 4);
+        *list = (char**) calloc(campaign_num, sizeof(char*));
         for (int i = 0; i < campaign_num; i++) {
             getstring(*list + i, campaigns[i]->get_name());
         }

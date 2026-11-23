@@ -27,6 +27,8 @@ class EmotionalAIModule : public AIModule {
     int defaultState() const;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiemomod_emotional_ai_module_size_check[(sizeof(EmotionalAIModule) == 0x1C0) ? 1 : -1];
+#endif
 
 #endif

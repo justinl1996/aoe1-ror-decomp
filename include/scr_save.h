@@ -46,10 +46,12 @@ class TribeSaveGameScreen : public TScreenPanel {
     int quit_after_save;
 
     void fillList();
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     void save_for_scenario_editor();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_save_screen_size_check[(sizeof(TribeSaveGameScreen) == 0x6A4) ? 1 : -1];
+#endif
 
 #endif

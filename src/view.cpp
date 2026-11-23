@@ -288,20 +288,25 @@ void RGE_View::Init_Tile_Edge_Tables() {
     if (fd != -1) {
         _lseek(fd, 0, SEEK_END);
         len = _tell(fd);
-        this->Tile_Edge_Tables = (Tile_FogEdge_Table**) calloc(1, len);
+        size_t ptr_bytes = 0x11 * sizeof(Tile_FogEdge_Table*);
+        size_t tbl_bytes = 0x11 * 0x2f * sizeof(Tile_FogEdge_Table);
+        unsigned char* block = (unsigned char*) calloc(1, ptr_bytes + tbl_bytes + len);
+        unsigned char* raw = block + ptr_bytes + tbl_bytes;
         _lseek(fd, 0, SEEK_SET);
-        _read(fd, this->Tile_Edge_Tables, len);
+        _read(fd, raw, len);
         _close(fd);
-        base = (int) this->Tile_Edge_Tables;
-        for (i = 0; i < 0x11; i++)
-            this->Tile_Edge_Tables[i] = (Tile_FogEdge_Table*) ((unsigned char*) this->Tile_Edge_Tables[i] + base);
+        this->Tile_Edge_Tables = (Tile_FogEdge_Table**) block;
+        Tile_FogEdge_Table* tables = (Tile_FogEdge_Table*) (block + ptr_bytes);
+        uint32_t* raw_ptrs = (uint32_t*) raw;
         for (i = 0; i < 0x11; i++) {
+            this->Tile_Edge_Tables[i] = &tables[i * 0x2f];
+            uint32_t* raw_entries = (uint32_t*) (raw + raw_ptrs[i]);
             fog_table = this->Tile_Edge_Tables[i];
             for (j = 0; j < 0x2f; j++) {
-                if (fog_table[j].normal_draw)
-                    fog_table[j].normal_draw = (VSpanMiniList*) ((unsigned char*) fog_table[j].normal_draw + base);
-                if (fog_table[j].fog_draw)
-                    fog_table[j].fog_draw = (VSpanMiniList*) ((unsigned char*) fog_table[j].fog_draw + base);
+                uint32_t norm_off = raw_entries[j * 2];
+                uint32_t fog_off = raw_entries[j * 2 + 1];
+                fog_table[j].normal_draw = norm_off ? (VSpanMiniList*) (raw + norm_off) : 0;
+                fog_table[j].fog_draw = fog_off ? (VSpanMiniList*) (raw + fog_off) : 0;
             }
         }
     }
@@ -309,18 +314,23 @@ void RGE_View::Init_Tile_Edge_Tables() {
     if (fd != -1) {
         _lseek(fd, 0, SEEK_END);
         len = _tell(fd);
-        this->Black_Edge_Tables = (Tile_BlackEdge_Table**) calloc(1, len);
+        size_t ptr_bytes = 0x11 * sizeof(Tile_BlackEdge_Table*);
+        size_t tbl_bytes = 0x11 * 0x2f * sizeof(Tile_BlackEdge_Table);
+        unsigned char* block = (unsigned char*) calloc(1, ptr_bytes + tbl_bytes + len);
+        unsigned char* raw = block + ptr_bytes + tbl_bytes;
         _lseek(fd, 0, SEEK_SET);
-        _read(fd, this->Black_Edge_Tables, len);
+        _read(fd, raw, len);
         _close(fd);
-        base = (int) this->Black_Edge_Tables;
-        for (i = 0; i < 0x11; i++)
-            this->Black_Edge_Tables[i] = (Tile_BlackEdge_Table*) ((unsigned char*) this->Black_Edge_Tables[i] + base);
+        this->Black_Edge_Tables = (Tile_BlackEdge_Table**) block;
+        Tile_BlackEdge_Table* tables = (Tile_BlackEdge_Table*) (block + ptr_bytes);
+        uint32_t* raw_ptrs = (uint32_t*) raw;
         for (i = 0; i < 0x11; i++) {
+            this->Black_Edge_Tables[i] = &tables[i * 0x2f];
+            uint32_t* raw_entries = (uint32_t*) (raw + raw_ptrs[i]);
             black_table = this->Black_Edge_Tables[i];
             for (j = 0; j < 0x2f; j++) {
-                if (black_table[j].black_UNdraw)
-                    black_table[j].black_UNdraw = (VSpanMiniList*) ((unsigned char*) black_table[j].black_UNdraw + base);
+                uint32_t blk_off = raw_entries[j];
+                black_table[j].black_UNdraw = blk_off ? (VSpanMiniList*) (raw + blk_off) : 0;
             }
         }
     }
@@ -701,7 +711,7 @@ void RGE_View::CreateBlitQueue(tagRECT& src_rect, tagRECT& dest_rect, int xDelta
     }
 
     if (this->Blit_Queue == 0) {
-        this->Blit_Queue = (Blit_Queue_Entry*) calloc(nBlits, 32);
+        this->Blit_Queue = (Blit_Queue_Entry*) calloc(nBlits, sizeof(Blit_Queue_Entry));
         this->Blt_Queue_Allocated = nBlits;
     }
 
@@ -4257,7 +4267,7 @@ void DClipInfo_List::SetNumZones(int New_Size) {
     int i;
 
     if (New_Size >= Max_Zones) {
-        Ptrs = (DClipInfo_Node**) calloc(New_Size, 4);
+        Ptrs = (DClipInfo_Node**) calloc(New_Size, sizeof(DClipInfo_Node*));
         new_zone_sizes = (int*) calloc(New_Size, sizeof(int));
         if (Zone_Ptrs != 0) {
             i = 0;
@@ -4588,9 +4598,9 @@ int DClipInfo_List::FreeThread(DClipInfo_Node* HeadNode, DClipInfo_Node* TailNod
     return count;
 }
 void DClipInfo_List::ReclaimAllNodes(void) {
-    memset(Draw_Clip_Nodes, 0, YLine_Size * 4);
-    memset(Draw_Level_Head, 0, (Max_Draw_Levels * 4) + 4);
-    memset(Draw_Level_Tail, 0, (Max_Draw_Levels * 4) + 4);
+    memset(Draw_Clip_Nodes, 0, YLine_Size * sizeof(*Draw_Clip_Nodes));
+    memset(Draw_Level_Head, 0, (Max_Draw_Levels + 1) * sizeof(*Draw_Level_Head));
+    memset(Draw_Level_Tail, 0, (Max_Draw_Levels + 1) * sizeof(*Draw_Level_Tail));
     Free_Head = 0;
     Free_Pool_Zone = 0;
     Free_Pool_Index = 0;

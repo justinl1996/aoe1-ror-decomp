@@ -122,7 +122,7 @@ void TDrawSystem::CheckAvailModes(int full_screen) {
     }
 }
 
-long __stdcall TDrawSystem::CheckAvailModesCallback(_DDSURFACEDESC* lpDDSurfaceDesc, void* lpContext) {
+HRESULT __stdcall TDrawSystem::CheckAvailModesCallback(_DDSURFACEDESC* lpDDSurfaceDesc, void* lpContext) {
     register long result = 1;
     TDrawSystem* mode_info = (TDrawSystem*) lpContext;
     int bpp = lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount;
@@ -890,7 +890,7 @@ TDrawArea::TDrawArea(char* SurfaceName, int ForceSystemMem) {
     this->FloatOffsetsSz = 0;
 
     memset(&this->SurfaceDesc, 0, sizeof(this->SurfaceDesc));
-    this->BitmapInfo = (BITMAPINFO256*) calloc(1, 1064);
+    this->BitmapInfo = (BITMAPINFO256*) calloc(1, sizeof(BITMAPINFO256));
     this->Orien = 1;
     this->SpanList = 0;
     this->CurSpanList = 0;
@@ -972,7 +972,7 @@ int TDrawArea::Init(TDrawSystem* draw_system_in, long wid_in, long hgt_in, int E
     if (draw_system_in != 0) {
         this->Wnd = draw_system_in->Wnd;
         if (this->Node == 0) {
-            node = (DrawAreaNode*) calloc(1, 12);
+            node = (DrawAreaNode*) calloc(1, sizeof(DrawAreaNode));
             this->Node = node;
             if (node == 0) {
                 return 0;
@@ -1305,7 +1305,7 @@ void TDrawArea::Clear(tagRECT* rect, int color) {
 }
 
 void TDrawArea::SetAccessOffsets() {
-    int size = this->Height << 2;
+    int size = this->Height * (int) sizeof(void*);
     if (size != this->DisplayOffsetsSz) {
         if (this->DisplayOffsets != 0)
             free(this->DisplayOffsets);
@@ -1347,7 +1347,7 @@ void TDrawArea::SetAccessOffsets() {
 }
 
 void TDrawArea::SetFloatOffsets(int X_Delta, int Y_Delta) {
-    int size = this->Height << 2;
+    int size = this->Height * (int) sizeof(void*);
     if (size != 0 && this->ExtendedLines != 0 && X_Delta >= 0 && Y_Delta >= 0) {
         if (size != this->FloatOffsetsSz) {
             if (this->FloatOffsets != 0)

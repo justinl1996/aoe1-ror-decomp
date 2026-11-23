@@ -34,6 +34,8 @@ class RGE_Master_Moving_Object : public RGE_Master_Animated_Object {
     unsigned char move_algorithem;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_master_moving_object_size_check[(sizeof(RGE_Master_Moving_Object) == 0xD8) ? 1 : -1];
+#endif
 
 #endif

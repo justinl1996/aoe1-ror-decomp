@@ -97,14 +97,25 @@ RGE_Sprite::RGE_Sprite(int infile, RGE_Sound** sounds, RGE_Color_Table** c_table
     this->main_sound = main_sound;
 
     if (this->draw_list_num > 0) {
-        this->draw_list = (RGE_Picture_List*) calloc((unsigned int) this->draw_list_num, 16);
-        rge_read(infile, this->draw_list, ((int) this->draw_list_num) << 4);
+        this->draw_list = (RGE_Picture_List*) calloc((unsigned int) this->draw_list_num, sizeof(RGE_Picture_List));
+        for (int i = 0; i < this->draw_list_num; ++i) {
+            short pad = 0;
+            uint32_t dummy_ptr = 0;
+            rge_read(infile, &this->draw_list[i].picture_num, 2);
+            rge_read(infile, &pad, 2);
+            rge_read(infile, &dummy_ptr, 4);
+            this->draw_list[i].sprite = (RGE_Sprite*) (uintptr_t) dummy_ptr;
+            rge_read(infile, &this->draw_list[i].offset_x, 2);
+            rge_read(infile, &this->draw_list[i].offset_y, 2);
+            rge_read(infile, &this->draw_list[i].facet, 2);
+            rge_read(infile, &pad, 2);
+        }
     } else {
         this->draw_list = 0;
     }
 
     if (this->micro_man_sound != 0) {
-        this->sound_list = (RGE_Sound_List*) calloc((unsigned int) this->facet_num, 20);
+        this->sound_list = (RGE_Sound_List*) calloc((unsigned int) this->facet_num, sizeof(RGE_Sound_List));
 
         int i = 0;
         if (this->facet_num > 0) {
@@ -198,7 +209,7 @@ RGE_Sprite::RGE_Sprite(FILE* infile, short in_id, RGE_Sound** sounds) {
     }
 
     if (*draw_count > 0) {
-        RGE_Picture_List* allocated_draw_list = (RGE_Picture_List*) calloc((unsigned int) *draw_count, 16);
+        RGE_Picture_List* allocated_draw_list = (RGE_Picture_List*) calloc((unsigned int) *draw_count, sizeof(RGE_Picture_List));
         short i = 0;
         if (i < *draw_count) {
             this->draw_list = allocated_draw_list;
@@ -215,7 +226,7 @@ RGE_Sprite::RGE_Sprite(FILE* infile, short in_id, RGE_Sound** sounds) {
     }
 
     if (this->micro_man_sound != 0) {
-        RGE_Sound_List* allocated_sound_list = (RGE_Sound_List*) calloc((unsigned int) this->facet_num, 20);
+        RGE_Sound_List* allocated_sound_list = (RGE_Sound_List*) calloc((unsigned int) this->facet_num, sizeof(RGE_Sound_List));
 
         short i = 0;
         if (i < *facet_count) {
@@ -339,7 +350,17 @@ void RGE_Sprite::save(int outfile) {
     rge_write(outfile, &this->mirror_flag, 1);
 
     if (this->draw_list != 0) {
-        rge_write(outfile, this->draw_list, ((int) this->draw_list_num) << 4);
+        for (int i = 0; i < this->draw_list_num; ++i) {
+            short pad = 0;
+            uint32_t ptr_flag = (this->draw_list[i].sprite != 0) ? 1u : 0u;
+            rge_write(outfile, &this->draw_list[i].picture_num, 2);
+            rge_write(outfile, &pad, 2);
+            rge_write(outfile, &ptr_flag, 4);
+            rge_write(outfile, &this->draw_list[i].offset_x, 2);
+            rge_write(outfile, &this->draw_list[i].offset_y, 2);
+            rge_write(outfile, &this->draw_list[i].facet, 2);
+            rge_write(outfile, &pad, 2);
+        }
     }
 
     if (this->micro_man_sound != 0) {
@@ -563,10 +584,10 @@ unsigned char RGE_Sprite::draw(
             RGE_Color_Table* loop_color_table = player_color;
             entry_offset = 0;
             do {
-                RGE_Picture_List* entry = (RGE_Picture_List*) ((char*) this->draw_list + entry_offset);
+                RGE_Picture_List* entry = &this->draw_list[count];
                 short entry_facet = entry->facet;
                 if ((entry_facet < 0) || (entry_facet == facet)) {
-                    RGE_Sprite* sprite = *(RGE_Sprite**) ((char*) this->draw_list + entry_offset + 4);
+                    RGE_Sprite* sprite = entry->sprite;
                     int child_facet = (sprite->facet_num * facet) / (int) this->facet_num;
                     if (sprite->draw_level <= 0xa) {
                         sprite->do_draw(
@@ -581,7 +602,6 @@ unsigned char RGE_Sprite::draw(
                     }
                 }
                 count = count + 1;
-                entry_offset = entry_offset + 0x10;
             } while (count < this->draw_list_num);
         }
     }
@@ -785,16 +805,11 @@ unsigned char RGE_Sprite::get_lowest_draw_level(void) {
 
     unsigned char lowest = 0x14;
     if (count > 0) {
-        // Walks draw_list[i].sprite. A typed RGE_Picture_List cursor, with or without a sprite local,
-        // starts with lea instead of the original mov/add and moves count to edx (50 bytes).
-        char* entry = (char*) this->draw_list + 4;
-        int i = count;
-        do {
-            RGE_Sprite* sprite = *(RGE_Sprite**) (entry);
+        for (int i = 0; i < count; ++i) {
+            RGE_Sprite* sprite = this->draw_list[i].sprite;
             if (sprite->draw_level < lowest)
                 lowest = sprite->draw_level;
-            entry += 0x10;
-        } while (--i != 0);
+        }
     }
     return lowest;
 }

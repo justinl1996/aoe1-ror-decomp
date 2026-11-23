@@ -21,7 +21,9 @@ class RGE_Armor_Weapon_Info {
     short value;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_armor_weapon_info_size_check[(sizeof(RGE_Armor_Weapon_Info) == 0x04) ? 1 : -1];
+#endif
 
 // The combat master owns the fields after RGE_Master_Action_Object.
 class RGE_Master_Combat_Object : public RGE_Master_Action_Object {
@@ -71,7 +73,11 @@ class RGE_Master_Combat_Object : public RGE_Master_Action_Object {
     float orig_speed_of_attack;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char m_co_obj_combat_size_check[(sizeof(RGE_Master_Combat_Object) == 0x148) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char m_co_obj_fight_sprite_offset_check[(offsetof(RGE_Master_Combat_Object, fight_sprite) == 0xFC) ? 1 : -1];
+#endif
 
 #endif // AOE1_M_CO_OBJ_H

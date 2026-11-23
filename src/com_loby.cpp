@@ -5,11 +5,21 @@
 
 int __stdcall EnumPlayersCallbackLobby(DPID pidID, DWORD dwPlayerType, DPNAME* lpName, DWORD dwFlags, LPVOID lpContext);
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_loby_size_check[(sizeof(RGE_Lobby) == 0x1c) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_loby_session_size_check[(sizeof(DPSESSIONDESC2) == 0x50) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_loby_name_size_check[(sizeof(DPNAME) == 0x10) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_loby_connection_size_check[(sizeof(DPLCONNECTION) == 0x28) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_loby_caps_size_check[(sizeof(DPCAPS) == 0x28) ? 1 : -1];
+#endif
 
 struct LobbySystemMessage {
     DWORD type;
@@ -73,7 +83,7 @@ int __stdcall EnumPlayersCallbackLobby(DPID pidID, DWORD dwPlayerType, DPNAME* l
 }
 
 unsigned char RGE_Lobby::CheckForLobbyLaunch(IDirectPlay3*& direct_play) {
-    unsigned long dwSize = 0x29;
+    DWORD dwSize = 0x29;
     direct_play = 0;
     this->ClearLobbyInfo();
 
@@ -172,8 +182,8 @@ long RGE_Lobby::ReceiveZoneMessages(void) {
         return 0;
     }
 
-    unsigned long dwDataSize = 0x800;
-    unsigned long dwRXFlags;
+    DWORD dwDataSize = 0x800;
+    DWORD dwRXFlags;
     char Data[2048];
 
     long result = this->glpDPL->ReceiveLobbyMessage(0, 0, &dwRXFlags, Data, &dwDataSize);

@@ -68,7 +68,7 @@ void TRIBE_History_Info::load(int infile) {
     rge_read(infile, &count, 4);
 
     while (count > 0) {
-        TRIBE_History_Events* step = (TRIBE_History_Events*) calloc(1, 16);
+        TRIBE_History_Events* step = (TRIBE_History_Events*) calloc(1, sizeof(TRIBE_History_Events));
         rge_read(infile, step, 16);
         *prev_ptr = step;
         prev_ptr = &step->next;
@@ -108,7 +108,7 @@ unsigned char TRIBE_History_Info::get_history_entry(unsigned char history_type, 
 
 void TRIBE_History_Info::add_history_event(unsigned char history_event) {
     if (this->number_of_entries > 0) {
-        TRIBE_History_Events* event_node = (TRIBE_History_Events*) calloc(1, 16);
+        TRIBE_History_Events* event_node = (TRIBE_History_Events*) calloc(1, sizeof(TRIBE_History_Events));
         event_node->next = this->events;
         event_node->time = this->number_of_entries;
         event_node->world_time = rge_base_game->world->world_time;

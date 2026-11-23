@@ -26,7 +26,9 @@ class TScrollTextPanel : public TTextPanel {
     void draw_scrolled_line(void* dc, short draw_row, short text_line, unsigned long color1, unsigned long color2);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_cred_scroll_text_panel_size_check[(sizeof(TScrollTextPanel) == 0x198) ? 1 : -1];
+#endif
 
 class TRIBE_Credits_Screen : public TScreenPanel {
   public:
@@ -48,10 +50,12 @@ class TRIBE_Credits_Screen : public TScreenPanel {
     virtual long handle_idle();
     virtual void draw();
     virtual long key_down_action(long key, short count, int alt_key, int ctrl_key, int shift_key);
-    virtual long action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2);
+    virtual long action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2);
     void close_screen();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_cred_screen_size_check[(sizeof(TRIBE_Credits_Screen) == 0x8B8) ? 1 : -1];
+#endif
 
 #endif

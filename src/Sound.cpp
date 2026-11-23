@@ -19,7 +19,7 @@ RGE_Sound::RGE_Sound(_iobuf* infile, short in_id) {
     this->play_at_update_count = 0;
     fscanf(infile, "%hd", &this->sound_num);
     if (this->sound_num > 0) {
-        this->sounds = (RGE_Sound_Info*) calloc(this->sound_num, 36);
+        this->sounds = (RGE_Sound_Info*) calloc(this->sound_num, sizeof(RGE_Sound_Info));
         for (int index = 0; index < this->sound_num; index++) {
             fscanf(infile, "%d %s %hd", &this->sounds[index].resource_id, this->sounds[index].name, &this->sounds[index].percent);
             strcat(this->sounds[index].name, ".wav");
@@ -38,7 +38,7 @@ RGE_Sound::RGE_Sound(int infile, TSound_Driver* sound) {
     rge_read(infile, &this->cache_time, 4);
 
     if (this->sound_num > 0) {
-        this->sounds = (RGE_Sound_Info*) calloc(this->sound_num, 36);
+        this->sounds = (RGE_Sound_Info*) calloc(this->sound_num, sizeof(RGE_Sound_Info));
         for (int i = 0; i < this->sound_num; i++) {
             rge_read(infile, this->sounds[i].name, 13);
             rge_read(infile, &this->sounds[i].resource_id, 4);

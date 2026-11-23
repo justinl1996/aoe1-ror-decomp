@@ -11,6 +11,8 @@ class XYZPoint {
     int z;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char xyz_point_size_check[(sizeof(XYZPoint) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

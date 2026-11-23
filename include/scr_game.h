@@ -189,7 +189,7 @@ class TRIBE_Screen_Game : public TScreenPanel {
     long handle_size(long win_wid, long win_hgt);
     void handle_game_update();
     long key_down_action(long key, short count, int alt_key, int ctrl_key, int shift_key);
-    long action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2);
+    long action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2);
 
   protected:
     void do_button_action(int action_in, int action2_in, int right_btn);
@@ -305,7 +305,9 @@ class TRIBE_Screen_Game : public TScreenPanel {
     virtual void set_focus(int have_focus_in);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_game_size_check[(sizeof(TRIBE_Screen_Game) == 0x7C4) ? 1 : -1];
+#endif
 
 extern int disable_terrain_sounds;
 extern int start_paused;

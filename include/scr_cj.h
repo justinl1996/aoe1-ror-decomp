@@ -42,13 +42,15 @@ class TribeJoinScreen : public TScreenPanel {
     virtual ~TribeJoinScreen();
     virtual long handle_idle();
     virtual long handle_user_command(unsigned int wParam, long lParam);
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
 
   protected:
     void fillList();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_cj_join_screen_size_check[(sizeof(TribeJoinScreen) == 0x4B0) ? 1 : -1];
+#endif
 
 class TribeMPCreateDialog : public TDialogPanel {
   protected:
@@ -63,9 +65,11 @@ class TribeMPCreateDialog : public TDialogPanel {
     TribeMPCreateDialog(TPanel* parentPanel);
 
   protected:
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_cj_create_dialog_size_check[(sizeof(TribeMPCreateDialog) == 0x4A4) ? 1 : -1];
+#endif
 
 #endif

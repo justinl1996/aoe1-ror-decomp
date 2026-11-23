@@ -26,6 +26,8 @@ class TChat {
     int RestartSoundSystem(TSound_Driver* driver);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char chat_size_check[(sizeof(TChat) == 0x100) ? 1 : -1];
+#endif
 
 #endif

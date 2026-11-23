@@ -404,7 +404,7 @@ TribeConfigDialog::~TribeConfigDialog() {
     this->delete_panel((TPanel**) &this->cancelButton);
 }
 
-long TribeConfigDialog::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeConfigDialog::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel != 0) {
         if (fromPanel == this->okButton && actionIn == 1) {
             if (this->modeValue == InGame) {

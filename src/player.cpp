@@ -1,5 +1,6 @@
 // This file owns the complete Player source body order.
 #include "../include/player.h"
+#include "../include/rge_fio.h"
 #include "../include/program_mode.h"
 #include "../include/world.h"
 #include "../include/mst_play.h"
@@ -38,8 +39,6 @@ struct vc5_phase_3;
 struct vc5_phase_4;
 
 extern int pathingCapValue;
-void rge_read(int file, void* buffer, int size);
-void rge_write(int file, void* buffer, int size);
 
 struct Selection_Locals {
     int list_count;
@@ -81,7 +80,7 @@ RGE_Player::RGE_Player(int infile, RGE_Game_World* gworld, unsigned char this_id
 
     rge_read(infile, &this->attribute_num, 2);
     if (this->attribute_num > 0) {
-        this->attributes = (float*) calloc((int) this->attribute_num, 4);
+        this->attributes = (float*) calloc((int) this->attribute_num, sizeof(float));
         rge_read(infile, this->attributes, (int) this->attribute_num << 2);
     } else {
         this->attributes = 0;
@@ -144,7 +143,7 @@ RGE_Player::RGE_Player(
 
     this->master_object_num = prototype->master_object_num;
     if (this->master_object_num > 0) {
-        this->master_objects = (RGE_Master_Static_Object**) calloc((int) this->master_object_num, 4);
+        this->master_objects = (RGE_Master_Static_Object**) calloc((int) this->master_object_num, sizeof(RGE_Master_Static_Object*));
         for (short i = 0; i < this->master_object_num; ++i) {
             if (prototype->master_objects[i] != 0) {
                 this->master_objects[i] = prototype->master_objects[i]->make_new_master();
@@ -170,7 +169,7 @@ RGE_Player::RGE_Player(
 
     this->attribute_num = prototype->attribute_num;
     if (this->attribute_num > 0) {
-        this->attributes = (float*) calloc((int) this->attribute_num, 4);
+        this->attributes = (float*) calloc((int) this->attribute_num, sizeof(float));
         memcpy(this->attributes, prototype->attributes, (int) this->attribute_num * 4);
     } else {
         this->attributes = 0;
@@ -466,11 +465,15 @@ void RGE_Player::incrementPathingAttempts() {
     this->currentUpdatePathingAttemptsValue++;
 }
 
+#include <stdarg.h>
+
 void __cdecl RGE_Player::sendChatMessage(int playerID, int copySelf, char* textIn, ...) {
     char textOut[1025];
 
-    // The cdecl varargs begin after textIn on the stack.
-    vsprintf(textOut, textIn, (char*) (&textIn + 1));
+    va_list ap;
+    va_start(ap, textIn);
+    vsprintf(textOut, textIn, ap);
+    va_end(ap);
 
     int i;
 
@@ -722,7 +725,7 @@ void RGE_Player::load(int infile) {
     rge_read(infile, &this->master_object_num, 2);
 
     if (this->master_object_num > 0) {
-        this->master_objects = (RGE_Master_Static_Object**) calloc((int) this->master_object_num, 4);
+        this->master_objects = (RGE_Master_Static_Object**) calloc((int) this->master_object_num, sizeof(RGE_Master_Static_Object*));
         rge_read(infile, this->master_objects, (int) this->master_object_num * 4);
 
         for (short i = 0; i < this->master_object_num; ++i) {
@@ -951,10 +954,7 @@ void RGE_Player::save2(int outfile) {
     if (0 < *master_object_count) {
         int i = 0;
         while (i < *master_object_count) {
-            outfile = (int) this->master_objects[i];
-            if (outfile != 0) {
-                outfile = 1;
-            }
+            outfile = (this->master_objects[i] != 0) ? 1 : 0;
             rge_write(save_file, &outfile, 4);
             ++i;
         }
@@ -1664,7 +1664,7 @@ unsigned char RGE_Player::get_selected_objects_to_command(
         return 0;
     }
 
-    locals.list = (RGE_Static_Object**) calloc(4, (unsigned int) player->sel_count);
+    locals.list = (RGE_Static_Object**) calloc((unsigned int) player->sel_count, sizeof(RGE_Static_Object*));
     if (min_select_level == -1) {
         min_select_level = 4;
     }
@@ -2017,13 +2017,13 @@ void RGE_Tile_List::del_list(void) {
     if (this->collapse_list != 0) {
         free(this->list);
         this->list_size = 8;
-        this->list = (RGE_Tile_List_Node*) calloc(8, 8);
+        this->list = (RGE_Tile_List_Node*) calloc(8, sizeof(RGE_Tile_List_Node));
         this->collapse_list = 0;
     }
 }
 
 RGE_Tile_List::RGE_Tile_List(int Initial_Size) {
-    this->list = (RGE_Tile_List_Node*) calloc(Initial_Size, 8);
+    this->list = (RGE_Tile_List_Node*) calloc(Initial_Size, sizeof(RGE_Tile_List_Node));
     this->list_size = Initial_Size;
     this->num_active = 0;
     this->new_count = 0;

@@ -31,6 +31,8 @@ class CCDAudio {
     unsigned long DisplayErrorMsg(unsigned long dwError);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char cdaudio_size_check[(sizeof(CCDAudio) == 0x18) ? 1 : -1];
+#endif
 
 #endif

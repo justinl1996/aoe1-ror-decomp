@@ -23,6 +23,8 @@ class AIPlayPhase {
     void initialize();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char ai_play_phase_size_check[(sizeof(AIPlayPhase) == 0x8C) ? 1 : -1];
+#endif
 
 #endif

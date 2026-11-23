@@ -480,7 +480,7 @@ long TribeGameSettingsScreen::handle_user_command(unsigned int wParam, long lPar
     return this->TPanel::handle_user_command(wParam, lParam);
 }
 
-long TribeGameSettingsScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeGameSettingsScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel == 0)
         goto def;
 
@@ -574,8 +574,8 @@ void TribeGameSettingsScreen::fillScenarios() {
             i++;
         }
 
-        this->scenarioMission = (char**) calloc(this->scenarioCount, 4);
-        this->scenarioFixed = (int*) calloc(this->scenarioCount, 4);
+        this->scenarioMission = (char**) calloc(this->scenarioCount, sizeof(char*));
+        this->scenarioFixed = (int*) calloc(this->scenarioCount, sizeof(int));
 
         if (this->scenarioMission != 0 && this->scenarioFixed != 0) {
             i = 0;

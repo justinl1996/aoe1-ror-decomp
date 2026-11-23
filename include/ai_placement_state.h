@@ -20,6 +20,8 @@ struct PlacementState {
     BuildItem* buildItem;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char ai_placement_state_size_check[(sizeof(PlacementState) == 0x130) ? 1 : -1];
+#endif
 
 #endif

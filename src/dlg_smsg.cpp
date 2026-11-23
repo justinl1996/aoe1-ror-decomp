@@ -189,7 +189,7 @@ TribeSendMessageDialog::~TribeSendMessageDialog() {
     delete this->backgroundPics;
 }
 
-long TribeSendMessageDialog::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeSendMessageDialog::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     char save_msg[66];
 
     if (fromPanel != 0) {
@@ -390,7 +390,7 @@ TribeSendQuickMessageDialog::~TribeSendQuickMessageDialog() {
     delete this->chatTitle;
 }
 
-long TribeSendQuickMessageDialog::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeSendQuickMessageDialog::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     char save_msg[66];
 
     if (fromPanel != 0 && fromPanel == this->chatInput) {

@@ -49,8 +49,12 @@ class RGE_Pick_Obj_Info {
     short draw_y;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char view_pick_info_size_check[(sizeof(RGE_Pick_Info) == 0x14) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char view_pick_object_info_size_check[(sizeof(RGE_Pick_Obj_Info) == 0x0C) ? 1 : -1];
+#endif
 
 extern RGE_Pick_Obj_Info Picked_Objects[];
 
@@ -78,7 +82,9 @@ class DClipInfo_Node {
     short y4;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char view_clip_node_size_check[(sizeof(DClipInfo_Node) == 0x40) ? 1 : -1];
+#endif
 
 class DClipInfo_List {
   private:
@@ -138,7 +144,9 @@ class DClipInfo_List {
     void InitNewZone(int Zone_Size);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char view_clip_list_size_check[(sizeof(DClipInfo_List) == 0x70) ? 1 : -1];
+#endif
 
 extern DClipInfo_List* SDI_List;
 extern int SDI_Capture_Info;
@@ -354,6 +362,8 @@ class RGE_View : public TPanel {
     int get_tile_mask_num(int map_col, int map_row, int map_width, int map_height, unsigned long VisibleMask);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char view_size_check[(sizeof(RGE_View) == 0x360) ? 1 : -1];
+#endif
 
 #endif

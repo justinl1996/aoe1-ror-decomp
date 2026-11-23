@@ -16,11 +16,19 @@ struct PAL_TABLE {
     unsigned char reserved;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dib_palette_table_size_check[(sizeof(PAL_TABLE) == 8) ? 1 : -1];
+#endif
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dib_bitmap_info_256_size_check[(sizeof(BITMAPINFO256) == 0x428) ? 1 : -1];
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dib_line_info_size_check[(sizeof(LINEINFO) == 0x10) ? 1 : -1];
+#endif
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dib_trans_info_line_offset_check[(sizeof(TRANSINFO) == 0x18) ? 1 : -1];
+#endif
 
 void __cdecl DibBlt(
     BITMAPINFO256* DestInfo, uchar* DestBits, RECT* ClipRect, long DestX, long DestY, long DestWid, long DestHgt,
@@ -32,8 +40,8 @@ void __cdecl TransDibBlt(
     int Mirror, int Flip, int TransColor
 );
 int __cdecl ClipDibBlt(
-    BITMAPINFO256* DestInfo, RECT* ClipRect, LONG& DestX, LONG& DestY, LONG& DestWid, LONG& DestHgt, LONG& SrcX, LONG& SrcY,
-    LONG& SrcWid, LONG& SrcHgt, int Mirror, int Flip
+    BITMAPINFO256* DestInfo, RECT* ClipRect, long& DestX, long& DestY, long& DestWid, long& DestHgt, long& SrcX, long& SrcY,
+    long& SrcWid, long& SrcHgt, int Mirror, int Flip
 );
 void __cdecl GetDibDim(BITMAPINFO256* Info, long& TotWid, long& TotHgt, long& Orien);
 long __cdecl TileDibBlt(

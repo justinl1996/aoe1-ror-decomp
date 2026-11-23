@@ -21,7 +21,11 @@ class TRIBE_Action_Build : public RGE_Action {
     virtual int work(RGE_Static_Object* obj_in, float x, float y, float z);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tact_bld_action_size[(sizeof(RGE_Action) == 0x40) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tact_bld_build_size[(sizeof(TRIBE_Action_Build) == 0x40) ? 1 : -1];
+#endif
 
 #endif // AOE1_TACT_BLD_H

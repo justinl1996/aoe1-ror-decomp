@@ -36,11 +36,13 @@ class TRIBE_Screen_Name : public TScreenPanel {
     void setup_tab_order();
 
   public:
-    virtual long action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2);
+    virtual long action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2);
     virtual long handle_idle();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_name_screen_size_check[(sizeof(TRIBE_Screen_Name) == 0x4A0) ? 1 : -1];
+#endif
 
 class TRIBE_Dialog_Name : public TDialogPanel {
   public:
@@ -52,10 +54,12 @@ class TRIBE_Dialog_Name : public TDialogPanel {
 
     TRIBE_Dialog_Name(TScreenPanel* parent_panel_in);
     virtual ~TRIBE_Dialog_Name();
-    long action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2);
+    long action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2);
     virtual long wnd_proc(void* hwnd, unsigned int msg, unsigned int wParam, long lParam);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_name_dialog_size_check[(sizeof(TRIBE_Dialog_Name) == 0x4A4) ? 1 : -1];
+#endif
 
 #endif

@@ -105,14 +105,16 @@ class TribeMPSetupScreen : public TScreenPanel {
   public:
     virtual long handle_idle();
     virtual long key_down_action(long key, short count, int alt_key, int ctrl_key, int shift_key);
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     virtual long handle_user_command(unsigned int wParam, long lParam);
     virtual long handle_timer_command(unsigned int wParam, long lParam);
     void fillPlayers();
     void updateSummary();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_mps_setup_screen_size_check[(sizeof(TribeMPSetupScreen) == 0x890) ? 1 : -1];
+#endif
 
 class TRIBE_Screen_Wait : public TScreenPanel {
   public:
@@ -126,11 +128,13 @@ class TRIBE_Screen_Wait : public TScreenPanel {
     virtual ~TRIBE_Screen_Wait();
     void set_text(char* message_in);
     void set_text(long message_in);
-    virtual long action(TPanel* from_panel, long action_in, unsigned long val1, unsigned long val2);
+    virtual long action(TPanel* from_panel, long action_in, uintptr_t val1, uintptr_t val2);
     virtual long handle_idle();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_mps_wait_screen_size_check[(sizeof(TRIBE_Screen_Wait) == 0x4D8) ? 1 : -1];
+#endif
 
 class TRIBE_Screen_Disconnect : public TScreenPanel {
   public:
@@ -143,10 +147,12 @@ class TRIBE_Screen_Disconnect : public TScreenPanel {
     virtual ~TRIBE_Screen_Disconnect();
     void set_text(char* message_in);
     void set_text(long message_in);
-    virtual long action(TPanel* from_panel, long action_in, unsigned long val1, unsigned long val2);
+    virtual long action(TPanel* from_panel, long action_in, uintptr_t val1, uintptr_t val2);
     virtual long handle_idle();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_mps_disconnect_screen_size_check[(sizeof(TRIBE_Screen_Disconnect) == 0x488) ? 1 : -1];
+#endif
 
 #endif

@@ -1,4 +1,5 @@
 #include "../include/aipbook.h"
+#include "../include/rge_fio.h"
 #include "../include/stat_obj.h"
 #include "../include/world.h"
 #include <stdio.h>
@@ -33,8 +34,6 @@ static char s_format_percent_s_space[] = "%s ";
 static char s_format_skip_string_int[] = "%*s %d ";
 static char s_format_skip_string_string[] = "%*s %s ";
 
-extern void rge_read(int file, void* data, int size);
-extern void rge_write(int file, void* data, int size);
 
 extern char s_empty_string[];
 

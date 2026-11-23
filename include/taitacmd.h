@@ -239,7 +239,11 @@ class TribeTacticalAIModule : public TacticalAIModule {
     int numberWaterExplorers();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taitacmd_verify_group_size[sizeof(TacticalAIGroup) == 0x330 ? 1 : -1];
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taitacmd_verify_module_size[sizeof(TribeTacticalAIModule) == 0x100C ? 1 : -1];
+#endif
+#endif
 
 #endif

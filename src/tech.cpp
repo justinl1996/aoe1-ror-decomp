@@ -1,4 +1,5 @@
 #include "../include/tech.h"
+#include "../include/rge_fio.h"
 #include "../include/game_globals.h"
 #include "../include/effects.h"
 #include "../include/t_histry.h"
@@ -12,8 +13,6 @@
 #pragma warning(disable : 4035 4805)
 
 void __cdecl getstring(char** destination, char* source);
-void __cdecl rge_read(int file, void* data, int size);
-void __cdecl rge_write(int file, void* data, int size);
 
 TRIBE_Tech::TRIBE_Tech(int file, TRIBE_World* world_arg) {
     short i;
@@ -21,7 +20,7 @@ TRIBE_Tech::TRIBE_Tech(int file, TRIBE_World* world_arg) {
     this->world = world_arg;
     rge_read(file, &this->tech_tree_num, 2);
     if (this->tech_tree_num > 0) {
-        this->tech_tree = (Tech_Tree*) calloc(60, this->tech_tree_num);
+        this->tech_tree = (Tech_Tree*) calloc(this->tech_tree_num, sizeof(Tech_Tree));
         for (i = 0; i < this->tech_tree_num; i++) {
             short j;
             for (j = 0; j < 4; j++) {
@@ -74,7 +73,7 @@ TRIBE_Tech::TRIBE_Tech(char* filename) {
             if (this->tech_tree_num > 0) {
                 char name_buf[0x64];
                 short i;
-                this->tech_tree = (Tech_Tree*) calloc(60, this->tech_tree_num);
+                this->tech_tree = (Tech_Tree*) calloc(this->tech_tree_num, sizeof(Tech_Tree));
                 for (i = 0; i < file_count; i++) {
                     short j;
                     short tech_id;
@@ -210,7 +209,7 @@ TRIBE_Player_Tech::TRIBE_Player_Tech(int file, TRIBE_Tech* tech, RGE_Player* pla
     this->base_tech = tech;
     this->owner = player;
     if (0 < this->tech_player_tree_num) {
-        this->tech_player_tree = (Tech_Player_Tree*) calloc(8, this->tech_player_tree_num);
+        this->tech_player_tree = (Tech_Player_Tree*) calloc(this->tech_player_tree_num, sizeof(Tech_Player_Tree));
 
         for (i = 0; i < this->tech_player_tree_num; i++) {
             if (save_game_version <= 7.03f) {
@@ -237,7 +236,7 @@ TRIBE_Player_Tech::TRIBE_Player_Tech(TRIBE_Tech* tech, RGE_Player* player, unsig
     this->owner = player;
     this->tech_player_tree_num = tech->tech_tree_num;
     if (0 < this->tech_player_tree_num) {
-        this->tech_player_tree = (Tech_Player_Tree*) calloc(8, this->tech_player_tree_num);
+        this->tech_player_tree = (Tech_Player_Tree*) calloc(this->tech_player_tree_num, sizeof(Tech_Player_Tree));
     }
     if (load) {
         check_for_new_tech();

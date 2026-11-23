@@ -57,7 +57,7 @@ class TTextPanel : public TPanel {
     virtual void draw();
     virtual long mouse_left_down_action(long, long, int, int);
     virtual long key_down_action(long, short, int, int, int);
-    virtual long action(TPanel*, long, unsigned long, unsigned long);
+    virtual long action(TPanel*, long, uintptr_t, uintptr_t);
     virtual void set_text(char*);
     virtual void set_text(long);
     virtual void set_text(char**, short);
@@ -176,8 +176,12 @@ class TTextPanel : public TPanel {
     int spacer_size;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_lst_textnode_size_check[(sizeof(TTextPanel::TextNode) == 0x10) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_lst_ttextpanel_size_check[(sizeof(TTextPanel) == 0x188) ? 1 : -1];
+#endif
 
 class TListPanel : public TTextPanel {
   public:
@@ -192,7 +196,7 @@ class TListPanel : public TTextPanel {
     virtual long mouse_left_dbl_click_action(long, long, int, int);
     virtual long key_down_action(long, short, int, int, int);
     virtual long char_action(long, short);
-    virtual long action(TPanel*, long, unsigned long, unsigned long);
+    virtual long action(TPanel*, long, uintptr_t, uintptr_t);
     virtual void set_focus(int);
     virtual void set_bevel_info(int, int, int, int, int, int, int);
 
@@ -211,6 +215,8 @@ class TListPanel : public TTextPanel {
     void draw_highlight_bar();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_lst_tlistpanel_size_check[(sizeof(TListPanel) == 0x1A0) ? 1 : -1];
+#endif
 
 #endif

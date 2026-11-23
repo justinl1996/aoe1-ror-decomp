@@ -93,7 +93,9 @@ struct TRIBE_Cliff_Higher_Check_Record {
     float line_y2;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_cliff_higher_check_record_size_check[(sizeof(TRIBE_Cliff_Higher_Check_Record) == 0x20) ? 1 : -1];
+#endif
 
 extern long world_update_counter;
 extern int computerPlayerSetup[13];

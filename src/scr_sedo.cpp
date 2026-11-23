@@ -126,7 +126,7 @@ void TRIBE_Screen_Sed_Open::fillList() {
 
 // The action keeps the shipped delete, open, panel-transition,
 // cleanup, and return paths in their original order.
-long TRIBE_Screen_Sed_Open::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TRIBE_Screen_Sed_Open::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     char fileName[260];
     char* line;
     RGE_Prog_Info* prog_info;

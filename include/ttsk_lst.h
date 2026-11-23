@@ -13,6 +13,8 @@ class TRIBE_Task_List : public RGE_Task_List {
     virtual int is_attack_task(RGE_Task* task);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_task_list_size_check[(sizeof(TRIBE_Task_List) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

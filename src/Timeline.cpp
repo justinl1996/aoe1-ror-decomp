@@ -309,7 +309,7 @@ RGE_Time_Entry* RGE_Timeline::add(float time) {
     node = this->time_list;
     prev = &this->time_list;
     if (node == 0) {
-        node = (RGE_Time_Entry*) calloc(1, 48);
+        node = (RGE_Time_Entry*) calloc(1, sizeof(RGE_Time_Entry));
         *prev = node;
         node->time = time;
         this->list_num++;
@@ -318,7 +318,7 @@ RGE_Time_Entry* RGE_Timeline::add(float time) {
 
     while (node != 0) {
         if (node->time > time) {
-            RGE_Time_Entry* new_node = (RGE_Time_Entry*) calloc(1, 48);
+            RGE_Time_Entry* new_node = (RGE_Time_Entry*) calloc(1, sizeof(RGE_Time_Entry));
             new_node->time = time;
             new_node->next = node;
             *prev = new_node;
@@ -330,7 +330,7 @@ RGE_Time_Entry* RGE_Timeline::add(float time) {
     }
 
     {
-        node = (RGE_Time_Entry*) calloc(1, 48);
+        node = (RGE_Time_Entry*) calloc(1, sizeof(RGE_Time_Entry));
         RGE_Time_Entry** node_next = &node->next;
         node->time = time;
         *node_next = 0;

@@ -54,7 +54,11 @@ class RGE_Zone_Map_List {
     void delete_zone_maps();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_zone_map_size_check[(sizeof(RGE_Zone_Map) == 0x51C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_zone_map_list_size_check[(sizeof(RGE_Zone_Map_List) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

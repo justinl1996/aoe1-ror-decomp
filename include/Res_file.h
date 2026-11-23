@@ -2,6 +2,7 @@
 #define AOE1_RES_FILE_H
 
 #include <stdio.h>
+#include <stdint.h>
 
 class ResFileHdr;
 class resfile_header;
@@ -17,32 +18,38 @@ class ResFileHdr {
 
 class resfile_header {
   public:
-    char banner_msg[40]; // +0x00
-    char version[4];     // +0x28
-    char password[12];   // +0x2C
-    int num_res_types;   // +0x38
-    int directory_size;  // +0x3C
+    char banner_msg[40];  // +0x00
+    char version[4];      // +0x28
+    char password[12];    // +0x2C
+    int32_t num_res_types;  // +0x38
+    int32_t directory_size; // +0x3C
 };
 
 class resfile_type_dir_node {
   public:
-    unsigned long type; // +0x00
-    long dirOffset;     // +0x04
-    long numID;         // +0x08
+    uint32_t type;     // +0x00
+    int32_t dirOffset; // +0x04
+    int32_t numID;     // +0x08
 };
 
 class resfile_id_dir_node {
   public:
-    unsigned long id; // +0x00
-    long itemOffset;  // +0x04
-    long itemSize;    // +0x08
+    uint32_t id;        // +0x00
+    int32_t itemOffset; // +0x04
+    int32_t itemSize;   // +0x08
 };
 
 class res_file_type_info {
   public:
-    char extension[4];   // +0x00
-    unsigned long rType; // +0x04
+    char extension[4]; // +0x00
+    uint32_t rType;    // +0x04
 };
+
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
+typedef char resfile_header_bin_check[(sizeof(resfile_header) == 0x40) ? 1 : -1];
+typedef char resfile_type_dir_bin_check[(sizeof(resfile_type_dir_node) == 0x0C) ? 1 : -1];
+#endif
+typedef char resfile_id_dir_bin_check[(sizeof(resfile_id_dir_node) == 0x0C) ? 1 : -1];
 
 class BuildRes_type_node;
 class BuildRes_id_node;

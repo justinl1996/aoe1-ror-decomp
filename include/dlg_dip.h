@@ -22,7 +22,7 @@ class TribeDiplomacyDialog : public TDialogPanel {
     virtual ~TribeDiplomacyDialog();
 
   protected:
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
 
   public:
     TTextPanel* title[8];
@@ -67,6 +67,8 @@ class TribeDiplomacyDialog : public TDialogPanel {
     virtual void draw();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dlg_dip_dialog_size_check[(sizeof(TribeDiplomacyDialog) == 0x6B8) ? 1 : -1];
+#endif
 
 #endif

@@ -36,9 +36,15 @@ struct RGE_Object_Info {
     long land_num;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_object_info_line_size_check[(sizeof(RGE_Object_Info_Line) == 0x30) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_land_point_info_line_size_check[(sizeof(RGE_Land_Point_Info_Line) == 0x10) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_object_info_size_check[(sizeof(RGE_Object_Info) == 0x18C8) ? 1 : -1];
+#endif
 
 class RGE_RMM_Object_Generator : public RGE_Random_Map_Module {
   protected:

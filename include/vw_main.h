@@ -61,7 +61,9 @@ class RGE_Main_View : public RGE_View {
     RGE_Player* save_player;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char vw_main_main_view_size_check[(sizeof(RGE_Main_View) == 0x380) ? 1 : -1];
+#endif
 
 // tvw_main.cpp owns the derived game-view input and wall-placement methods.
 // The base layout and virtual surface remain owned by vw_main.cpp/view.cpp.
@@ -82,6 +84,8 @@ class TRIBE_Main_View : public RGE_Main_View {
     void place_line_of_walls(TRIBE_Player* player, TRIBE_Master_Building_Object* master_obj, int x1, int y1, int x2, int y2);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char vw_main_tribe_main_view_size_check[(sizeof(TRIBE_Main_View) == 0x380) ? 1 : -1];
+#endif
 
 #endif

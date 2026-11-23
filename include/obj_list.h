@@ -52,7 +52,11 @@ class RGE_Object_List {
     void rehook_list();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char object_node_size_check[(sizeof(RGE_Object_Node) == 0x10) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char object_list_size_check[(sizeof(RGE_Object_List) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

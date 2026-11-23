@@ -35,6 +35,8 @@ class TDebuggingLog {
     char* YesOrNo(int TorF);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char debuglog_TDebuggingLog_size_check[(sizeof(TDebuggingLog) == 0x7B0) ? 1 : -1];
+#endif
 
 #endif

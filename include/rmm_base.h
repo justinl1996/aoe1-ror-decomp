@@ -70,7 +70,11 @@ class RGE_Random_Map_Module {
     virtual uchar generate();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rmm_base_module_size_check[(sizeof(RGE_Random_Map_Module) == 0x30) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rmm_base_stack_size_check[(sizeof(Map_Stack) == 0x18) ? 1 : -1];
+#endif
 
 #endif

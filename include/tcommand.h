@@ -38,7 +38,9 @@ struct TRIBE_Command_Header {
     unsigned char command;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_header_size_check[(sizeof(TRIBE_Command_Header) == 0x01) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Make {
     unsigned char command;
@@ -48,7 +50,9 @@ struct TRIBE_Command_Make {
     int unique_id;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_make_size_check[(sizeof(TRIBE_Command_Make) == 0x10) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Research {
     unsigned char command;
@@ -58,7 +62,9 @@ struct TRIBE_Command_Research {
     int unique_id;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_research_size_check[(sizeof(TRIBE_Command_Research) == 0x10) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Build {
     unsigned char command;
@@ -70,7 +76,9 @@ struct TRIBE_Command_Build {
     int unique_id;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_build_size_check[(sizeof(TRIBE_Command_Build) == 0x14) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Build_Wall {
     unsigned char command;
@@ -84,7 +92,9 @@ struct TRIBE_Command_Build_Wall {
     int unique_id;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_build_wall_size_check[(sizeof(TRIBE_Command_Build_Wall) == 0x10) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Explore {
     unsigned char command;
@@ -94,7 +104,9 @@ struct TRIBE_Command_Explore {
     float targetYPosition;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_explore_size_check[(sizeof(TRIBE_Command_Explore) == 0x0C) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Game {
     unsigned char command;
@@ -105,14 +117,18 @@ struct TRIBE_Command_Game {
     short var4;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_game_size_check[(sizeof(TRIBE_Command_Game) == 0x10) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Cancel_Build {
     unsigned char command;
     int unit_id;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_cancel_build_size_check[(sizeof(TRIBE_Command_Cancel_Build) == 0x08) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Attack_Ground {
     unsigned char command;
@@ -121,7 +137,9 @@ struct TRIBE_Command_Attack_Ground {
     float location_y;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_attack_ground_size_check[(sizeof(TRIBE_Command_Attack_Ground) == 0x0C) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Give_Attribute {
     unsigned char command;
@@ -132,7 +150,9 @@ struct TRIBE_Command_Give_Attribute {
     float attr_cost;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_give_attribute_size_check[(sizeof(TRIBE_Command_Give_Attribute) == 0x0C) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Trade_Attribute {
     unsigned char command;
@@ -140,7 +160,9 @@ struct TRIBE_Command_Trade_Attribute {
     long attribute;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_trade_attribute_size_check[(sizeof(TRIBE_Command_Trade_Attribute) == 0x08) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Repair {
     unsigned char command;
@@ -148,7 +170,9 @@ struct TRIBE_Command_Repair {
     RGE_Obj_Info target;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_repair_size_check[(sizeof(TRIBE_Command_Repair) == 0x08) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Unload {
     unsigned char command;
@@ -157,7 +181,9 @@ struct TRIBE_Command_Unload {
     float location_y;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_unload_size_check[(sizeof(TRIBE_Command_Unload) == 0x0C) ? 1 : -1];
+#endif
 
 struct TRIBE_Command_Queue {
     unsigned char command;
@@ -166,7 +192,9 @@ struct TRIBE_Command_Queue {
     short train_count;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_queue_size_check[(sizeof(TRIBE_Command_Queue) == 0x0C) ? 1 : -1];
+#endif
 
 class TRIBE_Command : public RGE_Command {
   public:
@@ -221,6 +249,8 @@ class TRIBE_Command : public RGE_Command {
     void command_queue(RGE_Static_Object* bldg_obj, short train_id, short train_count);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_command_size_check[(sizeof(TRIBE_Command) == 0x18) ? 1 : -1];
+#endif
 
 #endif // AOE1_TCOMMAND_H

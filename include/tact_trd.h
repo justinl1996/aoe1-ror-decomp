@@ -30,4 +30,6 @@ class TRIBE_Action_Trade : public RGE_Action {
     float pick_up_y;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tact_trd_action_trade_size_check[(sizeof(TRIBE_Action_Trade) == 0x48) ? 1 : -1];
+#endif

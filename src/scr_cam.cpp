@@ -302,8 +302,8 @@ void TRIBE_Campaign_Editor_Screen::make_campaign() {
             addstring(&text, campaign_filename, ".cpx");
             count = this->campaign_scenarios->numberLines();
             if (count > 0) {
-                scenarios_text = (char**) calloc(count, 4);
-                scenarios_filenames = (char**) calloc(count, 4);
+                scenarios_text = (char**) calloc(count, sizeof(char*));
+                scenarios_filenames = (char**) calloc(count, sizeof(char*));
                 for (i = 0; i < count; ++i) {
                     getstring(&scenarios_text[i], this->campaign_scenarios->get_text(i));
                     getstring(&scenarios_filenames[i], this->campaign_scenarios->get_text(i));
@@ -405,7 +405,7 @@ void TRIBE_Campaign_Editor_Screen::move_scenario_down() {
     }
 }
 
-long TRIBE_Campaign_Editor_Screen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TRIBE_Campaign_Editor_Screen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     char str[256];
     char text[300];
 

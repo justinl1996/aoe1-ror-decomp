@@ -1,6 +1,7 @@
 #ifndef AOE1_TSCENARO_H
 #define AOE1_TSCENARO_H
 
+#include <stdint.h>
 #include "scenario.h"
 
 typedef unsigned char uchar;
@@ -43,9 +44,11 @@ struct SP_Victory_Info {
     int AttribType;
     int obj_ID;
     int dest_obj_ID;
-    void* obj;
-    void* dest_obj;
+    uint32_t obj;
+    uint32_t dest_obj;
 };
+
+typedef char sp_victory_info_size_check[(sizeof(SP_Victory_Info) == 60) ? 1 : -1];
 
 class T_Scenario : public RGE_Scenario {
   private:
@@ -161,6 +164,8 @@ class TRIBE_Scenario_Header : public RGE_Scenario_Header {
     virtual void save(int outfile);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char t_scenario_size_check[(sizeof(T_Scenario) == 0x514C) ? 1 : -1];
+#endif
 
 #endif

@@ -13,7 +13,9 @@ class Attribute_Cost {
     unsigned char flag;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tm_co_ob_attribute_cost_size[(sizeof(Attribute_Cost) == 0x06) ? 1 : -1];
+#endif
 
 class TRIBE_Master_Combat_Object : public RGE_Master_Combat_Object {
   public:
@@ -45,7 +47,11 @@ class TRIBE_Master_Combat_Object : public RGE_Master_Combat_Object {
     virtual RGE_Task_List* create_task_list();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tm_co_ob_build_pts_required_offset[(offsetof(TRIBE_Master_Combat_Object, build_pts_required) == 0x15A) ? 1 : -1];
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tm_co_ob_tribe_size[(sizeof(TRIBE_Master_Combat_Object) == 0x164) ? 1 : -1];
+#endif
+#endif
 
 #endif // AOE1_TM_CO_OB_H

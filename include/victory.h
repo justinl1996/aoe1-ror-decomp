@@ -42,8 +42,12 @@ struct RGE_Victory_Point_Entry {
     RGE_Victory_Point_Entry* next; // +0x18
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_victory_entry_size_check[(sizeof(RGE_Victory_Entry) == 0x34) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_victory_point_entry_size_check[(sizeof(RGE_Victory_Point_Entry) == 0x1C) ? 1 : -1];
+#endif
 
 class RGE_Victory_Conditions {
   protected:
@@ -126,7 +130,9 @@ class RGE_Victory_Conditions {
     long tot_victory_points;                     // +0x1C
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_victory_conditions_size_check[(sizeof(RGE_Victory_Conditions) == 0x20) ? 1 : -1];
+#endif
 
 typedef RGE_Victory_Point_Entry VP_Entry;
 

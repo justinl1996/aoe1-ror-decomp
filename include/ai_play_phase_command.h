@@ -67,6 +67,8 @@ class AIPlayPhaseCommand {
     char* convertToNameType(unsigned char t) const;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char ai_play_phase_command_size_check[(sizeof(AIPlayPhaseCommand) == 0x10) ? 1 : -1];
+#endif
 
 #endif

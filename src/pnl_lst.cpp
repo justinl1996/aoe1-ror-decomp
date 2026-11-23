@@ -236,7 +236,7 @@ found:
     return 1;
 }
 
-long TListPanel::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TListPanel::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     return TTextPanel::action(from_panel, action_in, action_val1, action_val2);
 }
 

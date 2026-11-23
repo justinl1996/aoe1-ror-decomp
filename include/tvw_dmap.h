@@ -18,6 +18,8 @@ class TRIBE_Diamond_Map_View : public RGE_Diamond_Map_View {
     virtual void draw_object(short col, short row, unsigned char color, short size, RGE_Static_Object* game_obj);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tvw_dmap_view_size_check[(sizeof(TRIBE_Diamond_Map_View) == 0x174) ? 1 : -1];
+#endif
 
 #endif

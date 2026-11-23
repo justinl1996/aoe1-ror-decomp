@@ -1,6 +1,8 @@
 #ifndef AOE1_TAIINF_RECORDS_H
 #define AOE1_TAIINF_RECORDS_H
 
+#include <stdint.h>
+
 struct ObjectMemory {
     int id;
     short type;
@@ -35,7 +37,7 @@ struct AttackMemory {
     unsigned char targetOwner;
     short kills;
     unsigned char success;
-    unsigned long timeStamp;
+    uint32_t timeStamp;
     int play;
 };
 
@@ -58,10 +60,20 @@ struct ResourceMemory {
     int dropsiteID;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taiinf_object_memory_size[(sizeof(ObjectMemory) == 0x24) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taiinf_building_lot_size[(sizeof(BuildingLot) == 0x08) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taiinf_attack_memory_size[(sizeof(AttackMemory) == 0x18) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taiinf_quadrant_log_size[(sizeof(QuadrantLog) == 0x0C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char taiinf_resource_memory_size[(sizeof(ResourceMemory) == 0x14) ? 1 : -1];
+#endif
 
 #endif

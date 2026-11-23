@@ -30,8 +30,12 @@ class ResourceItem {
     int sortLarge();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char airesitm_resource_item_size[(sizeof(ResourceItem) == 0x70) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char airesitm_resource_item_pointer_width[(sizeof(void*) == 4) ? 1 : -1];
+#endif
 
 int operator==(const ResourceItem& one, const ResourceItem& two);
 int operator!=(const ResourceItem& one, const ResourceItem& two);

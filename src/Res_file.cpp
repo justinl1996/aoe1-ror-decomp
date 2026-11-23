@@ -27,15 +27,15 @@ void __cdecl RESFILE_open_new_resource_file(char* resFileName, char* password, c
     sprintf(resFile, "%s%s", path, resFileName);
 
     if (open_mode == 0) {
-        fHandle = (int) CreateFileA(resFile, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-        if (fHandle == -1) {
+        HANDLE winHandle = CreateFileA(resFile, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+        if (winHandle == INVALID_HANDLE_VALUE) {
             sprintf(error_msg, "Error: Open_new_ResFile, mapped file %s not Found.", resFileName);
             surface_message_box(error_msg, "RESOURCE ERROR", MB_ICONEXCLAMATION);
             return;
         }
 
-        HANDLE mapping = CreateFileMappingA((HANDLE) fHandle, 0, PAGE_READONLY, 0, 0, 0);
-        CloseHandle((HANDLE) fHandle);
+        HANDLE mapping = CreateFileMappingA(winHandle, 0, PAGE_READONLY, 0, 0, 0);
+        CloseHandle(winHandle);
         if (mapping == 0) {
             surface_message_box("Error: Open_Mapped_ResFile, Could not map file(1).", "RESOURCE ERROR", MB_ICONEXCLAMATION);
             return;

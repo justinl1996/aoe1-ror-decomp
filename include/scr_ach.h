@@ -43,13 +43,15 @@ class TribeAchievementsScreen : public TScreenPanel {
     void set_mode(long new_mode);
 
   public:
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
     virtual long handle_mouse_down(unsigned char mouse_button_in, long x, long y, int ctrl_key, int shift_key);
     virtual void draw();
     virtual long handle_idle();
     virtual long wnd_proc(void* hwnd, unsigned int msg, unsigned int wParam, long lParam);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_achievements_screen_size_check[(sizeof(TribeAchievementsScreen) == 0x5F8) ? 1 : -1];
+#endif
 
 #endif

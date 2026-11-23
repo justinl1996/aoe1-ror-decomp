@@ -9,6 +9,8 @@ class TacticalAIModule : public AIModule {
     virtual ~TacticalAIModule();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aitacmod_tactical_ai_module_size[(sizeof(TacticalAIModule) == 0xF0) ? 1 : -1];
+#endif
 
 #endif

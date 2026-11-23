@@ -17,6 +17,8 @@ class TRIBE_Victory_Conditions : public RGE_Victory_Conditions {
     unsigned char add_tech(unsigned char v_group, long tech_id);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_victory_conditions_size_check[(sizeof(TRIBE_Victory_Conditions) == 0x20) ? 1 : -1];
+#endif
 
 #endif

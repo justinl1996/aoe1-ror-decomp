@@ -49,6 +49,8 @@ class RGE_Master_Action_Object : public RGE_Master_Moving_Object {
     int setup(FILE* infile, RGE_Sprite** sprites, RGE_Sound** sounds, short in_id);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char m_ac_obj_action_size[(sizeof(RGE_Master_Action_Object) == 0xFC) ? 1 : -1];
+#endif
 
 #endif // AOE1_M_AC_OBJ_H

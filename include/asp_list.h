@@ -116,9 +116,17 @@ class RGE_Active_Sprite_List {
     unsigned char get_frame(short& min_x, short& min_y, short& max_x, short& max_y, RGE_Sprite* sprite, long facet);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char asp_list_active_sprite_size_check[(sizeof(RGE_Active_Sprite) == 0x14) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char asp_list_active_animated_sprite_size_check[(sizeof(RGE_Active_Animated_Sprite) == 0x28) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char asp_list_active_sprite_node_size_check[(sizeof(RGE_Active_Sprite_Node) == 0x0C) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char asp_list_active_sprite_list_size_check[(sizeof(RGE_Active_Sprite_List) == 0x0C) ? 1 : -1];
+#endif
 
 #endif

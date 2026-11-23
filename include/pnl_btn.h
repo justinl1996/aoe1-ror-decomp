@@ -125,6 +125,8 @@ class TButtonPanel : public TPanel {
     void set_sound_number(int);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char pnl_btn_tbutton_size_check[(sizeof(TButtonPanel) == 0x2B8) ? 1 : -1];
+#endif
 
 #endif

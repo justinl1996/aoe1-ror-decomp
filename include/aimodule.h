@@ -39,7 +39,9 @@ class AIModuleMessage {
     AIModuleMessage* prev;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aimodule_message_size_check[(sizeof(AIModuleMessage) == 0x138) ? 1 : -1];
+#endif
 
 class AIModule {
   public:
@@ -126,6 +128,8 @@ class AIModule {
     int processFrameValue;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aimodule_size_check[(sizeof(AIModule) == 0xF0) ? 1 : -1];
+#endif
 
 #endif

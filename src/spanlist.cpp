@@ -51,8 +51,8 @@ TSpan_Node_List::~TSpan_Node_List(void) {
 
 void TSpan_Node_List::SetNumZones(int New_Size) {
     if (New_Size >= this->Max_Zones) {
-        VSpan_Node** Ptrs = (VSpan_Node**) calloc(New_Size, 4);
-        int* newZoneSizePtrs = (int*) calloc(New_Size, 4);
+        VSpan_Node** Ptrs = (VSpan_Node**) calloc(New_Size, sizeof(VSpan_Node*));
+        int* newZoneSizePtrs = (int*) calloc(New_Size, sizeof(int));
 
         if (this->Zone_Ptrs) {
             for (int i = 0; i < this->Used_Zones; i++) {
@@ -182,7 +182,7 @@ void TSpan_Node_List::ResetStats() {
 }
 
 TSpan_List_Manager::TSpan_List_Manager(int Surface_Width, int Surface_Height) :
-    VSList(((Surface_Width + 31) / 32) * Surface_Height, Surface_Height << 4, 0x10) {
+    VSList(((Surface_Width + 31) / 32) * Surface_Height, Surface_Height << 4, sizeof(VSpan_Node)) {
     this->Num_Lines = Surface_Height;
     if (Surface_Height < 0x10)
         this->Num_Lines = 0x10;
@@ -190,11 +190,11 @@ TSpan_List_Manager::TSpan_List_Manager(int Surface_Width, int Surface_Height) :
     if (Surface_Width < 0x10)
         this->Num_Pixels = 0x10;
     this->SetSpanRegions(0, 0, this->Num_Pixels - 1, this->Num_Lines - 1);
-    this->Line_Head_Ptrs = (VSpan_Node**) calloc(this->Num_Lines, 4);
-    this->Line_Tail_Ptrs = (VSpan_Node**) calloc(this->Num_Lines, 4);
-    this->LeftMostPx = (int*) calloc(this->Num_Lines, 4);
-    this->RightMostPx = (int*) calloc(this->Num_Lines, 4);
-    this->Span_Count = (int*) calloc(this->Num_Lines, 4);
+    this->Line_Head_Ptrs = (VSpan_Node**) calloc(this->Num_Lines, sizeof(VSpan_Node*));
+    this->Line_Tail_Ptrs = (VSpan_Node**) calloc(this->Num_Lines, sizeof(VSpan_Node*));
+    this->LeftMostPx = (int*) calloc(this->Num_Lines, sizeof(int));
+    this->RightMostPx = (int*) calloc(this->Num_Lines, sizeof(int));
+    this->Span_Count = (int*) calloc(this->Num_Lines, sizeof(int));
 }
 
 TSpan_List_Manager::~TSpan_List_Manager() {
@@ -265,11 +265,11 @@ void TSpan_List_Manager::ResetAll() {
     this->VSList.ReclaimAllNodes();
 
     {
-        unsigned int size = this->Num_Lines * 4;
+        size_t size = (size_t) this->Num_Lines * sizeof(VSpan_Node*);
         memset(this->Line_Head_Ptrs, 0, size);
     }
     {
-        unsigned int size = this->Num_Lines * 4;
+        size_t size = (size_t) this->Num_Lines * sizeof(VSpan_Node*);
         memset(this->Line_Tail_Ptrs, 0, size);
     }
     {

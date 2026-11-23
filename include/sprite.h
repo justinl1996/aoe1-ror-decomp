@@ -95,7 +95,9 @@ class RGE_Sprite {
     void update(unsigned long curr_time);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char sprite_size_check[(sizeof(RGE_Sprite) == 0x78) ? 1 : -1];
+#endif
 
 extern DClipInfo_List* SDI_List;
 extern int SDI_Draw_Level;

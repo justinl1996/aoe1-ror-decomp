@@ -1122,7 +1122,11 @@ HWND surface_create_main_window(const char* title, int width, int height, WNDPRO
     window_wake_event = SDL_RegisterEvents(1);
     window_game_proc = game_proc;
 #ifdef _WIN32
+#ifdef _WIN64
+    window_sdl_proc = (WNDPROC) SetWindowLongPtrA(sdl_hwnd, GWLP_WNDPROC, (LONG_PTR) bridge_wnd_proc);
+#else
     window_sdl_proc = (WNDPROC) SetWindowLongA(sdl_hwnd, GWL_WNDPROC, (LONG) bridge_wnd_proc);
+#endif
 #endif
 
 #ifdef __EMSCRIPTEN__
@@ -1146,7 +1150,11 @@ void surface_destroy_main_window(void) {
     if (sdl_window != 0) {
 #ifdef _WIN32
         if (IsWindow(sdl_hwnd))
+#ifdef _WIN64
+            SetWindowLongPtrA(sdl_hwnd, GWLP_WNDPROC, (LONG_PTR) window_sdl_proc);
+#else
             SetWindowLongA(sdl_hwnd, GWL_WNDPROC, (LONG) window_sdl_proc);
+#endif
 #endif
         SDL_DestroyWindow(sdl_window);
         sdl_window = 0;

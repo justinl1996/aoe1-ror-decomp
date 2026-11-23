@@ -34,6 +34,8 @@ class TRIBE_Panel_Inven : public TPanel {
     void set_player(TRIBE_Player* player_in);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tpnl_inv_panel_size_check[(sizeof(TRIBE_Panel_Inven) == 0x118) ? 1 : -1];
+#endif
 
 #endif

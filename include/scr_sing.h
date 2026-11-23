@@ -18,9 +18,11 @@ class TribeSPMenuScreen : public TScreenPanel {
     TribeSPMenuScreen();
     virtual ~TribeSPMenuScreen();
     virtual long handle_idle();
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_sing_screen_size_check[(sizeof(TribeSPMenuScreen) == 0x49C) ? 1 : -1];
+#endif
 
 #endif

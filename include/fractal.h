@@ -108,6 +108,8 @@ class PointMaker {
     void MapCleanUpEliminatingSinglesOnly();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char point_maker_size_check[(sizeof(PointMaker) == 0x1058) ? 1 : -1];
+#endif
 
 #endif // AOE1_FRACTAL_H

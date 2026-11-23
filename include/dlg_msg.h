@@ -22,11 +22,13 @@ class TMessageDialog : public TDialogPanel {
         TPanel* parent_panel_in, char* info_file_in, long info_id_in, long wid_in, long hgt_in, unsigned char dlg_type_in,
         int text_id, long btn_wid_in, long btn_hgt_in
     );
-    virtual long action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2);
+    virtual long action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2);
     virtual long key_down_action(long key, short count, int alt_key, int ctrl_key, int shift_key);
     virtual long handle_idle();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dlg_msg_tmessage_dialog_size_check[(sizeof(TMessageDialog) == 0x4A4) ? 1 : -1];
+#endif
 
 #endif

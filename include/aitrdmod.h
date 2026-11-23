@@ -21,8 +21,12 @@ class TradeAIModule : public AIModule {
     MainDecisionAIModule* md;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aitrdmod_tradeaimodule_size[(sizeof(TradeAIModule) == 0xF4) ? 1 : -1];
+#endif
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aitrdmod_tradeaimodule_md_offset[((char*) &((TradeAIModule*) 0)->md - (char*) 0 == 0xF0) ? 1 : -1];
+#endif
 
 #endif

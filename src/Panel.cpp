@@ -113,7 +113,7 @@ int TPanelSystem::addPanel(TPanel* p, int makeCurrent, int makeModal) {
 
     node = findPanelNode(p->panelName());
     if (node == 0) {
-        node = (PanelNode*) calloc(1, 12);
+        node = (PanelNode*) calloc(1, sizeof(PanelNode));
         if (node == 0) {
             return 0;
         }
@@ -300,7 +300,7 @@ int TPanelSystem::inSystem(TPanel* p) {
 }
 
 int TPanelSystem::setup(void) {
-    panel_list = (PanelNode*) calloc(1, 12);
+    panel_list = (PanelNode*) calloc(1, sizeof(PanelNode));
     if (panel_list == 0) {
         return 0;
     }
@@ -583,7 +583,7 @@ long TPanel::setup(
     set_color((unsigned char) color_in);
     mouse_captured = 0;
     if (node == 0) {
-        node = (PanelNode*) calloc(1, 12);
+        node = (PanelNode*) calloc(1, sizeof(PanelNode));
         if (node == 0) {
             return 0;
         }
@@ -1476,7 +1476,7 @@ long TPanel::handle_mouse_dbl_click(unsigned char mouse_button_in, long x, long 
     return result;
 }
 
-long TPanel::action(TPanel* from_panel, long action_in, unsigned long action_val1, unsigned long action_val2) {
+long TPanel::action(TPanel* from_panel, long action_in, uintptr_t action_val1, uintptr_t action_val2) {
     if (parent_panel != 0) {
         return parent_panel->action(from_panel, action_in, action_val1, action_val2);
     }

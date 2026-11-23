@@ -27,7 +27,7 @@ InfluenceMap::InfluenceMap(int x, int y, unsigned char initialValue) :
     int total = y * x;
     this->valueValue = (unsigned char*) ::operator new(total);
     memset(this->valueValue, initialValue, total);
-    this->rowValue = (unsigned char**) ::operator new(this->ySizeValue * 4);
+    this->rowValue = (unsigned char**) ::operator new(this->ySizeValue * sizeof(unsigned char*));
     if (this->rowValue) {
         int i = 0;
         int offset = 0;

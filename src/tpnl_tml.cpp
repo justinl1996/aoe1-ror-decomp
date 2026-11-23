@@ -398,7 +398,7 @@ void Time_Line_Panel::init_timeline() {
 void Time_Line_Panel::add_pop_total_special_event(
     long sample_time_slice, long sample_pop_total, long sample_x_line_pos, int time_flag
 ) {
-    Special_Events* se = (Special_Events*) calloc(1, 176);
+    Special_Events* se = (Special_Events*) calloc(1, sizeof(Special_Events));
 
     se->time_slice = sample_time_slice;
     se->X_line_pos = sample_x_line_pos;
@@ -434,7 +434,7 @@ void Time_Line_Panel::record_special_event(
         return;
     }
 
-    Special_Events* special_event = (Special_Events*) calloc(1, 176);
+    Special_Events* special_event = (Special_Events*) calloc(1, sizeof(Special_Events));
     special_event->X_line_pos = x_line_pos;
     special_event->Y_line_pos = y_line_pos;
     special_event->intermediate_y_line_segment = intermediate_y_line_segment;
@@ -1166,7 +1166,7 @@ void Time_Line_Panel::draw_icon(Special_Events* event_ptr, short icon_number, uc
     long total;
     long hi_top;
     long q_top;
-    unsigned int (*getNearest)(void*, unsigned long) = gdi_get_nearest_palette_index;
+    UINT (*getNearest)(HPALETTE, COLORREF) = gdi_get_nearest_palette_index;
     getNearest(this->render_area->DrawSystem->Pal, 0xffffff);
     temp_str[0] = (char) getNearest(this->render_area->DrawSystem->Pal, 0);
 

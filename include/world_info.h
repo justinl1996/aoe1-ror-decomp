@@ -14,7 +14,9 @@ struct RGE_Info_Line {
     char obj_id;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_info_line_size_check[(sizeof(RGE_Info_Line) == 0x14) ? 1 : -1];
+#endif
 
 struct RGE_Map_Gen_Info {
     short base_terrain;
@@ -33,7 +35,9 @@ struct RGE_Map_Gen_Info {
     short space_between_islands_or_edge;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_map_gen_info_size_check[(sizeof(RGE_Map_Gen_Info) == 0x520) ? 1 : -1];
+#endif
 
 struct RGE_Player_Info {
     char name[9][65];
@@ -51,6 +55,8 @@ struct RGE_Player_Info {
     unsigned char campaign;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_player_info_size_check[(sizeof(RGE_Player_Info) == 0x2AC) ? 1 : -1];
+#endif
 
 #endif

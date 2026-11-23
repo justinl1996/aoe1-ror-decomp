@@ -11,6 +11,7 @@
 // tests/asm_port/ compares these with the assembly; see tools/asm_port_harness.py.
 #include "drawarea.h"
 
+#include <stdint.h>
 #include <string.h>
 
 static char ptr_clear_name[] = "PtrClear";
@@ -35,7 +36,7 @@ static void move_dword(unsigned char* dest, const unsigned char* source)
 // destination overlap.
 static void copy_aligned(unsigned char* dest, const unsigned char* source, long count)
 {
-    long head = (long)(-(long)(unsigned long)dest & 3);
+    long head = (long)(-(intptr_t)(uintptr_t)dest & 3);
     long rest = count - head;
     long i;
     if (rest <= 0) {

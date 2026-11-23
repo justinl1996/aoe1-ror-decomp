@@ -21,7 +21,9 @@ struct RGE_Land_Info_Line {
     uchar wall_fade;            // +0x30
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rmm_land_info_line_size_check[(sizeof(RGE_Land_Info_Line) == 0x34) ? 1 : -1];
+#endif
 
 struct RGE_Land_Info {
     RGE_Land_Info_Line land[99]; // +0x0000
@@ -34,7 +36,9 @@ struct RGE_Land_Info {
     uchar wall_fade;             // +0x1434
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rmm_land_info_size_check[(sizeof(RGE_Land_Info) == 0x1438) ? 1 : -1];
+#endif
 
 class RGE_RMM_Land_Generator : public RGE_Random_Map_Module {
   protected:
@@ -49,6 +53,8 @@ class RGE_RMM_Land_Generator : public RGE_Random_Map_Module {
     virtual uchar generate();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rmm_land_generator_size_check[(sizeof(RGE_RMM_Land_Generator) == 0x1468) ? 1 : -1];
+#endif
 
 #endif

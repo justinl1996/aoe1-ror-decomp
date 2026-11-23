@@ -78,8 +78,8 @@ class MemDirectSound : public IDirectSound {
         return DS_OK;
     }
     STDMETHOD(SetSpeakerConfig)(DWORD) { return DS_OK; }
-#ifdef AOE_LINUX
-    STDMETHOD(Initialize)(LPCGUID) { return DSERR_ALREADYINITIALIZED; }  // Wine's dsound.h
+#if defined(AOE_LINUX) || defined(__MINGW32__)
+    STDMETHOD(Initialize)(LPCGUID) { return DSERR_ALREADYINITIALIZED; }  // Wine/MinGW dsound.h
 #else
     STDMETHOD(Initialize)(LPGUID) { return DSERR_ALREADYINITIALIZED; }   // VC6's dsound.h
 #endif

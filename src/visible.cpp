@@ -1,5 +1,6 @@
 
 #include "../include/visible.h"
+#include "../include/rge_fio.h"
 #include <stdlib.h>
 #include "../include/map.h"
 #include "../include/player.h"
@@ -145,8 +146,6 @@ LOSTBL* SquareLOS[17] = { Edge_Offsets_T0,  Edge_Offsets_T1,  Edge_Offsets_T2,  
 
 #pragma intrinsic(_rotl)
 
-void __cdecl rge_write(int handle, void* buffer, int count);
-void __cdecl rge_read(int handle, void* buffer, int count);
 
 extern void __cdecl log_map_call(int wt, int plyr, int action, int id, int x1, int y1, int x2, int y2, int sup);
 
@@ -167,7 +166,7 @@ RGE_Visible_Map::RGE_Visible_Map(RGE_Map* in_map, RGE_Player* in_player) {
         this->map_offsets = 0;
     } else {
         this->visible_map = (unsigned char*) calloc(this->numberTotalTilesValue, 1);
-        this->map_offsets = (unsigned char**) calloc(this->heightValue, 4);
+        this->map_offsets = (unsigned char**) calloc(this->heightValue, sizeof(unsigned char*));
         row = 0;
         if (0 < this->heightValue) {
             do {
@@ -208,7 +207,7 @@ RGE_Visible_Map::RGE_Visible_Map(int infile, RGE_Game_World* theWorld) {
         this->map_offsets = 0;
     } else {
         this->visible_map = (unsigned char*) calloc(this->numberTotalTilesValue, 1);
-        this->map_offsets = (unsigned char**) calloc(this->heightValue, 4);
+        this->map_offsets = (unsigned char**) calloc(this->heightValue, sizeof(unsigned char*));
 
         int row = 0;
         if (0 < this->heightValue) {
@@ -772,7 +771,7 @@ RGE_Unified_Visible_Map::RGE_Unified_Visible_Map(int width, int height) {
     this->mapHeight = height;
     Map_Update_Suppresion = 0;
     if ((0 < this->mapHeight) && (0 < this->mapWidth)) {
-        this->UnifiedVisibleMap = (unsigned long*) calloc(this->mapWidth * this->mapHeight, 4);
+        this->UnifiedVisibleMap = (unsigned long*) calloc(this->mapWidth * this->mapHeight, sizeof(unsigned long));
         Set_Map_Offsets();
     } else {
         this->UnifiedVisibleMap = 0;
@@ -802,7 +801,7 @@ void RGE_Unified_Visible_Map::load(int infile) {
             if (this->UnifiedVisibleMap != 0) {
                 free(this->UnifiedVisibleMap);
             }
-            this->UnifiedVisibleMap = (unsigned long*) calloc(this->mapHeight * this->mapWidth, 4);
+            this->UnifiedVisibleMap = (unsigned long*) calloc(this->mapHeight * this->mapWidth, sizeof(unsigned long));
         }
         rge_read(infile, this->UnifiedVisibleMap, this->mapHeight * this->mapWidth * 4);
         return;
@@ -830,7 +829,7 @@ void RGE_Unified_Visible_Map::save(int outfile) {
 
 void RGE_Unified_Visible_Map::reset(void) {
     if (this->UnifiedVisibleMap != 0) {
-        memset(this->UnifiedVisibleMap, 0, this->mapWidth * this->mapHeight * 4);
+        memset(this->UnifiedVisibleMap, 0, this->mapWidth * this->mapHeight * sizeof(*this->UnifiedVisibleMap));
     }
 }
 

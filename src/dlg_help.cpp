@@ -117,7 +117,7 @@ void THelpDialog::setup_help(
     this->set_tab_order(tabList, tab_count);
 }
 
-long THelpDialog::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long THelpDialog::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     int help_page_id = this->help_page_id;
 
     if (actionIn == 1) {
@@ -133,7 +133,8 @@ long THelpDialog::action(TPanel* fromPanel, long actionIn, unsigned long a1, uns
 
             HWND prog_window = rge_base_game->prog_window;
             char* help_topic = this->get_string(help_page_id);
-            WinHelpA(prog_window, "empires.hlp", HELP_KEY, (DWORD) help_topic);
+#include <stdint.h>
+            WinHelpA(prog_window, "empires.hlp", HELP_KEY, (uintptr_t) help_topic);
             return 1;
         }
     }

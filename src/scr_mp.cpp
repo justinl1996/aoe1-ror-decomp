@@ -20,9 +20,9 @@ TribeMPStartupScreen::TribeMPStartupScreen() : TScreenPanel("MP Startup Screen")
     TButtonPanel** ok_button;
     TButtonPanel* cancel;
     HKEY ghUserKey;
-    unsigned long dwSize;
-    unsigned long dwType;
-    unsigned long gdwDisp;
+    DWORD dwSize;
+    DWORD dwType;
+    DWORD gdwDisp;
     char Data[256];
     char temp_str[256];
     char str[256];
@@ -158,7 +158,7 @@ long TribeMPStartupScreen::handle_idle() {
     return TPanel::handle_idle();
 }
 
-long TribeMPStartupScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeMPStartupScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     if (fromPanel != 0) {
         if (fromPanel == this->list && actionIn == 3) {
             this->action(this->okButton, 1, 0, 0);

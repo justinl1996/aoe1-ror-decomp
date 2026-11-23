@@ -14,7 +14,9 @@ struct VISIBLE_UNIT_REC {
     unsigned char pos_y;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aoe1_visible_unit_rec_size_check[(sizeof(VISIBLE_UNIT_REC) == 0x08) ? 1 : -1];
+#endif
 
 struct VISIBLE_UNIT_PTR {
     VISIBLE_UNIT_REC* unit_list;
@@ -22,7 +24,9 @@ struct VISIBLE_UNIT_PTR {
     short used;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aoe1_visible_unit_ptr_size_check[(sizeof(VISIBLE_UNIT_PTR) == 0x08) ? 1 : -1];
+#endif
 
 class Visible_Unit_Manager {
   public:
@@ -45,7 +49,9 @@ class Visible_Unit_Manager {
     int GetVisibleUnits(int Xpos, int Ypos, int LOS, int player, int* DesiredTypes, int DesiredCount, int* PlayerListMap);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aoe1_visible_unit_manager_size_check[(sizeof(Visible_Unit_Manager) == 0x24) ? 1 : -1];
+#endif
 
 struct VISIBLE_RESOURCE_REC {
   public:
@@ -56,7 +62,9 @@ struct VISIBLE_RESOURCE_REC {
     unsigned char pos_y;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aoe1_visible_resource_rec_size_check[(sizeof(VISIBLE_RESOURCE_REC) == 0x08) ? 1 : -1];
+#endif
 
 class Visible_Resource_Manager {
   public:
@@ -76,6 +84,8 @@ class Visible_Resource_Manager {
     VISIBLE_RESOURCE_REC* Get_Closest_Resource(int Xpos, int Ypos, int Zone, int ResType, int* excList, int elSize);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aoe1_visible_resource_manager_size_check[(sizeof(Visible_Resource_Manager) == 0x14) ? 1 : -1];
+#endif
 
 #endif

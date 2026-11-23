@@ -114,7 +114,7 @@ int RGE_Master_Static_Object::setup(RGE_Master_Static_Object* other_object) {
     {
         damage_sprite_num = other_object->damage_sprite_num;
         if (damage_sprite_num > 0) {
-            damage_sprites = (RGE_Damage_Sprite_Info*) calloc(damage_sprite_num, 8);
+            damage_sprites = (RGE_Damage_Sprite_Info*) calloc(damage_sprite_num, sizeof(RGE_Damage_Sprite_Info));
             short i = 0;
             if (damage_sprite_num > 0) {
                 do {
@@ -232,7 +232,7 @@ int RGE_Master_Static_Object::setup(int infile, RGE_Sprite** sprites, RGE_Sound*
 
     rge_read(file_handle, &this->damage_sprite_num, 1);
     if (this->damage_sprite_num > 0) {
-        this->damage_sprites = (RGE_Damage_Sprite_Info*) calloc(this->damage_sprite_num, 8);
+        this->damage_sprites = (RGE_Damage_Sprite_Info*) calloc(this->damage_sprite_num, sizeof(RGE_Damage_Sprite_Info));
         short i = 0;
         if (this->damage_sprite_num > 0) {
             do {
@@ -384,7 +384,7 @@ int RGE_Master_Static_Object::setup(FILE* infile, RGE_Sprite** sprites, RGE_Soun
     if (this->damage_sprite_num == 0) {
         this->damage_sprites = 0;
     } else {
-        this->damage_sprites = (RGE_Damage_Sprite_Info*) calloc(this->damage_sprite_num, 8);
+        this->damage_sprites = (RGE_Damage_Sprite_Info*) calloc(this->damage_sprite_num, sizeof(RGE_Damage_Sprite_Info));
 
         short index = 0;
         if (this->damage_sprite_num != 0) {
@@ -620,7 +620,7 @@ void RGE_Master_Static_Object::copy_obj(RGE_Master_Static_Object* source) {
     source->hide_in_scenario_editor = 1;
 
     if (damage_sprite_num > 0) {
-        damage_sprites = (RGE_Damage_Sprite_Info*) calloc(damage_sprite_num, 8);
+        damage_sprites = (RGE_Damage_Sprite_Info*) calloc(damage_sprite_num, sizeof(RGE_Damage_Sprite_Info));
         int i = 0;
         if (damage_sprite_num > 0) {
             do {

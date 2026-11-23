@@ -181,7 +181,9 @@ struct COMMPLAYEROPTIONS {
     unsigned long DataSizeToFollow;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char comm_hand_options_size_check[(sizeof(COMMPLAYEROPTIONS) == 0x1D0) ? 1 : -1];
+#endif
 
 class TCommunications_Handler {
     // com_spd.cpp reads these two source-owned fields in AnalyzeGameSpeed and
@@ -534,6 +536,8 @@ class TCommunications_Handler {
     int IsPaused();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char comm_hand_size_check[(sizeof(TCommunications_Handler) == 0x1774) ? 1 : -1];
+#endif
 
 #endif

@@ -1,4 +1,5 @@
 #include "../include/color.h"
+#include "../include/rge_fio.h"
 #include <stdlib.h>
 #include "../include/drawarea.h"
 
@@ -7,8 +8,6 @@
 
 static char s_C__msdev_work_age1_x1_color_cpp[] = "C:\\msdev\\work\\age1_x1\\color.cpp";
 
-extern void __cdecl rge_read(int fd, void* buf, int size);
-extern void __cdecl rge_write(int fd, void* data, int size);
 extern void __cdecl addstring(char** dst, char* base, char* ext);
 extern unsigned long __cdecl debug_timeGetTime(char* file, int line);
 extern "C" long __cdecl _ftol();
@@ -164,7 +163,7 @@ RGE_Color_Table::RGE_Color_Table(FILE* infile, short id_val) {
 
     fscanf(infile, "%hd %s %hd %hd", &this->resource_id, this->color_table_name, &id_val, &infile);
     this->map_color = (unsigned char) id_val;
-    this->type = (unsigned char) (unsigned long) infile;
+    this->type = (unsigned char) (uintptr_t) infile;
     addstring(&file_name, this->color_table_name, ".col");
     strcpy(this->color_table_name, file_name);
     if (file_name != 0) {

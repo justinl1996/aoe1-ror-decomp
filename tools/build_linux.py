@@ -40,16 +40,24 @@ from common import REPO_ROOT, load_build_modules, repo_path
 LINUX_CONFIG = REPO_ROOT / "config/linux.json"
 TREE_ROOTS = build_clang.TREE_ROOTS + ("port/linux",)
 
-COMMON_FLAGS = [
-    "--target=i686-linux-gnu",
+COMMON_FLAGS_BASE = [
     "-fdeclspec",          # __declspec(...) in the sources
-    "-malign-double",      # doubles 8-byte aligned in structs, as with MSVC
-    "-mno-sse",            # x87 floating point, as the original
+    "-fsigned-char",       # consistent signed char across x86_64 and arm64
     "-fno-strict-aliasing",
     "-fwrapv",             # signed overflow wraps, as the original's code assumed
     "-O2", "-g",
     "-w",                  # the sources predate most of clang's warnings
 ]
+ARCH_FLAGS = {
+    "i686": [
+        "--target=i686-linux-gnu",
+        "-malign-double",      # doubles 8-byte aligned in structs, as with MSVC
+        "-mno-sse",            # x87 floating point, as the original
+    ],
+    "x86_64": [
+        "--target=x86_64-linux-gnu",
+    ],
+}
 C_FLAGS = ["-x", "c", "-std=gnu89", "-Wno-return-mismatch", "-Wno-implicit-function-declaration",
            "-Wno-implicit-int", "-Wno-int-conversion", "-Wno-incompatible-pointer-types"]
 CXX_FLAGS = ["-std=gnu++98"]
@@ -61,6 +69,8 @@ def run(command: list, cwd: Path) -> subprocess.CompletedProcess:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--arch", choices=("i686", "x86_64"), default="i686",
+                        help="Target architecture (i686 for 32-bit, x86_64 for 64-bit).")
     parser.add_argument("--output-dir", default="build/linux",
                         help="Output directory under build/. Each run uses a new subdirectory.")
     parser.add_argument("--clang", default="clang++")
@@ -107,7 +117,7 @@ def main() -> int:
     plan = ([entry["source"] for entry in source_plan(config, load_build_modules())] + config["port_sources"]
             + sdl_config["sources"] + linux_config["sources"])
 
-    target = [*COMMON_FLAGS]
+    target = [*ARCH_FLAGS[args.arch], *COMMON_FLAGS_BASE]
     if args.sanitize:
         target += ["-fsanitize=" + args.sanitize, "-fno-omit-frame-pointer"]
     if args.sysroot:
@@ -140,7 +150,7 @@ def main() -> int:
     exe = output / config["name"]
     link_args = [args.clang, *target, "-fuse-ld=lld", "-o", exe,
                  *[row["object"] for row in rows if row["compiled"]],
-                 *[f"-L{d}" for d in args.library_dir],
+                 *[f"-L{Path(d).resolve()}" for d in args.library_dir],
                  "-Wl,-rpath,$ORIGIN", *linux_config["libraries"]]
     link = run(link_args, output) if not failed else None
     if link is not None:

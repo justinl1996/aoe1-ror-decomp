@@ -110,7 +110,10 @@ void surface_sound_set_volume(int line, long volume);
 // devices, playing WAV files through the SDL mixer: CD tracks ripped to
 // music/trackNN.wav, and WAV renderings of MIDI files. Anything else goes
 // to the system's MCI.
-MCIERROR WINAPI surface_mci_send_command(MCIDEVICEID id, UINT msg, DWORD flags, DWORD params);
+#if defined(_MSC_VER) && _MSC_VER <= 1200 && !defined(_WIN64)
+typedef unsigned long DWORD_PTR;
+#endif
+MCIERROR WINAPI surface_mci_send_command(MCIDEVICEID id, UINT msg, DWORD flags, DWORD_PTR params);
 BOOL surface_mci_get_error_string(MCIERROR error, LPSTR text, UINT length);
 
 // WINMM stand-ins for the WAV stream (port/sdl/winmm.cpp): timeSetEvent on

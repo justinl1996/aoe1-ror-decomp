@@ -21,12 +21,14 @@ class TribeLoadSavedGameScreen : public TScreenPanel {
     TribeLoadSavedGameScreen();
     virtual ~TribeLoadSavedGameScreen();
     virtual long handle_idle();
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
 
   protected:
     void fillList();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char scr_load_screen_size_check[(sizeof(TribeLoadSavedGameScreen) == 0x494) ? 1 : -1];
+#endif
 
 #endif

@@ -155,7 +155,7 @@ long TribeLoadSavedGameScreen::handle_idle() {
     return TPanel::handle_idle();
 }
 
-long TribeLoadSavedGameScreen::action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2) {
+long TribeLoadSavedGameScreen::action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2) {
     char fileName[260];
     char fileNameNoExt[260];
 

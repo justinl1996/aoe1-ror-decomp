@@ -19,6 +19,8 @@ class RGE_Panel_Time : public TPanel {
     virtual long handle_idle();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rpnl_tim_panel_size_check[(sizeof(RGE_Panel_Time) == 0x108) ? 1 : -1];
+#endif
 
 #endif

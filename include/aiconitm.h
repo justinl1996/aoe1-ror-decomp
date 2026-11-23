@@ -27,10 +27,18 @@ class ConstructionItem : public BaseItem {
     void setBuildAttempts(int v);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiconitm_constructionitem_size[(sizeof(ConstructionItem) == 0x80) ? 1 : -1];
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiconitm_inprogress_offset[((char*) &((ConstructionItem*) 0)->inProgressValue - (char*) 0 == 0x74) ? 1 : -1];
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiconitm_built_offset[((char*) &((ConstructionItem*) 0)->builtValue - (char*) 0 == 0x78) ? 1 : -1];
+#endif
+#endif
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char aiconitm_build_attempts_offset[((char*) &((ConstructionItem*) 0)->buildAttemptsValue - (char*) 0 == 0x7c) ? 1 : -1];
+#endif
 
 int __cdecl operator==(const ConstructionItem& one, const ConstructionItem& two);
 int __cdecl operator!=(const ConstructionItem& one, const ConstructionItem& two);

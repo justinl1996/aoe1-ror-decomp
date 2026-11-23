@@ -15,9 +15,11 @@ class TribeMenuDialog : public TDialogPanel {
     virtual ~TribeMenuDialog();
 
   protected:
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dlg_menu_dialog_size_check[(sizeof(TribeMenuDialog) == 0x4BC) ? 1 : -1];
+#endif
 
 #endif

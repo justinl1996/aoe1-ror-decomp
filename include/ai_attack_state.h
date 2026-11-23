@@ -15,6 +15,8 @@ struct AttackState {
     int active;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char ai_attack_state_size_check[(sizeof(AttackState) == 0x2C) ? 1 : -1];
+#endif
 
 #endif

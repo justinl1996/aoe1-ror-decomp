@@ -39,6 +39,7 @@ TREE_ROOTS = build_linux.TREE_ROOTS + ("port/web",)
 
 COMMON_FLAGS = [
     "-fdeclspec",          # __declspec(...) in the sources
+    "-fsigned-char",
     "-fno-strict-aliasing",
     "-fwrapv",             # signed overflow wraps, as the original's code assumed
     "-w",                  # the sources predate most of clang's warnings
@@ -48,18 +49,18 @@ C_FLAGS = ["-x", "c", "-std=gnu89", "-Wno-return-mismatch", "-Wno-implicit-funct
 CXX_FLAGS = ["-std=gnu++98"]
 
 # Wine's winnt.h stops for CPUs it does not know. The game never uses a
-# thread context or the TEB, so wasm32 gets placeholders.
+# thread context or the TEB, so wasm32/wasm64 gets placeholders.
 WINE_WASM_EDITS = {
     "winnt.h": [
         ("#if !defined(CONTEXT_FULL) && !defined(RC_INVOKED)\n#error You need to define a CONTEXT for your CPU\n",
-         "#if defined(__wasm32__) && !defined(CONTEXT_FULL)\n"
+         "#if (defined(__wasm32__) || defined(__wasm64__)) && !defined(CONTEXT_FULL)\n"
          "/* aoe1-ror-decomp web build: no CPU context (unused by the game). */\n"
          "#define CONTEXT_FULL 0\n"
          "typedef struct _CONTEXT { DWORD ContextFlags; } CONTEXT, *PCONTEXT;\n"
          "#endif\n"
          "#if !defined(CONTEXT_FULL) && !defined(RC_INVOKED)\n#error You need to define a CONTEXT for your CPU\n"),
         ("#elif !defined(RC_INVOKED)\n# error You must define NtCurrentTeb() for your architecture\n",
-         "#elif defined(__wasm32__)\n"
+         "#elif defined(__wasm32__) || defined(__wasm64__)\n"
          "/* aoe1-ror-decomp web build: no TEB (unused by the game). */\n"
          "static FORCEINLINE struct _TEB * WINAPI NtCurrentTeb(void)\n{\n    return 0;\n}\n"
          "#elif !defined(RC_INVOKED)\n# error You must define NtCurrentTeb() for your architecture\n"),
@@ -100,6 +101,8 @@ def main() -> int:
                         help="Output directory under build/. Each run uses a new subdirectory.")
     parser.add_argument("--debug", action="store_true",
                         help="-O0 -g with Emscripten's run-time checks (assertions, SAFE_HEAP=2 without the alignment check: the game reads its data unaligned, as wasm allows, and stack checks).")
+    parser.add_argument("--memory64", action="store_true",
+                        help="Build for 64-bit WebAssembly (wasm64, -sMEMORY64=1).")
     parser.add_argument("--compile-only", action="store_true", help="Stop after compiling.")
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 2)
     args = parser.parse_args()
@@ -138,7 +141,8 @@ def main() -> int:
             + sdl_config["sources"] + linux_config["sources"] + web_config["sources"])
 
     optimize = ["-O0", "-g"] if args.debug else ["-O2"]
-    base = [*COMMON_FLAGS, *optimize, *web_config["compile_flags"],
+    mem64 = ["-sMEMORY64=1"] if args.memory64 else []
+    base = [*COMMON_FLAGS, *optimize, *mem64, *web_config["compile_flags"],
             "-I", tree / "port/web/include", "-I", tree / "port/linux/include", "-isystem", wine_include,
             "-I", tree / "include", *["-D" + d for d in web_config["defines"]],
             "-include", tree / "port/linux/include/aoe_linux.h", "-c"]
@@ -169,7 +173,7 @@ def main() -> int:
             if folder == "fonts":
                 shutil.copy2(sdl_packages[package] / relative, fonts / Path(relative).name)
         page = output / "index.html"
-        link_args = [empp, *optimize, *web_config["link_flags"],
+        link_args = [empp, *optimize, *mem64, *web_config["link_flags"],
                      *(["-sASSERTIONS=2", "-sSAFE_HEAP=2", "-sSTACK_OVERFLOW_CHECK=2"] if args.debug else []),
                      "--preload-file", f"{fonts}@/fonts",
                      *[row["object"] for row in rows], "-o", page]

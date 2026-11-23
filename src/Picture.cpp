@@ -1,5 +1,6 @@
 
 #include "../include/Picture.h"
+#include "../include/rge_fio.h"
 #include "../include/Shape.h"
 #include "../include/Res_file.h"
 #include "../include/Dib.h"
@@ -8,9 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern void __cdecl rge_read(int handle, void* data, int size);
 extern unsigned long __cdecl debug_timeGetTime(char* source_name, int source_line);
-extern void __cdecl rge_write(int handle, void* data, int size);
 
 TPicture::TPicture(char* FileName, long res_id, int UseTrans, void* MapToPal, int ZeroIsTrans) {
     this->Dib = 0;
@@ -58,7 +57,7 @@ TPicture::TPicture(int infile, int UseTrans) {
     this->TransInfo = 0;
 
     if (UseTrans != 0 && this->Dib != 0) {
-        TRANSINFO* trans_info = (TRANSINFO*) malloc(24);
+        TRANSINFO* trans_info = (TRANSINFO*) malloc(sizeof(TRANSINFO));
         this->TransInfo = trans_info;
         if (trans_info != 0) {
             if (((BITMAPINFO256*) this->Dib)->bmiHeader.biCompression == 3) {
@@ -181,7 +180,7 @@ void TPicture::Load(char* FileName, long res_id, int UseTrans, void* MapToPal, i
             return;
         }
 
-        info = (TRANSINFO*) malloc(24);
+        info = (TRANSINFO*) malloc(sizeof(TRANSINFO));
         this->TransInfo = info;
         if (info != 0) {
             bitmap = (BITMAPINFO256*) this->Dib;

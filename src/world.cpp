@@ -265,7 +265,7 @@ unsigned char RGE_Game_World::data_load_sounds(char* file_name) {
         int result;
         result = fscanf(fp, "%hd %hd", &this->sound_num, &count);
         if (result != -1) {
-            this->sounds = (RGE_Sound**) calloc(this->sound_num, 4);
+            this->sounds = (RGE_Sound**) calloc(this->sound_num, sizeof(RGE_Sound*));
             for (id = 0; id < count; id++) {
                 if (fscanf(fp, "%hd", &index) != -1) {
                     RGE_Sound* s = new RGE_Sound(fp, index);
@@ -285,7 +285,7 @@ unsigned char RGE_Game_World::data_load_terrain_tables(char* file_name) {
     FILE* f = fopen(file_name, "r");
     if (f != 0) {
         if (fscanf(f, "%hd %hd", &this->terrain_num, &this->terrain_size) != -1) {
-            this->terrains = (float**) calloc(this->terrain_num, 4);
+            this->terrains = (float**) calloc(this->terrain_num, sizeof(float*));
 
             short index = 0;
             if (index < this->terrain_num) {
@@ -294,7 +294,7 @@ unsigned char RGE_Game_World::data_load_terrain_tables(char* file_name) {
                     short count;
 
                     if (fscanf(f, "%hd %hd", &id, &count) != -1) {
-                        this->terrains[id] = (float*) calloc(this->terrain_size, 4);
+                        this->terrains[id] = (float*) calloc(this->terrain_size, sizeof(float));
 
                         short si = 0;
                         if (si < count) {
@@ -327,7 +327,7 @@ uchar RGE_Game_World::data_load_color_tables(char* file_name) {
         goto epilogue;
 
     if (fscanf(f, "%hd %hd", &this->color_table_num, &count) != -1) {
-        this->color_tables = (RGE_Color_Table**) calloc(this->color_table_num, 4);
+        this->color_tables = (RGE_Color_Table**) calloc(this->color_table_num, sizeof(RGE_Color_Table*));
         for (short id = 0; id < count; id++) {
             short index;
             if (fscanf(f, "%hd", &index) != -1) {
@@ -354,7 +354,7 @@ unsigned char RGE_Game_World::data_load_sprites(char* file_name) {
         short id;
 
         if (fscanf(file, "%hd %hd", &this->sprite_num, &count) != -1) {
-            this->sprites = (RGE_Sprite**) calloc(this->sprite_num, 4);
+            this->sprites = (RGE_Sprite**) calloc(this->sprite_num, sizeof(RGE_Sprite*));
 
             for (i = 0; i < count; i++) {
                 if (fscanf(file, "%hd", &id) != -1) {
@@ -393,7 +393,7 @@ unsigned char RGE_Game_World::data_load_players(char* file_name) {
     fp = fopen(file_name, "r");
     if (fp != 0) {
         if (fscanf(fp, "%hd %hd", &this->master_player_num, &count) != -1) {
-            this->master_players = (RGE_Master_Player**) calloc(this->master_player_num, 4);
+            this->master_players = (RGE_Master_Player**) calloc(this->master_player_num, sizeof(RGE_Master_Player*));
             for (short i = 0; i < count; i++) {
                 if (fscanf(fp, "%hd %hd", &id, &type) != -1) {
                     this->data_load_players_type(id, type, fp);
@@ -527,7 +527,7 @@ unsigned char RGE_Game_World::init_player(int infile) {
     rge_read(infile, &this->master_player_num, 2);
 
     if (this->master_player_num > 0) {
-        this->master_players = (RGE_Master_Player**) calloc(this->master_player_num, 4);
+        this->master_players = (RGE_Master_Player**) calloc(this->master_player_num, sizeof(RGE_Master_Player*));
         for (int i = 0; (short) i < this->master_player_num; i++) {
             unsigned char type;
             rge_read(infile, &type, 1);
@@ -542,12 +542,12 @@ void RGE_Game_World::terrain_tables_init(int infile) {
     rge_read(infile, &terrain_size, 2);
 
     if (terrain_num > 0 && terrain_size > 0) {
-        terrains = (float**) calloc(terrain_num, 4);
+        terrains = (float**) calloc(terrain_num, sizeof(float*));
         rge_read(infile, terrains, terrain_num * 4);
 
         for (int i = 0; i < terrain_num; i++) {
             if (terrains[i] != 0) {
-                terrains[i] = (float*) calloc(terrain_size, 4);
+                terrains[i] = (float*) calloc(terrain_size, sizeof(float));
                 rge_read(infile, terrains[i], terrain_size * 4);
             }
         }
@@ -558,7 +558,7 @@ void RGE_Game_World::color_table_init(int infile) {
     rge_read(infile, &color_table_num, 2);
 
     if (color_table_num > 0) {
-        color_tables = (RGE_Color_Table**) calloc(color_table_num, 4);
+        color_tables = (RGE_Color_Table**) calloc(color_table_num, sizeof(RGE_Color_Table*));
         for (int i = 0; i < color_table_num; i++) {
             color_tables[i] = new RGE_Color_Table(infile);
         }
@@ -567,7 +567,7 @@ void RGE_Game_World::color_table_init(int infile) {
 
 void RGE_Game_World::init_sounds(int infile, TSound_Driver* sound_dvr) {
     rge_read(infile, &this->sound_num, 2);
-    this->sounds = (RGE_Sound**) calloc(this->sound_num, 4);
+    this->sounds = (RGE_Sound**) calloc(this->sound_num, sizeof(RGE_Sound*));
     for (int i = 0; i < this->sound_num; i++) {
         this->sounds[i] = new RGE_Sound(infile, this->sound_driver);
     }
@@ -576,7 +576,7 @@ void RGE_Game_World::init_sounds(int infile, TSound_Driver* sound_dvr) {
 void RGE_Game_World::init_sprites(int infile) {
     rge_read(infile, &sprite_num, 2);
 
-    sprites = (RGE_Sprite**) calloc(sprite_num, 4);
+    sprites = (RGE_Sprite**) calloc(sprite_num, sizeof(RGE_Sprite*));
 
     rge_read(infile, sprites, sprite_num * 4);
 
@@ -812,7 +812,7 @@ unsigned char RGE_Game_World::load_world(int infile1) {
     this->currentUpdateComputerPlayer = -1;
 
     if (0 < this->player_num) {
-        this->players = (RGE_Player**) calloc(4, this->player_num);
+        this->players = (RGE_Player**) calloc(this->player_num, sizeof(RGE_Player*));
         if (0 < this->player_num) {
             do {
                 rge_read(f, &type, 1);
@@ -1001,7 +1001,7 @@ unsigned char RGE_Game_World::new_game(RGE_Player_Info& info, int myPlayerNum) {
     L->Log("  World: after_new_map (rand=%d)", this->random_seed);
 
     this->player_num = info.player_num + 1;
-    this->players = (RGE_Player**) calloc(4, (int) this->player_num);
+    this->players = (RGE_Player**) calloc((int) this->player_num, sizeof(RGE_Player*));
     this->setup_gaia();
     this->random_seed = debug_rand("C:\\msdev\\work\\age1_x1\\World.cpp", 1312);
     L->Log("  World: after_gaia (rand=%d)", this->random_seed);
@@ -1111,7 +1111,7 @@ unsigned char RGE_Game_World::new_scenario(RGE_Player_Info& info, int random_see
     this->map->clear_map((unsigned char) info.map_info->base_terrain, 1);
 
     this->player_num = info.player_num + 1;
-    this->players = (RGE_Player**) calloc(4, (int) this->player_num);
+    this->players = (RGE_Player**) calloc((int) this->player_num, sizeof(RGE_Player*));
     this->setup_gaia();
     this->setup_players(info);
 

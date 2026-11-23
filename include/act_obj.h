@@ -62,7 +62,9 @@ class RGE_Action_Object : public RGE_Moving_Object {
 // The Linux build's C++ ABI (Itanium) places a derived class's first members in its
 // base class's tail padding; MSVC does not. These layout checks are MSVC's.
 #ifndef AOE_LINUX
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rge_action_object_size_check[(sizeof(RGE_Action_Object) == 0x194) ? 1 : -1];
+#endif
 #endif
 
 #endif

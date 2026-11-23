@@ -29,12 +29,14 @@ class TribeAboutDialog : public TDialogPanel {
     virtual ~TribeAboutDialog();
 
   protected:
-    virtual long action(TPanel* fromPanel, long actionIn, unsigned long a1, unsigned long a2);
+    virtual long action(TPanel* fromPanel, long actionIn, uintptr_t a1, uintptr_t a2);
 
   public:
     virtual void draw();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char dlg_abt_dialog_size_check[(sizeof(TribeAboutDialog) == 0x4C4) ? 1 : -1];
+#endif
 
 #endif

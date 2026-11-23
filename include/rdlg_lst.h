@@ -11,7 +11,9 @@ struct rdlg_list_info {
     short id;
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rdlg_list_info_size_check[(sizeof(rdlg_list_info) == 0x66) ? 1 : -1];
+#endif
 
 int __cdecl rdlg_list_compare(const void* arg1, const void* arg2);
 
@@ -36,6 +38,8 @@ class RGE_Dialog_List : public TListDialog {
     virtual short get_cur_id();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char rdlg_dialog_list_size_check[(sizeof(RGE_Dialog_List) == 0x4BC) ? 1 : -1];
+#endif
 
 #endif

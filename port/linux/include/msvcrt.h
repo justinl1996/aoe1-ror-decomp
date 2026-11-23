@@ -89,9 +89,15 @@ struct linux_stat_buf {
     short st_gid;
     unsigned int st_rdev;
     long st_size;
+#ifdef __APPLE__
+    struct timespec st_atimespec;
+    struct timespec st_mtimespec;
+    struct timespec st_ctimespec;
+#else
     struct timespec st_atim;
     struct timespec st_mtim;
     struct timespec st_ctim;
+#endif
 };
 /* `struct _stat buf; _stat(path, &buf);` names a struct and a function
    alike; so do these. */

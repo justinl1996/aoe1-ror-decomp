@@ -12,6 +12,8 @@ class TRIBE_Tree_Object : public RGE_Static_Object {
     virtual void set_object_state(unsigned char new_object_state);
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char tribe_tree_object_size_check[(sizeof(TRIBE_Tree_Object) == 0x88) ? 1 : -1];
+#endif
 
 #endif

@@ -98,7 +98,9 @@ class RGE_Communications_Speed {
     void AdjustLocalSpeed();
 };
 
+#if !defined(__LP64__) && !defined(_WIN64) && !defined(__wasm64__)
 typedef char com_spd_size_check[(sizeof(RGE_Communications_Speed) == 0x240) ? 1 : -1];
+#endif
 
 extern TDebuggingLog* L;
 
