@@ -272,6 +272,7 @@ TRIBE_Game::~TRIBE_Game() {
     RESFILE_close_new_resource_file("Terrain.drs");
     RESFILE_close_new_resource_file("Border.drs");
     RESFILE_close_new_resource_file("Interfac.drs");
+    RESFILE_close_new_resource_file("inter_up.drs");
 
     if (StringTableX != 0) {
         surface_string_table_close(StringTableX);
@@ -338,6 +339,13 @@ int TRIBE_Game::setup() {
     RESFILE_open_new_resource_file("Terrain.drs", "tribe", "data\\", 0);
     RESFILE_open_new_resource_file("Border.drs", "tribe", "data\\", 0);
     RESFILE_open_new_resource_file("Interfac.drs", "tribe", "data\\", 0);
+
+    sprintf(str, "%sinter_up.drs", this->prog_info->resource_dir);
+    if (_stat(str, &file_data) == 0) {
+        RESFILE_open_new_resource_file("inter_up.drs", "tribe", this->prog_info->resource_dir, 0);
+    } else if (_stat("data\\inter_up.drs", &file_data) == 0) {
+        RESFILE_open_new_resource_file("inter_up.drs", "tribe", "data\\", 0);
+    }
 
     if (this->RGE_Base_Game::setup() == 0) {
         return 0;

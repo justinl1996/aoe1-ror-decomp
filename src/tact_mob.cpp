@@ -1,4 +1,5 @@
 #include "../include/tact_mob.h"
+#include "../include/t_b_obj.h"
 #include "../include/act_obj.h"
 #include "../include/stat_obj.h"
 #include "../include/m_co_obj.h"
@@ -139,6 +140,22 @@ unsigned char TRIBE_Action_Make_Obj::update() {
                     );
                     ((TRIBE_Player*) this->obj->owner)
                         ->registerTrain((int) this->obj_id, (int) this->obj->id, this->unique_id, (int) newObject->id);
+                    if (this->obj->type == 80 && newObject != 0) {
+                        TRIBE_Building_Object* bldg = (TRIBE_Building_Object*) this->obj;
+                        if (bldg->has_gather_point != 0) {
+                            RGE_Static_Object* target = 0;
+                            if (bldg->gather_point_target_id >= 0) {
+                                target = this->obj->owner->world->object(bldg->gather_point_target_id);
+                                if (target != 0 && target->object_state != RGE_OBJECT_STATE_ACTIVE)
+                                    target = 0;
+                            }
+                            if (target != 0) {
+                                newObject->work(target, target->world_x, target->world_y, target->world_z);
+                            } else {
+                                newObject->move_to(0, bldg->gather_point_x, bldg->gather_point_y, 0.0f);
+                            }
+                        }
+                    }
                     this->obj->notify(
                         (int) this->obj->id, (int) this->obj->id, UNIT_AI_NOTIFY_ACTION_COMPLETED, (long) UNIT_AI_ACTION_TRAIN,
                         (long) 0, (long) 0

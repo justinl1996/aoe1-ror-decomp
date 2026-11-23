@@ -63,9 +63,15 @@ long Time_Line_Panel::create_timeline(
     TPanel* parent, Time_Line_Panel** time_line, long x, long y, long width, long height, long axis_font_num, long body_font_num,
     long ideal_width, long ideal_height
 ) {
-    long left = parent->width() * x / ideal_width;
+    long virt_w = parent->width();
+    long offset_x = 0;
+    if (ideal_width > 0 && ideal_height > 0 && parent->width() * ideal_height > parent->height() * ideal_width) {
+        virt_w = (parent->height() * ideal_width) / ideal_height;
+        offset_x = (parent->width() - virt_w) / 2;
+    }
+    long left = offset_x + virt_w * x / ideal_width;
     long top = parent->height() * y / ideal_height;
-    long right = parent->width() * width / ideal_width;
+    long right = virt_w * width / ideal_width;
     long bottom = parent->height() * height / ideal_height;
 
     Time_Line_Panel* panel = new Time_Line_Panel();

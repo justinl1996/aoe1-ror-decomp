@@ -14,6 +14,7 @@
 #include "../include/sprite.h"
 #include "../include/task_lst.h"
 #include "../include/vw_main.h"
+#include "../include/t_b_obj.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -941,6 +942,43 @@ int RGE_Main_View::command_make_do(long x, long y, int work_on_tile, short actio
     int result;
 
     if (allow_user_commands != 0) {
+        if (this->player->sel_count == 1 && this->player->selected_obj != 0
+            && this->player->selected_obj->owner == this->player && this->player->selected_obj->type == 80) {
+            TRIBE_Building_Object* bldg = (TRIBE_Building_Object*) this->player->selected_obj;
+            if (bldg->can_set_gather_point()) {
+                if (this->pick1(0x29, 0, x, y, &pick_info, 0, 1) == 0x34 && pick_info.object != 0) {
+                    if (pick_info.object == bldg) {
+                        bldg->has_gather_point = 0;
+                        bldg->gather_point_target_id = -1;
+                        this->reset_overlay_sprites();
+                        this->set_redraw(TPanel::RedrawNormal);
+                        return 1;
+                    }
+                    bldg->has_gather_point = 1;
+                    bldg->gather_point_x = pick_info.object->world_x;
+                    bldg->gather_point_y = pick_info.object->world_y;
+                    bldg->gather_point_target_id = pick_info.object->id;
+                    this->display_object_selection(pick_info.object->id, 0x5DC, 2, 2);
+                    this->reset_overlay_sprites();
+                    this->set_redraw(TPanel::RedrawNormal);
+                    return 1;
+                }
+                if (work_on_tile != 0 && this->pick1(0x28, 0, x, y, &pick_info, 0, 1) == 0x33) {
+                    this->fixup_pick_info(&pick_info);
+                    bldg->has_gather_point = 1;
+                    bldg->gather_point_x = pick_info.x;
+                    bldg->gather_point_y = pick_info.y;
+                    bldg->gather_point_target_id = -1;
+                    this->reset_display_object_selection(2);
+                    this->add_overlay_sprite(
+                        rge_base_game->shapes[2], 0, this->map_scr_x_offset + x, this->map_scr_y_offset + y, 0, 0x0F, 0, 2,
+                        0x5A
+                    );
+                    this->set_redraw(TPanel::RedrawNormal);
+                    return 1;
+                }
+            }
+        }
         if (this->player->get_selected_objects_to_command(&list, &list_num, -1, -1, -1, -1)) {
             free(list);
             color_log(0x4C, 0xBA, 2);

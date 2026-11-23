@@ -23,6 +23,7 @@
 #include "../include/pnl_msg.h"
 #include "../include/rge_base_game_global.h"
 #include "../include/stat_obj.h"
+#include "../include/t_b_obj.h"
 #include "../include/sprite.h"
 #include "../include/visible.h"
 #include "../include/view.h"
@@ -2232,6 +2233,29 @@ long RGE_View::view_function_terrain(unsigned char function_mode_in, tagRECT sav
     }
     if (rge_base_game->game_mode == TRIBE_GAME_MODE_PLACE_CONNECTED) {
         this->draw_multi_object_outline();
+    }
+
+    if (this->player != 0 && this->map != 0 && this->player->selected_obj != 0
+        && this->player->selected_obj->owner == this->player && this->player->selected_obj->type == 80
+        && rge_base_game->shapes[1] != 0 && rge_base_game->shapes[1]->shape_count() > 0) {
+        TRIBE_Building_Object* bldg = (TRIBE_Building_Object*) this->player->selected_obj;
+        if (bldg->has_gather_point != 0) {
+            int col = (int) bldg->gather_point_x;
+            int row = (int) bldg->gather_point_y;
+            if (col >= 0 && col < this->map->map_width && row >= 0 && row < this->map->map_height) {
+                RGE_Tile* tile = this->map->map_row_offset[row] + col;
+                float fx = bldg->gather_point_x - (float) col;
+                float fy = bldg->gather_point_y - (float) row;
+                int scr_x = (int) tile->screen_xpos + (int) ((fx + fy) * (float) this->tile_half_wid) - this->map_scr_x_offset;
+                int scr_y = (int) tile->screen_ypos + (int) tile->height * this->elev_hgt
+                            + (int) ((fy - fx) * (float) this->tile_half_hgt) - this->map_scr_y_offset;
+                SDI_Draw_Level = 0x0F;
+                SDI_Object_ID = -1;
+                int facet = (int) ((debug_timeGetTime((char*) s_C__msdev_work_age1_x1_view_cpp, 3646) / 150)
+                                   % rge_base_game->shapes[1]->shape_count());
+                rge_base_game->shapes[1]->shape_draw(this->render_area, scr_x, scr_y, facet, 0, 0);
+            }
+        }
     }
 
     {

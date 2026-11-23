@@ -80,6 +80,17 @@ static int queue_pop(MessageQueue* queue, MSG* out) {
 }
 
 static void input_post(UINT msg, WPARAM wparam, LPARAM lparam) {
+    // Coalesce consecutive WM_MOUSEMOVE messages (matching Win32's message queue)
+    // so high-polling-rate mice don't queue up a lag backlog during drag-selection.
+    if (msg == WM_MOUSEMOVE && queue_input.count > 0) {
+        int tail = (queue_input.head + queue_input.count - 1) % QUEUE_SIZE;
+        if (queue_input.items[tail].message == WM_MOUSEMOVE) {
+            queue_input.items[tail].wParam = wparam;
+            queue_input.items[tail].lParam = lparam;
+            queue_input.items[tail].time = SDL_GetTicks();
+            return;
+        }
+    }
     queue_push(&queue_input, sdl_hwnd, msg, wparam, lparam);
 }
 
@@ -563,6 +574,16 @@ static void translate_event(const SDL_Event* event) {
                 break;
             input_post(WM_MOUSEMOVE, mouse_key_flags(), mouse_point(event->motion.x, event->motion.y));
             break;
+        case SDL_MOUSEWHEEL: {
+            if (mouse_input_enabled == 0)
+                break;
+            int dy = event->wheel.y;
+            if (event->wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
+                dy = -dy;
+            if (dy != 0)
+                surface_zoom_step(dy);
+            break;
+        }
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP: {
             int down = event->type == SDL_MOUSEBUTTONDOWN;

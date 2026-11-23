@@ -69,8 +69,8 @@ extern "C" int __stdcall WinMain(HINSTANCE prog_inst, HINSTANCE prev_inst, char*
     info.use_ima = 0;
     info.use_midi = 0;
     info.use_wave_music = 0;
-    info.main_wid = 800;
-    info.main_hgt = 600;
+    info.main_wid = 1280;
+    info.main_hgt = 720;
     info.zone_guid = ZONE_GUID;
 
     strcpy(info.data_dir, "data2\\");

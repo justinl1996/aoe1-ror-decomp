@@ -30,6 +30,7 @@ long map_game_width(void);
 long map_game_height(void);
 void layout_toggle(void);
 int layout_is_windowed(void);
+void surface_zoom_step(int delta);
 
 // window.cpp: the folder that holds the game's own files next to the
 // program (settings.ini, the language DLLs, music/): the executable's

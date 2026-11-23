@@ -706,14 +706,14 @@ STDMETHODIMP MemDirectDraw::CreateSurface(LPDDSURFACEDESC desc, LPDIRECTDRAWSURF
 }
 
 STDMETHODIMP MemDirectDraw::EnumDisplayModes(DWORD, LPDDSURFACEDESC, LPVOID context, LPDDENUMMODESCALLBACK callback) {
-    static const long sizes[][2] = {{640, 480}, {800, 600}, {1024, 768}, {1280, 1024}};
+    static const long sizes[][2] = {{1280, 720}, {1600, 900}, {1920, 1080}};
     static const DWORD depths[] = {8, 16};
     DDSURFACEDESC desc;
 
     if (callback == 0)
         return DDERR_INVALIDPARAMS;
     for (int d = 0; d < 2; ++d) {
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 3; ++i) {
             desc.dwSize = sizeof(desc);
             this->fill_mode_desc(&desc, sizes[i][0], sizes[i][1], depths[d]);
             if (callback(&desc, context) == DDENUMRET_CANCEL)

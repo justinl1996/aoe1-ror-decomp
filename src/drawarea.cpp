@@ -49,9 +49,9 @@ TDrawSystem::TDrawSystem() {
     this->CanSrcBlt = 0;
     this->DrawAreaList = 0;
     this->Restored = 0;
-    this->ModeAvail640 = 0;
-    this->ModeAvail800 = 0;
-    this->ModeAvail1024 = 0;
+    this->ModeAvail1280_720 = 0;
+    this->ModeAvail1600_900 = 0;
+    this->ModeAvail1920_1080 = 0;
     this->ModeAvail1280 = 0;
     this->ModeAvail320_200 = 0;
     this->ModeAvail320_240 = 0;
@@ -100,18 +100,9 @@ TDrawSystem::~TDrawSystem() {
 
 void TDrawSystem::CheckAvailModes(int full_screen) {
     if (full_screen == 0) {
-        this->ModeAvail640 = 1;
-        long width;
-        long height;
-        surface_get_display_size(&width, &height);
-        {
-            if (width >= 800)
-                this->ModeAvail800 = 1;
-            if (width >= 1024)
-                this->ModeAvail1024 = 1;
-            if (width >= 1280)
-                this->ModeAvail1280 = 1;
-        }
+        this->ModeAvail1280_720 = 1;
+        this->ModeAvail1600_900 = 1;
+        this->ModeAvail1920_1080 = 1;
     } else {
         IDirectDraw** direct_draw = &this->DirDraw;
         int was_present;
@@ -137,49 +128,29 @@ long __stdcall TDrawSystem::CheckAvailModesCallback(_DDSURFACEDESC* lpDDSurfaceD
     int bpp = lpDDSurfaceDesc->ddpfPixelFormat.dwRGBBitCount;
 
     if (bpp == 8) {
-        if (lpDDSurfaceDesc->dwWidth == 640 && lpDDSurfaceDesc->dwHeight == 480) {
-            mode_info->ModeAvail640 = 1;
+        if (lpDDSurfaceDesc->dwWidth == 1280 && lpDDSurfaceDesc->dwHeight == 720) {
+            mode_info->ModeAvail1280_720 = 1;
             goto done;
         }
-        if (lpDDSurfaceDesc->dwWidth == 800 && lpDDSurfaceDesc->dwHeight == 600) {
-            mode_info->ModeAvail800 = 1;
+        if (lpDDSurfaceDesc->dwWidth == 1600 && lpDDSurfaceDesc->dwHeight == 900) {
+            mode_info->ModeAvail1600_900 = 1;
             goto done;
         }
-        if (lpDDSurfaceDesc->dwWidth == 1024 && lpDDSurfaceDesc->dwHeight == 768) {
-            mode_info->ModeAvail1024 = 1;
-            goto done;
-        }
-        if (lpDDSurfaceDesc->dwWidth == 1280 && lpDDSurfaceDesc->dwHeight == 1024) {
-            mode_info->ModeAvail1280 = 1;
-            goto done;
-        }
-        if (lpDDSurfaceDesc->dwWidth == 320 && lpDDSurfaceDesc->dwHeight == 200) {
-            mode_info->ModeAvail320_200 = 1;
-            goto done;
-        }
-        if (lpDDSurfaceDesc->dwWidth == 320 && lpDDSurfaceDesc->dwHeight == 240) {
-            mode_info->ModeAvail320_240 = 1;
+        if (lpDDSurfaceDesc->dwWidth == 1920 && lpDDSurfaceDesc->dwHeight == 1080) {
+            mode_info->ModeAvail1920_1080 = 1;
             goto done;
         }
     } else if (bpp == 16) {
-        if (lpDDSurfaceDesc->dwWidth == 640 && lpDDSurfaceDesc->dwHeight == 480) {
+        if (lpDDSurfaceDesc->dwWidth == 1280 && lpDDSurfaceDesc->dwHeight == 720) {
             mode_info->ModeAvail640_16 = 1;
             goto done;
         }
-        if (lpDDSurfaceDesc->dwWidth == 800 && lpDDSurfaceDesc->dwHeight == 600) {
+        if (lpDDSurfaceDesc->dwWidth == 1600 && lpDDSurfaceDesc->dwHeight == 900) {
             mode_info->ModeAvail800_16 = 1;
             goto done;
         }
-        if (lpDDSurfaceDesc->dwWidth == 1024 && lpDDSurfaceDesc->dwHeight == 768) {
+        if (lpDDSurfaceDesc->dwWidth == 1920 && lpDDSurfaceDesc->dwHeight == 1080) {
             mode_info->ModeAvail1024_16 = 1;
-            goto done;
-        }
-        if (lpDDSurfaceDesc->dwWidth == 320 && lpDDSurfaceDesc->dwHeight == 200) {
-            mode_info->ModeAvail320_200_16 = 1;
-            goto done;
-        }
-        if (lpDDSurfaceDesc->dwWidth == 320 && lpDDSurfaceDesc->dwHeight == 240) {
-            mode_info->ModeAvail320_240_16 = 1;
             goto done;
         }
     }
@@ -190,55 +161,19 @@ done:
 
 int TDrawSystem::IsModeAvail(long wid_in, long hgt_in, int color_bits) {
     if (color_bits == 8) {
-        if (wid_in <= 640) {
-            if (wid_in != 640) {
-                if (wid_in == 320) {
-                    if (hgt_in == 200) {
-                        return this->ModeAvail320_200;
-                    }
-                    if (hgt_in == 240) {
-                        return this->ModeAvail320_240;
-                    }
-                }
-            } else {
-                return this->ModeAvail640;
-            }
-        } else {
-            if (wid_in != 800) {
-                if (wid_in != 1024) {
-                    if (wid_in == 1280) {
-                        return this->ModeAvail1280;
-                    }
-                } else {
-                    return this->ModeAvail1024;
-                }
-            } else {
-                return this->ModeAvail800;
-            }
-        }
+        if (wid_in == 1280 && (hgt_in == 0 || hgt_in == 720))
+            return this->ModeAvail1280_720;
+        if (wid_in == 1600 && (hgt_in == 0 || hgt_in == 900))
+            return this->ModeAvail1600_900;
+        if (wid_in == 1920 && (hgt_in == 0 || hgt_in == 1080))
+            return this->ModeAvail1920_1080;
     } else if (color_bits == 16) {
-        if (wid_in <= 640) {
-            if (wid_in != 640) {
-                if (wid_in == 320) {
-                    if (hgt_in == 200) {
-                        return this->ModeAvail320_200_16;
-                    }
-                    if (hgt_in == 240) {
-                        return this->ModeAvail320_240_16;
-                    }
-                }
-            } else {
-                return this->ModeAvail640_16;
-            }
-        } else {
-            if (wid_in != 800) {
-                if (wid_in == 1024) {
-                    return this->ModeAvail1024_16;
-                }
-            } else {
-                return this->ModeAvail800_16;
-            }
-        }
+        if (wid_in == 1280 && (hgt_in == 0 || hgt_in == 720))
+            return this->ModeAvail640_16;
+        if (wid_in == 1600 && (hgt_in == 0 || hgt_in == 900))
+            return this->ModeAvail800_16;
+        if (wid_in == 1920 && (hgt_in == 0 || hgt_in == 1080))
+            return this->ModeAvail1024_16;
     }
     return 0;
 }

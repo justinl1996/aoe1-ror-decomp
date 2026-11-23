@@ -256,11 +256,7 @@ TribeGameSettingsScreen::TribeGameSettingsScreen() : TScreenPanel("Game Settings
 
     // The executable computes this position before it reloads
     // scenarioList, then uses signed divide by ideal_width.
-    long second_column_pos;
-    second_column_pos = this->scenarioListWidth;
-    second_column_pos -= 60;
-    second_column_pos *= this->pnl_wid;
-    second_column_pos /= this->ideal_width;
+    long second_column_pos = this->scale_ideal_w(this->scenarioListWidth - 60);
     this->scenarioList->set_second_column_pos(second_column_pos);
 
     if (rge_base_game->multiplayerGame() != 0) {

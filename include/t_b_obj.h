@@ -81,16 +81,16 @@ class TRIBE_Building_Object : public TRIBE_Combat_Object {
     long PriorTurn1;                            // +0x1F8
     long PriorTurn2;                            // +0x1FC
     long PriorTurn3;                            // +0x200
+    unsigned char has_gather_point;
+    float gather_point_x;
+    float gather_point_y;
+    long gather_point_target_id;
+
+    int can_set_gather_point() const;
 
   protected:
     virtual int setup(TRIBE_Master_Building_Object* tobj, RGE_Player* obj_owner, float x, float y, float z);
     virtual int setup(int infile, RGE_Game_World* gworld);
 };
-
-// The Linux build's C++ ABI (Itanium) places a derived class's first members in its
-// base class's tail padding; MSVC does not. These layout checks are MSVC's.
-#ifndef AOE_LINUX
-typedef char tribe_building_object_size_check[(sizeof(TRIBE_Building_Object) == 0x204) ? 1 : -1];
-#endif
 
 #endif // AOE1_T_B_OBJ_H

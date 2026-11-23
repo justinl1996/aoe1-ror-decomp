@@ -38,15 +38,8 @@ TribeSelectTribeScreen::TribeSelectTribeScreen() : TScreenPanel("Select Tribe Sc
     }
 
     width = this->render_area->Width;
-    if (width < 800) {
-        strcpy(backgroundName, "bgA640");
-    } else {
-        if (width < 1024) {
-            strcpy(backgroundName, "bgA800");
-        } else {
-            strcpy(backgroundName, "bgA1024");
-        }
-    }
+    (void) width;
+    strcpy(backgroundName, "bgA1024");
 
     this->background = new TPicturePanel;
     if (this->background == 0) {

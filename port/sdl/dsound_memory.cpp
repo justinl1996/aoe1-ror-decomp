@@ -30,7 +30,11 @@
 
 enum {
     MIX_RATE = 44100,
+#ifdef __EMSCRIPTEN__
+    MIX_SAMPLES = 2048,    // per callback: ~46 ms (prevents WebAudio underruns on main thread)
+#else
     MIX_SAMPLES = 512,     // per callback: about 12 ms
+#endif
     GAIN_ONE = 1 << 16,    // fixed-point unit gain
     STEP_SHIFT = 16,       // fixed-point source frames per output frame
     WRITE_LEAD_MS = 15,    // write cursor distance ahead of the play cursor

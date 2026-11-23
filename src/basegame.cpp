@@ -10,6 +10,7 @@
 #include <time.h>
 
 #include "../include/basegame.h"
+#include "../include/hd_resolutions.h"
 #include "../include/main.h"
 #include "../include/rge_base_game_global.h"
 #include "../include/gameinfo.h"
@@ -246,23 +247,12 @@ int RGE_Base_Game::setup() {
     debug_srand("C:\\msdev\\work\\age1_x1\\basegame.cpp", 522, debug_timeGetTime("C:\\msdev\\work\\age1_x1\\basegame.cpp", 522));
 
     temp_val = this->registry->RegGetInt(1, "Screen Size");
-    switch (temp_val) {
-        case 640:
-            this->prog_info->main_wid = temp_val;
-            this->prog_info->main_hgt = 480;
-            break;
-        case 800:
-            this->prog_info->main_wid = temp_val;
-            this->prog_info->main_hgt = 600;
-            break;
-        case 1024:
-            this->prog_info->main_wid = temp_val;
-            this->prog_info->main_hgt = 768;
-            break;
-        case 1280:
-            this->prog_info->main_wid = temp_val;
-            this->prog_info->main_hgt = 1024;
-            break;
+    {
+        const AOE_ResolutionPreset* preset = aoe_find_resolution(temp_val, 0);
+        if (preset != 0) {
+            this->prog_info->main_wid = preset->width;
+            this->prog_info->main_hgt = preset->height;
+        }
     }
 
     temp_val = this->registry->RegGetInt(1, "Rollover Text");
@@ -991,19 +981,19 @@ int RGE_Base_Game::setup_cmd_options() {
         this->prog_info->use_sound = 0;
     }
 
-    if (strstr(cmd_line, "640") != 0) {
-        this->prog_info->main_wid = 640;
-        this->prog_info->main_hgt = 480;
+    if (strstr(cmd_line, "720P") != 0 || strstr(cmd_line, "1280") != 0) {
+        this->prog_info->main_wid = 1280;
+        this->prog_info->main_hgt = 720;
     }
 
-    if (strstr(cmd_line, "800") != 0) {
-        this->prog_info->main_wid = 800;
-        this->prog_info->main_hgt = 600;
+    if (strstr(cmd_line, "900P") != 0 || strstr(cmd_line, "1600") != 0) {
+        this->prog_info->main_wid = 1600;
+        this->prog_info->main_hgt = 900;
     }
 
-    if (strstr(cmd_line, "1024") != 0) {
-        this->prog_info->main_wid = 1024;
-        this->prog_info->main_hgt = 768;
+    if (strstr(cmd_line, "1080P") != 0 || strstr(cmd_line, "1920") != 0) {
+        this->prog_info->main_wid = 1920;
+        this->prog_info->main_hgt = 1080;
     }
 
     if (strstr(cmd_line, "ALLCP") != 0) {
@@ -1253,7 +1243,7 @@ int RGE_Base_Game::setup_cmd_options() {
 
     if (strstr(cmd_line, "1280")) {
         this->prog_info->main_wid = 1280;
-        this->prog_info->main_hgt = 1024;
+        this->prog_info->main_hgt = 720;
     }
 
     if ((strstr(cmd_line, "LOGFPS") != 0) || (strstr(cmd_line, "LOG FPS") != 0) || (strstr(cmd_line, "LOG_FPS") != 0)) {
@@ -1559,39 +1549,18 @@ int RGE_Base_Game::setup_graphics_system() {
 
     draw_system->CheckAvailModes(this->prog_info->full_screen);
 
-    if (!this->draw_system->IsModeAvail(this->prog_info->main_wid, 0, 8)) {
-        if (this->prog_info->main_wid != 640) {
-            if (this->draw_system->IsModeAvail(640, 0, 8)) {
-                this->prog_info->main_wid = 640;
-                this->prog_info->main_hgt = 480;
-                goto init_step;
+    if (!this->draw_system->IsModeAvail(this->prog_info->main_wid, this->prog_info->main_hgt, 8)) {
+        int found = 0;
+        for (int i = 0; i < AOE_HD_RESOLUTION_COUNT; ++i) {
+            if (this->draw_system->IsModeAvail(AOE_HD_RESOLUTIONS[i].width, AOE_HD_RESOLUTIONS[i].height, 8)) {
+                this->prog_info->main_wid = AOE_HD_RESOLUTIONS[i].width;
+                this->prog_info->main_hgt = AOE_HD_RESOLUTIONS[i].height;
+                found = 1;
+                break;
             }
         }
-
-        if (this->prog_info->main_wid != 800) {
-            if (this->draw_system->IsModeAvail(800, 0, 8)) {
-                this->prog_info->main_wid = 800;
-                this->prog_info->main_hgt = 600;
-                goto init_step;
-            }
-        }
-
-        if (this->prog_info->main_wid != 1024) {
-            if (this->draw_system->IsModeAvail(1024, 0, 8)) {
-                this->prog_info->main_wid = 1024;
-                this->prog_info->main_hgt = 768;
-                goto init_step;
-            }
-        }
-
-        if (this->prog_info->main_wid == 1280)
+        if (!found)
             goto init_fail;
-
-        if (!this->draw_system->IsModeAvail(1024, 0, 8))
-            goto init_fail;
-
-        this->prog_info->main_wid = 1280;
-        this->prog_info->main_hgt = 1024;
     }
 
 init_step:

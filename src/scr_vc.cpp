@@ -74,30 +74,13 @@ TRIBE_Mission_Screen::TRIBE_Mission_Screen(char* text_in, unsigned char from_gam
         this->text_buttons[i]->set_radio_info(this->text_buttons, 3);
     }
 
-    if (this->pnl_wid <= 640) {
-        this->title->set_fixed_position(3, 15, 634, 20);
-        this->list->set_fixed_position(20, 50, 600, 115);
-        this->text_buttons[0]->set_fixed_position(5, 445, 150, 30);
-        (*text_button_1)->set_fixed_position(165, 445, 150, 30);
-        this->text_buttons[2]->set_fixed_position(325, 445, 150, 30);
-        this->ok_button->set_fixed_position(485, 445, 150, 30);
-    } else if (this->pnl_wid <= 800) {
-        set_ideal_size(800, 640);
-        this->title->set_fixed_position(3, 15, 794, 20);
-        this->list->set_fixed_position(30, 45, 740, 230);
-        this->text_buttons[0]->set_fixed_position(5, 565, 190, 30);
-        (*text_button_1)->set_fixed_position(205, 565, 190, 30);
-        this->text_buttons[2]->set_fixed_position(405, 565, 190, 30);
-        this->ok_button->set_fixed_position(605, 565, 190, 30);
-    } else {
-        set_ideal_size(1024, 768);
-        this->title->set_fixed_position(3, 15, 1018, 20);
-        this->list->set_fixed_position(40, 65, 944, 310);
-        this->text_buttons[0]->set_fixed_position(10, 690, 240, 50);
-        (*text_button_1)->set_fixed_position(266, 690, 240, 50);
-        this->text_buttons[2]->set_fixed_position(522, 690, 240, 50);
-        this->ok_button->set_fixed_position(774, 690, 240, 50);
-    }
+    set_ideal_size(1024, 768);
+    this->position_panel(this->title, 3, 15, 1018, 20);
+    this->position_panel(this->list, 40, 65, 944, 310);
+    this->position_panel(this->text_buttons[0], 10, 690, 240, 50);
+    this->position_panel(*text_button_1, 266, 690, 240, 50);
+    this->position_panel(this->text_buttons[2], 522, 690, 240, 50);
+    this->position_panel(this->ok_button, 774, 690, 240, 50);
 
     if (rge_base_game->world->scenario->Get_message(0) != 0) {
         this->list->set_text(rge_base_game->world->scenario->Get_message(0));
@@ -177,13 +160,9 @@ void TRIBE_Mission_Screen::draw() {
 
         unsigned char* locked = this->render_area->Lock("scr_vc::draw", 1);
         if (locked != 0) {
-            if (this->pnl_wid <= 640) {
-                this->vc_back_bmp->Draw(this->render_area, this->pnl_x + 7, this->pnl_y + 166, 0, 0);
-            } else if (this->pnl_wid <= 800) {
-                this->vc_back_bmp->Draw(this->render_area, this->pnl_x + 83, this->pnl_y + 280, 0, 0);
-            } else {
-                this->vc_back_bmp->Draw(this->render_area, this->pnl_x + 197, this->pnl_y + 363, 0, 0);
-            }
+            this->vc_back_bmp->Draw(
+                this->render_area, this->pnl_x + this->scale_ideal_x(197), this->pnl_y + this->scale_ideal_y(363), 0, 0
+            );
             this->render_area->Unlock("scr_vc::draw");
         }
 

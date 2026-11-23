@@ -9,6 +9,7 @@
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
                font: 15px/1.4 system-ui, sans-serif; overflow: hidden; }
   #canvas { display: block; position: absolute; inset: 0; margin: auto; background: #000;
+            max-width: 100%; max-height: 100%; width: auto; height: auto;
             image-rendering: pixelated; outline: none; }
   #panel { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   #box { max-width: 34em; padding: 1.5em 2em; border: 1px solid var(--muted); background: #0d0b06; }
@@ -23,7 +24,7 @@
 </style>
 </head>
 <body>
-<canvas id="canvas" tabindex="-1" width="1024" height="768"></canvas>
+<canvas id="canvas" tabindex="-1" width="1280" height="720"></canvas>
 <div id="panel">
   <div id="box">
     <h1>Age of Empires: The Rise of Rome</h1>
@@ -74,8 +75,12 @@
     catch (e) { return false; }
   }
 
+  let syncInFlight = false;
   function sync(populate) {
+    if (syncInFlight) return Promise.resolve();
+    syncInFlight = true;
     return new Promise((resolve) => FS.syncfs(populate, (err) => {
+      syncInFlight = false;
       if (err) console.warn('IndexedDB sync failed', err);
       resolve();
     }));
@@ -215,9 +220,8 @@
     },
   };
 
-  // Keep settings, saved games and scenarios: write them to IndexedDB
-  // regularly and when the page is hidden.
-  setInterval(() => { if (window.FS && FS.syncfs) sync(false); }, 30000);
+  // Keep settings, saved games and scenarios: main_loop.cpp syncs after writes,
+  // and we flush when the page is hidden or the game exits.
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden' && window.FS && FS.syncfs) sync(false);
   });

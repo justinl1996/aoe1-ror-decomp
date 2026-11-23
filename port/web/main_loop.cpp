@@ -36,7 +36,7 @@ static void web_sync_if_due(void) {
     });
 }
 
-enum { FRAME_BUDGET_MS = 25 };
+enum { FRAME_BUDGET_MS = 16 };
 
 static void web_frame(void) {
     if (web_game == 0)

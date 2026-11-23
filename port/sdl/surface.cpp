@@ -26,6 +26,68 @@ static Uint32 present_lut[256];
 static int present_pending = 0;
 static Uint32 present_last_ticks = 0;
 
+// In-game mouse-wheel viewport zoom (zooms only the map viewport; HUD stays 1:1).
+static int zoom_enabled = 0;
+static int zoom_suspended = 0;
+static long zoom_view_x = 0;
+static long zoom_view_y = 0;
+static long zoom_view_w = 0;
+static long zoom_view_h = 0;
+static int zoom_level = 0;
+static const float zoom_levels[] = { 1.0f, 1.25f, 1.5f, 1.75f, 2.0f };
+static const int ZOOM_LEVEL_COUNT = 5;
+
+static int zoom_is_active(void) {
+    return zoom_enabled != 0 && zoom_suspended == 0 && zoom_level > 0 && zoom_view_w > 0 && zoom_view_h > 0;
+}
+
+static void zoom_src_rect(SDL_Rect* out) {
+    float z = zoom_levels[zoom_level];
+    int sw = (int) (zoom_view_w / z + 0.5f);
+    int sh = (int) (zoom_view_h / z + 0.5f);
+    if (sw < 1) sw = 1;
+    if (sh < 1) sh = 1;
+    out->x = (int) zoom_view_x + ((int) zoom_view_w - sw) / 2;
+    out->y = (int) zoom_view_y + ((int) zoom_view_h - sh) / 2;
+    out->w = sw;
+    out->h = sh;
+}
+
+void surface_set_zoom_viewport(int enabled, long x, long y, long w, long h) {
+    zoom_enabled = enabled != 0;
+    zoom_view_x = x;
+    zoom_view_y = y;
+    zoom_view_w = w;
+    zoom_view_h = h;
+    if (!zoom_enabled) {
+        zoom_level = 0;
+        zoom_suspended = 0;
+    }
+}
+
+void surface_set_zoom_suspended(int suspended) {
+    int next = suspended != 0;
+    if (zoom_suspended != next) {
+        zoom_suspended = next;
+        if (zoom_enabled && zoom_level > 0)
+            present_repaint();
+    }
+}
+
+void surface_zoom_step(int delta) {
+    if (!zoom_enabled || zoom_suspended || delta == 0)
+        return;
+    int next = zoom_level + (delta > 0 ? 1 : -1);
+    if (next < 0)
+        next = 0;
+    if (next >= ZOOM_LEVEL_COUNT)
+        next = ZOOM_LEVEL_COUNT - 1;
+    if (next != zoom_level) {
+        zoom_level = next;
+        present_repaint();
+    }
+}
+
 static void layout_apply(void);
 
 void present_destroy_target(void) {
@@ -84,7 +146,23 @@ void surface_present_palette(const PALETTEENTRY* entries) {
 
 static void present_now(void) {
     SDL_RenderClear(present_renderer);
-    SDL_RenderCopy(present_renderer, present_texture, 0, 0);
+    if (zoom_is_active()) {
+        if (zoom_view_y > 0) {
+            SDL_Rect top = { 0, 0, (int) present_width, (int) zoom_view_y };
+            SDL_RenderCopy(present_renderer, present_texture, &top, &top);
+        }
+        SDL_Rect src;
+        zoom_src_rect(&src);
+        SDL_Rect dst = { (int) zoom_view_x, (int) zoom_view_y, (int) zoom_view_w, (int) zoom_view_h };
+        SDL_RenderCopy(present_renderer, present_texture, &src, &dst);
+        int bot_y = (int) (zoom_view_y + zoom_view_h);
+        if (bot_y < present_height) {
+            SDL_Rect bot = { 0, bot_y, (int) present_width, (int) (present_height - bot_y) };
+            SDL_RenderCopy(present_renderer, present_texture, &bot, &bot);
+        }
+    } else {
+        SDL_RenderCopy(present_renderer, present_texture, 0, 0);
+    }
     SDL_RenderPresent(present_renderer);
     present_pending = 0;
     present_last_ticks = SDL_GetTicks();
@@ -262,6 +340,17 @@ void map_client_to_game(POINT* point) {
         gx = present_width - 1;
     if (gy > present_height - 1)
         gy = present_height - 1;
+    if (zoom_is_active() && gx >= zoom_view_x && gx < zoom_view_x + zoom_view_w
+        && gy >= zoom_view_y && gy < zoom_view_y + zoom_view_h) {
+        // Preserve screen-edge pixels so edge-scrolling still works while zoomed in.
+        int on_left_edge = gx < 4;
+        int on_right_edge = gx >= present_width - 4;
+        SDL_Rect src;
+        zoom_src_rect(&src);
+        if (!on_left_edge && !on_right_edge)
+            gx = src.x + (long) ((gx - zoom_view_x) * src.w / zoom_view_w);
+        gy = src.y + (long) ((gy - zoom_view_y) * src.h / zoom_view_h);
+    }
     point->x = gx;
     point->y = gy;
 }
@@ -271,8 +360,17 @@ void map_client_to_game(POINT* point) {
 void map_game_to_client(POINT* point, int center) {
     int x;
     int y;
+    float px = (float) point->x;
+    float py = (float) point->y;
+    if (zoom_is_active() && point->x >= zoom_view_x && point->x < zoom_view_x + zoom_view_w
+        && point->y >= zoom_view_y && point->y < zoom_view_y + zoom_view_h) {
+        SDL_Rect src;
+        zoom_src_rect(&src);
+        px = (float) zoom_view_x + ((px - (float) src.x) * (float) zoom_view_w) / (float) src.w;
+        py = (float) zoom_view_y + ((py - (float) src.y) * (float) zoom_view_h) / (float) src.h;
+    }
     float offset = center != 0 ? 0.5f : 0.0f;
-    SDL_RenderLogicalToWindow(present_renderer, point->x + offset, point->y + offset, &x, &y);
+    SDL_RenderLogicalToWindow(present_renderer, px + offset, py + offset, &x, &y);
     point->x = x;
     point->y = y;
 }

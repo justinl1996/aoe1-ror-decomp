@@ -15,7 +15,7 @@
 #include "../include/rge_base_game_global.h"
 
 // The target reserves 0x1400 bytes from SrcXTbl to the next global.
-static long SrcXTbl[0x500];
+static long SrcXTbl[0x1000];
 
 
 #pragma function(memcpy)

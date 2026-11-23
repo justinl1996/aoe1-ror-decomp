@@ -1,4 +1,5 @@
 #include "../include/panel_ez.h"
+#include "../include/hd_resolutions.h"
 #include "../include/surface.h"
 #include "../include/basegame.h"
 #include "../include/drawarea.h"
@@ -145,7 +146,15 @@ long TEasy_Panel::setup(
 
     if (info_data == 0) {
         if (this->info_id != -1) {
-            info_data = RESFILE_load(RES_TYPE_BINARY, this->info_id, own_mem, resDataSize);
+            if (this->info_id >= 50051 && this->info_id <= 50061 && this->render_area != 0) {
+                const AOE_ResolutionPreset& preset =
+                    aoe_resolution_or_default(this->render_area->Width, this->render_area->Height);
+                long hd_info_id = preset.menu_bina_base + (this->info_id - 50050);
+                info_data = RESFILE_load(RES_TYPE_BINARY, hd_info_id, own_mem, resDataSize);
+            }
+            if (info_data == 0) {
+                info_data = RESFILE_load(RES_TYPE_BINARY, this->info_id, own_mem, resDataSize);
+            }
         }
         if (info_data == 0) {
             return 1;
@@ -836,10 +845,10 @@ int TEasy_Panel::create_button(
     int i;
 
     sound = 0;
-    ideal_x = (x * this->pnl_wid) / this->ideal_width;
-    sy = (y * this->pnl_hgt) / this->ideal_height;
-    sw = (width * this->pnl_wid) / this->ideal_width;
-    sh = (height * this->pnl_hgt) / this->ideal_height;
+    ideal_x = this->scale_ideal_x(x);
+    sy = this->scale_ideal_y(y);
+    sw = this->scale_ideal_w(width);
+    sh = this->scale_ideal_h(height);
 
     TButtonPanel* button_panel = new TButtonPanel;
     *button = button_panel;
@@ -900,10 +909,10 @@ int TEasy_Panel::create_check_box(
     long sh;
 
     sound = 0;
-    ideal_x = x * this->pnl_wid / this->ideal_width;
-    sy = y * this->pnl_hgt / this->ideal_height;
-    sw = width * this->pnl_wid / this->ideal_width;
-    sh = height * this->pnl_hgt / this->ideal_height;
+    ideal_x = this->scale_ideal_x(x);
+    sy = this->scale_ideal_y(y);
+    sw = this->scale_ideal_w(width);
+    sh = this->scale_ideal_h(height);
     TButtonPanel* button_panel = new TButtonPanel;
     *button = button_panel;
     if (button_panel != 0 && button_panel->error_code == 0) {
@@ -954,10 +963,10 @@ int TEasy_Panel::create_radio_button(
     long sh;
 
     sound = 0;
-    sx = (ideal_x * this->pnl_wid) / this->ideal_width;
-    sy = (y * this->pnl_hgt) / this->ideal_height;
-    sw = (width * this->pnl_wid) / this->ideal_width;
-    sh = (height * this->pnl_hgt) / this->ideal_height;
+    sx = this->scale_ideal_x(ideal_x);
+    sy = this->scale_ideal_y(y);
+    sw = this->scale_ideal_w(width);
+    sh = this->scale_ideal_h(height);
 
     button_panel = new TButtonPanel;
     *button = button_panel;
@@ -1014,10 +1023,10 @@ int TEasy_Panel::create_text(
     TPanel* parent, TTextPanel** text_panel, char* text, long x, long y, long width, long height, long font_num, int horz_center,
     int vert_center, int word_wrap
 ) {
-    long ideal_x = (x * this->pnl_wid) / this->ideal_width;
-    long ideal_y = (y * this->pnl_hgt) / this->ideal_height;
-    long ideal_w = (width * this->pnl_wid) / this->ideal_width;
-    long ideal_h = (height * this->pnl_hgt) / this->ideal_height;
+    long ideal_x = this->scale_ideal_x(x);
+    long ideal_y = this->scale_ideal_y(y);
+    long ideal_w = this->scale_ideal_w(width);
+    long ideal_h = this->scale_ideal_h(height);
 
     *text_panel = new TTextPanel;
     if (*text_panel != 0 && (*text_panel)->error_code == 0) {
@@ -1057,10 +1066,10 @@ int TEasy_Panel::create_text(
     TPanel* parent, TTextPanel** text_panel, char** text, long line_num, long x, long y, long width, long height, long font_num,
     int horz_center, int vert_center
 ) {
-    long ideal_x = (x * this->pnl_wid) / this->ideal_width;
-    long ideal_y = (y * this->pnl_hgt) / this->ideal_height;
-    long ideal_w = (width * this->pnl_wid) / this->ideal_width;
-    long ideal_h = (height * this->pnl_hgt) / this->ideal_height;
+    long ideal_x = this->scale_ideal_x(x);
+    long ideal_y = this->scale_ideal_y(y);
+    long ideal_w = this->scale_ideal_w(width);
+    long ideal_h = this->scale_ideal_h(height);
 
     TTextPanel* text_panel_instance = new TTextPanel;
     *text_panel = text_panel_instance;
@@ -1101,10 +1110,10 @@ int TEasy_Panel::create_input(
     TPanel* parent, TInputPanel** input_panel, char* value, short max_len, TInputPanel::FormatType format_type, long x, long y,
     long width, long height, long font_num
 ) {
-    long ideal_x = (x * this->pnl_wid) / this->ideal_width;
-    long ideal_y = (y * this->pnl_hgt) / this->ideal_height;
-    long ideal_w = (width * this->pnl_wid) / this->ideal_width;
-    long ideal_h = (height * this->pnl_hgt) / this->ideal_height;
+    long ideal_x = this->scale_ideal_x(x);
+    long ideal_y = this->scale_ideal_y(y);
+    long ideal_w = this->scale_ideal_w(width);
+    long ideal_h = this->scale_ideal_h(height);
 
     *input_panel = new TInputPanel;
     if (*input_panel != 0 && (*input_panel)->error_code == 0) {
@@ -1141,9 +1150,9 @@ int TEasy_Panel::create_edit(
     TPanel* parent, TEditPanel** edit_panel, char* value, short max_len, TEditPanel::FormatType format_type, long x, long y,
     long width, long height, long font_num, int enable_ime, int turn_ime_on
 ) {
-    int scaled_x = (x * this->pnl_wid) / this->ideal_width;
-    int scaled_y = (this->pnl_hgt * y) / this->ideal_height;
-    int scaled_width = (width * this->pnl_wid) / this->ideal_width;
+    int scaled_x = this->scale_ideal_x(x);
+    int scaled_y = this->scale_ideal_y(y);
+    int scaled_width = this->scale_ideal_w(width);
 
     *edit_panel = new TEditPanel;
     if (*edit_panel != 0 && (*edit_panel)->error_code == 0) {
@@ -1187,13 +1196,13 @@ int TEasy_Panel::create_drop_down(
     TPanel* parent, TDropDownPanel** drop_panel, long list_width, long list_height, long x, long y, long width, long height,
     long font_num
 ) {
-    long ideal_x = x * this->pnl_wid / this->ideal_width;
-    long ideal_y = y * this->pnl_hgt / this->ideal_height;
-    long ideal_w = width * this->pnl_wid / this->ideal_width;
-    long ideal_h = height * this->pnl_hgt / this->ideal_height;
-    long button_size = (this->pnl_wid * 18) / this->ideal_width;
-    long list_w = list_width * this->pnl_wid / this->ideal_width;
-    long list_h = list_height * this->pnl_hgt / this->ideal_height;
+    long ideal_x = this->scale_ideal_x(x);
+    long ideal_y = this->scale_ideal_y(y);
+    long ideal_w = this->scale_ideal_w(width);
+    long ideal_h = this->scale_ideal_h(height);
+    long button_size = this->scale_ideal_w(18);
+    long list_w = this->scale_ideal_w(list_width);
+    long list_h = this->scale_ideal_h(list_height);
     if (font_num >= 0)
         rge_base_game->get_font(font_num);
     else
@@ -1257,13 +1266,13 @@ int TEasy_Panel::create_list(TPanel* parent, TListPanel** list_panel, long x, lo
         long x;
     } ideal;
 
-    ideal.x = (x * this->pnl_wid) / this->ideal_width;
-    ideal.y = (y * this->pnl_hgt) / this->ideal_height;
+    ideal.x = this->scale_ideal_x(x);
+    ideal.y = this->scale_ideal_y(y);
     char** list_items;
     RGE_Font* font;
 
-    width = (width * this->pnl_wid) / this->ideal_width;
-    long ideal_h = (height * this->pnl_hgt) / this->ideal_height;
+    width = this->scale_ideal_w(width);
+    long ideal_h = this->scale_ideal_h(height);
 
     if (font_num >= 0) {
         rge_base_game->get_font(font_num);
@@ -1332,9 +1341,9 @@ int TEasy_Panel::create_scrollbar(
     TPanel* parent, TScrollBarPanel** scrollbar_panel, TTextPanel* list_panel, long list_size, long x, long y, long width,
     long height
 ) {
-    long scaled_x = (this->pnl_wid * x) / this->ideal_width;
-    long scaled_y = (y * this->pnl_hgt) / this->ideal_height;
-    long h = (height * this->pnl_hgt) / this->ideal_height;
+    long scaled_x = this->scale_ideal_x(x);
+    long scaled_y = this->scale_ideal_y(y);
+    long h = this->scale_ideal_h(height);
     TScrollBarPanel* sb = new TScrollBarPanel;
     *scrollbar_panel = sb;
 
@@ -1382,10 +1391,10 @@ int TEasy_Panel::create_vert_slider(
     TPanel* parent, TVerticalSliderPanel** slider_panel, long scale, long one_step, long page_step, long x, long y, long width,
     long height
 ) {
-    long ideal_x = (x * this->pnl_wid) / this->ideal_width;
-    long ideal_y = (y * this->pnl_hgt) / this->ideal_height;
-    long ideal_w = (width * this->pnl_wid) / this->ideal_width;
-    long ideal_h = (height * this->pnl_hgt) / this->ideal_height;
+    long ideal_x = this->scale_ideal_x(x);
+    long ideal_y = this->scale_ideal_y(y);
+    long ideal_w = this->scale_ideal_w(width);
+    long ideal_h = this->scale_ideal_h(height);
 
     *slider_panel = new TVerticalSliderPanel;
     if (*slider_panel != 0 && (*slider_panel)->error_code == 0
@@ -1416,10 +1425,10 @@ int TEasy_Panel::create_horz_slider(
     TPanel* parent, THorizontalSliderPanel** slider_panel, long scale, long one_step, long page_step, long x, long y, long width,
     long height
 ) {
-    long ideal_x = (x * this->pnl_wid) / this->ideal_width;
-    long ideal_y = (y * this->pnl_hgt) / this->ideal_height;
-    long ideal_w = (width * this->pnl_wid) / this->ideal_width;
-    long ideal_h = (height * this->pnl_hgt) / this->ideal_height;
+    long ideal_x = this->scale_ideal_x(x);
+    long ideal_y = this->scale_ideal_y(y);
+    long ideal_w = this->scale_ideal_w(width);
+    long ideal_h = this->scale_ideal_h(height);
 
     int result;
     *slider_panel = new THorizontalSliderPanel;
@@ -1449,8 +1458,8 @@ int TEasy_Panel::create_horz_slider(
 
 void TEasy_Panel::position_panel(TPanel* panel, long x, long y, long width, long height) {
     panel->set_fixed_position(
-        (x * this->pnl_wid) / this->ideal_width, (y * this->pnl_hgt) / this->ideal_height,
-        (width * this->pnl_wid) / this->ideal_width, (height * this->pnl_hgt) / this->ideal_height
+        this->scale_ideal_x(x), this->scale_ideal_y(y),
+        this->scale_ideal_w(width), this->scale_ideal_h(height)
     );
 }
 

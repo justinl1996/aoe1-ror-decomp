@@ -585,9 +585,9 @@ RGE_Moving_Object::PathResult RGE_Moving_Object::findPath() {
     this->numberWaitDelays = 0;
     this->setWaitingToMove(0);
     if (!this->owner->computerPlayer()) {
-        this->continueCounter = this->numberUserDefinedWaypointsValue + 0x19;
+        this->continueCounter = this->numberUserDefinedWaypointsValue + 60;
     } else {
-        this->continueCounter = this->numberUserDefinedWaypointsValue + 0x0f;
+        this->continueCounter = this->numberUserDefinedWaypointsValue + 40;
     }
     this->setStart(this->world_x, this->world_y, this->world_z);
     this->closestDistanceToWaypoint = 100000.0f;
@@ -1195,7 +1195,14 @@ int RGE_Moving_Object::doTrivialMove(float x, float y) {
         }
 
         if (pathSystem.passable(this, x, y, 1) == 0) {
-            return 2;
+            // Waypoint is blocked by an obstacle: only treat as reached if it is the
+            // final goal and we are already adjacent; otherwise fall through to repath around it.
+            float gdx = this->goalValue.x - this->world_x;
+            float gdy = this->goalValue.y - this->world_y;
+            if (this->pathValue.currentWaypointNumber() >= this->pathValue.numberOfWaypoints() - 1
+                && (gdx * gdx + gdy * gdy) <= 2.25f) {
+                return 2;
+            }
         }
 
         --this->continueCounter;

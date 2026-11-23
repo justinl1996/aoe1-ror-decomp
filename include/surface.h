@@ -66,6 +66,9 @@ void surface_get_display_size(long* width, long* height);
 // While mouse input is off, the game gets no mouse messages (it used to give
 // the mouse capture to a hidden window while loading).
 void surface_set_mouse_input(int enabled);
+// In-game viewport mouse-wheel zoom (port/sdl/surface.cpp).
+void surface_set_zoom_viewport(int enabled, long x, long y, long w, long h);
+void surface_set_zoom_suspended(int suspended);
 // A message box (MessageBoxA's MB_ICON* flags choose its look), and the
 // default beep (nothing where there is none).
 void surface_message_box(const char* text, const char* title, UINT type);

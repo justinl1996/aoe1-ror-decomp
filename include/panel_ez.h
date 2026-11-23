@@ -124,6 +124,28 @@ class TEasy_Panel : public TPanel {
     void set_button_pics(char*, long);
     void set_shadow_amount(long);
     void set_enable_ime(int);
+    long ideal_virtual_width() const {
+        if (this->ideal_width > 0 && this->ideal_height > 0
+            && this->pnl_wid * this->ideal_height > this->pnl_hgt * this->ideal_width) {
+            return (this->pnl_hgt * this->ideal_width) / this->ideal_height;
+        }
+        return this->pnl_wid;
+    }
+    long ideal_offset_x() const {
+        return (this->pnl_wid - this->ideal_virtual_width()) / 2;
+    }
+    long scale_ideal_x(long x) const {
+        return this->ideal_offset_x() + (x * this->ideal_virtual_width()) / this->ideal_width;
+    }
+    long scale_ideal_y(long y) const {
+        return (y * this->pnl_hgt) / this->ideal_height;
+    }
+    long scale_ideal_w(long w) const {
+        return (w * this->ideal_virtual_width()) / this->ideal_width;
+    }
+    long scale_ideal_h(long h) const {
+        return (h * this->pnl_hgt) / this->ideal_height;
+    }
     char* get_info_file();
     long get_info_id();
     TShape* get_background();

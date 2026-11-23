@@ -1,5 +1,6 @@
 
 #include "../include/dlg_conf.h"
+#include "../include/hd_resolutions.h"
 #include "../include/program_mode.h"
 #include "../include/game_globals.h"
 #include "../include/pathsys.h"
@@ -159,46 +160,30 @@ TribeConfigDialog::TribeConfigDialog(Mode m, TScreenPanel* parentPanel) : TDialo
 
     if (!this->create_text(this, this->sizeTitle, STRING_ID_SCREEN_SIZE_TITLE, 20, 190, 200, 30, RGE_FONT_STANDARD, 0, 1, 0))
         return;
-    for (i = 0; i < 3; ++i) {
-        switch (i) {
-            case 0:
-                string_id = STRING_ID_SCREEN_SIZE_640X480;
-                break;
-            case 1:
-                string_id = STRING_ID_SCREEN_SIZE_800X600;
-                break;
-            case 2:
-                string_id = STRING_ID_SCREEN_SIZE_1024X768;
-                break;
-        }
+    for (i = 0; i < AOE_HD_RESOLUTION_COUNT; ++i) {
         y = i * 35 + 225;
-        if (!this->create_text(this, &this->sizeTitle[i + 1], string_id, 55, y, 100, 30, RGE_FONT_STANDARD, 0, 1, 0))
+        if (!this->create_text(
+                this, &this->sizeTitle[i + 1], (char*) AOE_HD_RESOLUTIONS[i].label, 55, y, 115, 30, RGE_FONT_STANDARD, 0, 1, 0
+            ))
             return;
         if (!this->create_radio_button(this, &this->sizeButton[i], 20, y, 30, 30, 0, 0))
             return;
     }
-    for (i = 0; i < 3; ++i)
-        this->sizeButton[i]->set_radio_info(this->sizeButton, 3);
+    for (i = 0; i < AOE_HD_RESOLUTION_COUNT; ++i)
+        this->sizeButton[i]->set_radio_info(this->sizeButton, AOE_HD_RESOLUTION_COUNT);
 
     int screen_width = this->render_area->DrawSystem->ScreenWidth;
-    switch (screen_width) {
-        case 640:
-            this->sizeButton[0]->set_radio_button();
+    for (i = 0; i < AOE_HD_RESOLUTION_COUNT; ++i) {
+        if (screen_width == AOE_HD_RESOLUTIONS[i].width) {
+            this->sizeButton[i]->set_radio_button();
             break;
-        case 800:
-            this->sizeButton[1]->set_radio_button();
-            break;
-        case 1024:
-            this->sizeButton[2]->set_radio_button();
-            break;
+        }
     }
 
-    if (!this->render_area->DrawSystem->IsModeAvail(640, 0, 8))
-        this->sizeButton[0]->set_disabled(1);
-    if (!this->render_area->DrawSystem->IsModeAvail(800, 0, 8))
-        this->sizeButton[1]->set_disabled(1);
-    if (!this->render_area->DrawSystem->IsModeAvail(1024, 0, 8))
-        this->sizeButton[2]->set_disabled(1);
+    for (i = 0; i < AOE_HD_RESOLUTION_COUNT; ++i) {
+        if (!this->render_area->DrawSystem->IsModeAvail(AOE_HD_RESOLUTIONS[i].width, AOE_HD_RESOLUTIONS[i].height, 8))
+            this->sizeButton[i]->set_disabled(1);
+    }
 
     if (!this->create_text(
             this, this->mouseTitle, STRING_ID_MOUSE_INTERFACE_TITLE, 170, 190, 210, 30, RGE_FONT_STANDARD, 0, 1, 0
@@ -500,20 +485,14 @@ long TribeConfigDialog::action(TPanel* fromPanel, long actionIn, unsigned long a
                     }
                 }
 
-                long width;
-                long height;
-                if (this->sizeButton[0]->get_state() != 0) {
-                    width = 640;
-                    height = 480;
-                } else if (this->sizeButton[1]->get_state() != 0) {
-                    width = 800;
-                    height = 600;
-                } else if (this->sizeButton[2]->get_state() != 0) {
-                    width = 1024;
-                    height = 768;
-                } else {
-                    width = 640;
-                    height = 480;
+                long width = AOE_HD_RESOLUTIONS[0].width;
+                long height = AOE_HD_RESOLUTIONS[0].height;
+                for (int idx = 0; idx < AOE_HD_RESOLUTION_COUNT; ++idx) {
+                    if (this->sizeButton[idx]->get_state() != 0) {
+                        width = AOE_HD_RESOLUTIONS[idx].width;
+                        height = AOE_HD_RESOLUTIONS[idx].height;
+                        break;
+                    }
                 }
 
                 panel_system.setCurrentPanel("Game Screen", 0);

@@ -16,13 +16,7 @@ TribeEndScreen::TribeEndScreen(char* titleText, char** textText, int textLineCou
         return;
     }
 
-    if (render_area->Width < 800) {
-        strcpy(backgroundName, "bgA640");
-    } else if (render_area->Width < 1024) {
-        strcpy(backgroundName, "bgA800");
-    } else {
-        strcpy(backgroundName, "bgA1024");
-    }
+    strcpy(backgroundName, "bgA1024");
 
     background = new TPicturePanel;
     if (background == 0) {

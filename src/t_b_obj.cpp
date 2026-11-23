@@ -39,12 +39,35 @@ static void set_tile_terrain(RGE_Tile* tile, unsigned char value) {
     tile->height = value >> 5;
 }
 
+int TRIBE_Building_Object::can_set_gather_point() const {
+    if (this->object_state != RGE_OBJECT_STATE_ACTIVE || this->master_obj == 0)
+        return 0;
+    switch (this->master_obj->id) {
+        case MASTER_OBJECT_ACADEMY:
+        case MASTER_OBJECT_BARRACKS1:
+        case MASTER_OBJECT_BARRACKS2:
+        case MASTER_OBJECT_DOCK_1:
+        case MASTER_OBJECT_DOCK_2:
+        case MASTER_OBJECT_SIEGE_WORKSHOP:
+        case MASTER_OBJECT_TOWN_CENTER1:
+        case MASTER_OBJECT_TOWN_CENTER2:
+        case MASTER_OBJECT_STABLE1:
+        case MASTER_OBJECT_STABLE:
+        case MASTER_OBJECT_RANGE1:
+        case MASTER_OBJECT_TEMPLE1:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 TRIBE_Building_Object::TRIBE_Building_Object(
     TRIBE_Master_Building_Object* tobj, RGE_Player* obj_owner, float x, float y, float z, int uID, int do_setup
 ) :
     TRIBE_Combat_Object(tobj, obj_owner, x, y, z, 0), production_queue(0), production_queue_size(0), production_queue_count(0),
     production_queue_enabled(1), production_queue_actions(0), production_queue_change_flag(0), production_queue_auto_paused(0),
-    production_queue_need_attr(-1), unique_build_id(uID), DoppleInstalled(0) {
+    production_queue_need_attr(-1), unique_build_id(uID), DoppleInstalled(0),
+    has_gather_point(0), gather_point_x(0.0f), gather_point_y(0.0f), gather_point_target_id(-1) {
     if (do_setup != 0) {
         setup(tobj, obj_owner, x, y, z);
     }
@@ -70,7 +93,8 @@ TRIBE_Building_Object::TRIBE_Building_Object(
 ) :
     TRIBE_Combat_Object(tobj, obj_owner, x, y, z, 0), production_queue(0), production_queue_size(0), production_queue_count(0),
     production_queue_enabled(1), production_queue_actions(0), production_queue_change_flag(0), production_queue_auto_paused(0),
-    production_queue_need_attr(-1), unique_build_id(-1), DoppleInstalled(0) {
+    production_queue_need_attr(-1), unique_build_id(-1), DoppleInstalled(0),
+    has_gather_point(0), gather_point_x(0.0f), gather_point_y(0.0f), gather_point_target_id(-1) {
     if (do_setup != 0) {
         setup(tobj, obj_owner, x, y, z);
     }
@@ -89,7 +113,8 @@ TRIBE_Building_Object::TRIBE_Building_Object(
 TRIBE_Building_Object::TRIBE_Building_Object(int infile, RGE_Game_World* gworld, int do_setup) :
     TRIBE_Combat_Object(infile, gworld, 0), production_queue(0), production_queue_size(0), production_queue_count(0),
     production_queue_enabled(1), production_queue_actions(0), production_queue_change_flag(0), production_queue_auto_paused(0),
-    production_queue_need_attr(-1), DoppleInstalled(0) {
+    production_queue_need_attr(-1), DoppleInstalled(0),
+    has_gather_point(0), gather_point_x(0.0f), gather_point_y(0.0f), gather_point_target_id(-1) {
     if (do_setup != 0) {
         setup(infile, gworld);
     }
@@ -417,6 +442,8 @@ void TRIBE_Building_Object::change_ownership(RGE_Player* new_owner) {
     }
 
     actions->delete_list();
+    this->has_gather_point = 0;
+    this->gather_point_target_id = -1;
     TRIBE_Combat_Object::change_ownership(new_owner);
 
     if (object_state == RGE_OBJECT_STATE_UNBUILT) {

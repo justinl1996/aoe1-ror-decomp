@@ -228,9 +228,9 @@ class TDrawSystem {
     long IsBanked;                      // +0x40
     long CanSrcBlt;                     // +0x44
     long Restored;                      // +0x48
-    long ModeAvail640;                  // +0x4C
-    long ModeAvail800;                  // +0x50
-    long ModeAvail1024;                 // +0x54
+    long ModeAvail1280_720;             // +0x4C
+    long ModeAvail1600_900;             // +0x50
+    long ModeAvail1920_1080;            // +0x54
     long ModeAvail1280;                 // +0x58
     long ModeAvail320_200;              // +0x5C
     long ModeAvail320_240;              // +0x60

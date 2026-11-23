@@ -51,7 +51,7 @@ TribeSelectScenarioScreen::TribeSelectScenarioScreen() : TScreenPanel("Select Sc
         this->scenarioListHeight = 263;
 
         if (this->create_list(this, &this->scenarioList, 20, 70, 600, 263, RGE_FONT_STANDARD)) {
-            this->scenarioList->set_second_column_pos(((this->scenarioListWidth - 60) * this->pnl_wid) / this->ideal_width);
+            this->scenarioList->set_second_column_pos(this->scale_ideal_w(this->scenarioListWidth - 60));
             this->scenarioList->set_text(STRING_ID_SCENARIO_LIST_LOADING);
 
             if (this->create_auto_scrollbar(&this->scenarioScrollbar, this->scenarioList, 20)) {

@@ -465,17 +465,20 @@ int PathingSystem::findTilePath(
         numberIterationCap /= 10;
     else
         numberIterationCap /= 100;
-    if (this->currentObject->owner->id == 0 && numberIterationCap > 100)
-        numberIterationCap = 100;
-    if (this->currentObject->owner->computerPlayer() == 1)
-        numberIterationCap = (dist * 0x9c4) / 100;
+    if (this->currentObject->owner->id == 0) {
+        if (numberIterationCap > 500)
+            numberIterationCap = 500;
+    } else {
+        if (numberIterationCap < 4000)
+            numberIterationCap = 4000;
+    }
 
     while (this->numberOpenPathsValue > 0) {
         XYPoint bestPathPoint;
         XYPoint temp;
         if (numberPathingIterations != -1 && checkPathingIterations == 1 && iterations > numberIterationCap)
             break;
-        if (iterations > 0x4e20)
+        if (iterations > 40000)
             break;
 
         bestPathPoint.x = this->MGP_openPaths[1].x;
@@ -545,11 +548,11 @@ int PathingSystem::findTilePath(
         copiedX = this->MGP_openPaths[1].x;
         copiedY = this->MGP_openPaths[1].y;
         oldTotal = this->MGP_openPaths[1].total;
-        while (hole < heapCount / 2) {
+        while (hole <= heapCount / 2) {
             child = hole * 2;
             if (child < heapCount && this->MGP_openPaths[child + 1].total < this->MGP_openPaths[child].total)
                 ++child;
-            if (oldTotal < this->MGP_openPaths[child].total)
+            if (oldTotal <= this->MGP_openPaths[child].total)
                 break;
             this->MGP_openPaths[hole] = this->MGP_openPaths[child];
             hole = child;
