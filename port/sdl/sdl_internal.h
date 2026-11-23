@@ -26,6 +26,7 @@ void present_destroy_target(void);
 int map_active(void);
 void map_client_to_game(POINT* point);
 void map_game_to_client(POINT* point, int center);
+void map_zoom_to_game(long* x, long* y);
 long map_game_width(void);
 long map_game_height(void);
 void layout_toggle(void);

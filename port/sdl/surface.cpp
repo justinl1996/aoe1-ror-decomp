@@ -324,6 +324,24 @@ long map_game_height(void) {
     return present_height;
 }
 
+void map_zoom_to_game(long* x, long* y) {
+    long gx = *x;
+    long gy = *y;
+    if (zoom_is_active() && gx >= zoom_view_x && gx < zoom_view_x + zoom_view_w
+        && gy >= zoom_view_y && gy < zoom_view_y + zoom_view_h) {
+        // Preserve screen-edge pixels so edge-scrolling still works while zoomed in.
+        int on_left_edge = gx < 4;
+        int on_right_edge = gx >= present_width - 4;
+        SDL_Rect src;
+        zoom_src_rect(&src);
+        if (!on_left_edge && !on_right_edge)
+            gx = src.x + (long) ((gx - zoom_view_x) * src.w / zoom_view_w);
+        gy = src.y + (long) ((gy - zoom_view_y) * src.h / zoom_view_h);
+        *x = gx;
+        *y = gy;
+    }
+}
+
 // Client pixel to game pixel, clamped to the game area (the letterbox bars
 // count as its nearest edge, so edge scrolling still works there).
 void map_client_to_game(POINT* point) {
@@ -340,17 +358,7 @@ void map_client_to_game(POINT* point) {
         gx = present_width - 1;
     if (gy > present_height - 1)
         gy = present_height - 1;
-    if (zoom_is_active() && gx >= zoom_view_x && gx < zoom_view_x + zoom_view_w
-        && gy >= zoom_view_y && gy < zoom_view_y + zoom_view_h) {
-        // Preserve screen-edge pixels so edge-scrolling still works while zoomed in.
-        int on_left_edge = gx < 4;
-        int on_right_edge = gx >= present_width - 4;
-        SDL_Rect src;
-        zoom_src_rect(&src);
-        if (!on_left_edge && !on_right_edge)
-            gx = src.x + (long) ((gx - zoom_view_x) * src.w / zoom_view_w);
-        gy = src.y + (long) ((gy - zoom_view_y) * src.h / zoom_view_h);
-    }
+    map_zoom_to_game(&gx, &gy);
     point->x = gx;
     point->y = gy;
 }

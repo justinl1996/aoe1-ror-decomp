@@ -458,6 +458,11 @@ static LPARAM mouse_point(int x, int y) {
             x = map_game_width() - 1;
         if (y > map_game_height() - 1)
             y = map_game_height() - 1;
+        long gx = x;
+        long gy = y;
+        map_zoom_to_game(&gx, &gy);
+        x = (int) gx;
+        y = (int) gy;
     }
     return MAKELPARAM(x, y);
 }
@@ -578,6 +583,10 @@ static void translate_event(const SDL_Event* event) {
             if (mouse_input_enabled == 0)
                 break;
             int dy = event->wheel.y;
+#if SDL_VERSION_ATLEAST(2, 0, 18)
+            if (dy == 0 && event->wheel.preciseY != 0.0f)
+                dy = event->wheel.preciseY > 0.0f ? 1 : -1;
+#endif
             if (event->wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
                 dy = -dy;
             if (dy != 0)

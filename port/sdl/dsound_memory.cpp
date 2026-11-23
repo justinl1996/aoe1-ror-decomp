@@ -31,7 +31,7 @@
 enum {
     MIX_RATE = 44100,
 #ifdef __EMSCRIPTEN__
-    MIX_SAMPLES = 2048,    // per callback: ~46 ms (prevents WebAudio underruns on main thread)
+    MIX_SAMPLES = 4096,    // per callback: ~93 ms (absorbs HD menu SLP decode stalls on main thread)
 #else
     MIX_SAMPLES = 512,     // per callback: about 12 ms
 #endif
