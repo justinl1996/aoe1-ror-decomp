@@ -2681,7 +2681,9 @@ void TRIBE_Screen_Game::setup_buttons() {
                     short work_target;
                     short progress;
 
-                    building->work_status(work_type, work_target, progress, name + 4, 0x200);
+                    // The space left after name + 4: the original passed 0x200, the
+                    // whole buffer, and strncpy's padding wrote 4 bytes past it.
+                    building->work_status(work_type, work_target, progress, name + 4, sizeof(name) - 4);
                     if (progress == 100) {
                         work_type = 0;
                     }
