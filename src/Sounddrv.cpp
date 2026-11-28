@@ -14,7 +14,9 @@
 extern "C" void __cdecl ds_stream_init(void* main_wnd, LPDIRECTSOUND direct_sound, LPDIRECTSOUNDBUFFER primary_buffer);
 extern "C" void __cdecl ds_stream_exit(void);
 extern "C" int __cdecl ds_stream_file(char* file_name, int mode, long resource_id);
-extern "C" int __cdecl ds_stream_volume(long volume);
+// Declared as defined (Dsutil.c): on wasm64 a long here, an int there, is a
+// signature mismatch that traps.
+extern "C" int __cdecl ds_stream_volume(int volume);
 extern "C" int __cdecl ds_stream_pause(void);
 extern "C" int __cdecl ds_stream_resume(void);
 extern "C" int __cdecl ds_stream_stop(void);

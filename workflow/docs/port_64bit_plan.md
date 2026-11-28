@@ -195,3 +195,21 @@ Checked since: a campaign scenario started and played for two
 minutes; a random map left running for six. Not checked on 64-bit: the
 scenario editor, long AI games, music. Saved games from 64-bit and 32-bit builds were not compared byte
 for byte.
+
+### WebAssembly 64 (web64)
+
+All 459 types have the same size on wasm64 as on x86_64 Linux (and on
+wasm32 as on i686), and `long`, `DWORD`, `LONG` and pointers have the
+same widths; the layout fixes above cover web64 unchanged.
+
+WebAssembly adds one hazard: a function declared with one signature and
+defined with another links to a stub that traps (`wasm-ld: warning:
+function signature mismatch`). On wasm32 `long` and `DWORD` are both
+i32, so such declarations matched; on wasm64 `long` is i64. Three local
+`extern` declarations disagreed with their definitions: `ICInfo` and
+`MCIWndCreateA` (tribegam.cpp: web64 trapped at startup) and
+`ds_stream_volume` (Sounddrv.cpp). Each web64 link log should have no
+signature-mismatch warnings.
+
+Checked (2026-11-28): web64 in headless Chromium at 1280x720, a random
+map with drags, zoom, scrolling, two minutes of play and a save.

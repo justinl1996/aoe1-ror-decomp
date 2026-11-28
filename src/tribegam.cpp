@@ -152,7 +152,9 @@ struct ICINFO {
     unsigned short szDriver[128];
 };
 
-extern "C" int __stdcall ICInfo(unsigned long fccType, unsigned long fccHandler, ICINFO* info);
+// DWORD, as vfw.h has it: unsigned long is 8 bytes on wasm64 and LP64, and
+// a mismatched signature traps on WebAssembly.
+extern "C" int __stdcall ICInfo(DWORD fccType, DWORD fccHandler, ICINFO* info);
 
 TRIBE_Game::TRIBE_Game(RGE_Prog_Info* prog_info_in, int do_setup) :
     RGE_Base_Game(prog_info_in, 0), video_window(0), cur_video(TRIBE_VIDEO_STAGE_NONE), old_video_wnd_proc(0), video_paused(0),
@@ -1081,7 +1083,7 @@ void TRIBE_Game::close_status_message() {
 #include <string.h>
 #include <windows.h>
 
-extern "C" void* __cdecl MCIWndCreateA(void* parent, void* instance, unsigned long style, const char* file);
+extern "C" void* __cdecl MCIWndCreateA(void* parent, void* instance, DWORD style, const char* file);  // DWORD: see ICInfo
 
 // These MCIWnd values match the VC5 VFW.H definitions.
 #define TRIBE_MCIWNDM_GETMODEA (WM_USER + 106)
