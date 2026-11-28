@@ -10,7 +10,7 @@
 typedef struct SNDOBJ SNDOBJ;
 struct SNDOBJ {
     unsigned char* pbWaveData;
-    unsigned long cbWaveSize;
+    DWORD cbWaveSize; /* filled through a DWORD pointer */
     int iAlloc;
     int iCurrent;
     LPDIRECTSOUNDBUFFER Buffers[1];
@@ -96,7 +96,7 @@ int __cdecl DSGetWaveResource(void* hModule, const char* lpName, void* ppWaveHea
 
 SNDOBJ* __cdecl SndObjCreate(LPDIRECTSOUND pDS, const char* lpName, int iConcurrent) {
     unsigned char* pbData;
-    unsigned long cbData;
+    DWORD cbData; /* filled through a DWORD pointer */
     void* pWaveHeader;
     SNDOBJ* obj;
     int i;
@@ -983,12 +983,15 @@ void __stdcall ds_stream_time_func(
     unsigned int uTimerID, unsigned int uMsg, unsigned long dwUser, unsigned long dw1, unsigned long dw2
 ) {
     static int bInTimer;
-    unsigned long dwPlay;
-    unsigned long dwWrite;
+    /* DWORD, as the DirectSound calls write them: with unsigned long (8 bytes
+       on 64-bit Linux) only the low half was set, and a garbage length made
+       the refill memset and copy run far past the stream buffer. */
+    DWORD dwPlay;
+    DWORD dwWrite;
     unsigned char* lpWrite1;
-    unsigned long dwLen1;
+    DWORD dwLen1;
     unsigned char* lpWrite2;
-    unsigned long dwLen2;
+    DWORD dwLen2;
     unsigned int uChkErr;
     unsigned long playDistance;
     unsigned char* lpWriteCursor;
