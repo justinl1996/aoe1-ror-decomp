@@ -125,7 +125,8 @@ static void settings_load(void) {
         *equals = 0;
         char* value = equals + 1;
         if (strncmp(value, "dword:", 6) == 0) {
-            unsigned long number = strtoul(value + 6, 0, 10);
+            // A DWORD is 4 bytes; unsigned long is 8 on 64-bit Linux.
+            unsigned int number = (unsigned int) strtoul(value + 6, 0, 10);
             settings_put(section, line, REG_DWORD, (const unsigned char*) &number, 4);
         } else if (strncmp(value, "sz:", 3) == 0) {
             settings_put(section, line, REG_SZ, (const unsigned char*) (value + 3), (unsigned long) strlen(value + 3) + 1);
@@ -170,9 +171,9 @@ static void settings_save(void) {
             if (strcmp(setting->section, head->section) != 0)
                 continue;
             if (setting->type == REG_DWORD && setting->size == 4) {
-                unsigned long number;
+                unsigned int number;  // 4 bytes, as the DWORD it holds
                 memcpy(&number, setting->data, 4);
-                fprintf(file, "%s=dword:%lu\n", setting->name, number);
+                fprintf(file, "%s=dword:%u\n", setting->name, number);
             } else if (setting->type == REG_SZ && memchr(setting->data, '\n', setting->size) == 0) {
                 fprintf(file, "%s=sz:%s\n", setting->name, (const char*) setting->data);
             } else {

@@ -540,8 +540,10 @@ int RGE_View::create_surfaces() {
         }
 
         int v = this->pnl_hgt + 0x1c2;
-        this->prior_objs = new DClipInfo_List(v + v, v, 0x40, -200, this->pnl_hgt + 0xf9, 0x28);
-        this->futur_objs = new DClipInfo_List(v + v, v, 0x40, -200, this->pnl_hgt + 0xf9, 0x28);
+        // Node size by sizeof: the original passed 0x40, its 32-bit size, and
+        // on 64-bit the larger nodes overran each block of the pool.
+        this->prior_objs = new DClipInfo_List(v + v, v, sizeof(DClipInfo_Node), -200, this->pnl_hgt + 0xf9, 0x28);
+        this->futur_objs = new DClipInfo_List(v + v, v, sizeof(DClipInfo_Node), -200, this->pnl_hgt + 0xf9, 0x28);
 
         this->prior_objs->SetDrawRegion(0, 0, this->pnl_wid - 1, this->pnl_hgt - 1);
         this->futur_objs->SetDrawRegion(0, 0, this->pnl_wid - 1, this->pnl_hgt - 1);

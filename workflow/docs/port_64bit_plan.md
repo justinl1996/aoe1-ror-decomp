@@ -161,6 +161,24 @@ Fixed (each a raw 32-bit size or `long` width):
 - **taitacmd.cpp**: `placementStateValue.buildItem` (a pointer) is cleared
   after loading; the 304 saved bytes stop short of it on 64-bit.
 - **Dsutil.c** (`SndObjDestroy`): `iAlloc` by `offsetof`, not 8.
+- **view.cpp**: the drawing-node pools (`DClipInfo_List`) were created
+  with an element size of 0x40, `DClipInfo_Node`'s 32-bit size; the node
+  is 88 bytes on 64-bit. With many objects on screen, nodes went past the
+  end of each block: heap corruption and a crash some minutes into a game.
+- **Dib.cpp** (`DibCheckTrans`): line records allocated at 16 bytes each
+  (`h << 4`), but a `LINEINFO` is 24 on 64-bit. Starting a campaign
+  scenario (its briefing picture) overran the buffer.
+- **port/sdl/settings.cpp**: DWORD settings went through an 8-byte
+  `unsigned long` with only 4 bytes set, so values written back to
+  settings.ini could be wrong. Now 4-byte `unsigned int`.
+
+A second sweep (after the campaign crash) covered every allocation and
+every `memset`/`memcpy`/`memmove`/`memcmp` whose size is not written with
+`sizeof`, matched against the types whose size differs, and every size or
+count passed as a literal to a constructor, `qsort` or `fread`. The rest
+are byte buffers, `int` arrays, or types of the same size on both
+(`Waypoint`, `BuildingLot`, `OrderEvent`, `NotifyEvent`, `List_Info`,
+`VISIBLE_*_REC`).
 
 Checked and left as they are: struct reads of file formats (same layout
 on both); `rge_read`/`rge_write` of `long`, `unsigned long` and pointer
@@ -173,6 +191,7 @@ Not fixed, outside the port's scope: flics.cpp (`FrameHead` read whole;
 no callers) and com_hand.cpp (multiplayer messages read as `unsigned
 long`).
 
-Not checked on 64-bit: campaigns, the scenario editor, long AI games,
-music. Saved games from 64-bit and 32-bit builds were not compared byte
+Checked since: a campaign scenario started and played for two
+minutes; a random map left running for six. Not checked on 64-bit: the
+scenario editor, long AI games, music. Saved games from 64-bit and 32-bit builds were not compared byte
 for byte.

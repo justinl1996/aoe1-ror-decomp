@@ -499,7 +499,9 @@ int __cdecl DibCheckTrans(BITMAPINFO256* DibInfo, TRANSINFO* TransInfo, unsigned
 
     GetDibDim(DibInfo, tw, h, orien);
     w = DibInfo->bmiHeader.biWidth;
-    TransInfo->LineInfo = (LINEINFO*) malloc(h << 4);
+    // sizeof(LINEINFO): the original allocated 16 bytes a line, its 32-bit
+    // size; on 64-bit the longs in it make it larger.
+    TransInfo->LineInfo = (LINEINFO*) malloc(h * sizeof(LINEINFO));
     if (TransInfo->LineInfo == 0)
         return 1;
 
