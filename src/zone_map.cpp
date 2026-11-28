@@ -107,7 +107,6 @@ uchar RGE_Zone_Map::do_zone_map() {
     long map_height;
     long y;
     uchar group;
-    long row_offset;
     int group_counter;
     int row;
     int col;
@@ -129,13 +128,14 @@ uchar RGE_Zone_Map::do_zone_map() {
         do {
             int x = 0;
             if (map_height > 0) {
-                row_offset = 0;
                 do {
                     if (this->zone_map_rows[y][x] == 0xFF) {
                         if (group_counter >= 255)
                             group_counter = 0;
 
-                        int terrainByte = ((unsigned char*) this->map->map_row_offset[y])[row_offset + 5] & 0x1F;
+                        // The tile's terrain, by member: the original read byte 5 of
+                        // a 0x18-byte stride, which is RGE_Tile's 32-bit layout only.
+                        int terrainByte = this->map->map_row_offset[y][x].terrain_type;
                         float passability = this->terrain_passability_rules[terrainByte];
                         group = 1;
                         if (!(passability > 0.0))
@@ -146,7 +146,6 @@ uchar RGE_Zone_Map::do_zone_map() {
                         group_counter++;
                     }
                     x++;
-                    row_offset += 0x18;
                 } while (x < map_height);
             }
             y++;

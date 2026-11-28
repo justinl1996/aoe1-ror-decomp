@@ -428,11 +428,13 @@ static void mem_copy(unsigned char* dst, unsigned char* src, int length) {
     if (length >= 16) {
         blocks = (unsigned int) length >> 4;
         length -= blocks << 4;
+        /* Four 4-byte words: unsigned int, as unsigned long is 8 bytes
+           on 64-bit Linux and four of them overran the 16-byte block. */
         do {
-            ((unsigned long*) dst)[0] = ((unsigned long*) src)[0];
-            ((unsigned long*) dst)[1] = ((unsigned long*) src)[1];
-            ((unsigned long*) dst)[2] = ((unsigned long*) src)[2];
-            ((unsigned long*) dst)[3] = ((unsigned long*) src)[3];
+            ((unsigned int*) dst)[0] = ((unsigned int*) src)[0];
+            ((unsigned int*) dst)[1] = ((unsigned int*) src)[1];
+            ((unsigned int*) dst)[2] = ((unsigned int*) src)[2];
+            ((unsigned int*) dst)[3] = ((unsigned int*) src)[3];
             dst += 16;
             src += 16;
         } while (--blocks);

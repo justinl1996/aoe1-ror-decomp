@@ -1610,6 +1610,9 @@ TribeTacticalAIModule::TribeTacticalAIModule(int pID, int infile) :
     }
     if (!(save_game_version < 6.2f)) {
         rge_read(infile, &this->placementStateValue, 304);
+        // A pointer from a save file is never valid (and on 64-bit the 304
+        // bytes, the 32-bit layout, stop short of it).
+        this->placementStateValue.buildItem = 0;
     } else {
         memset(&this->placementStateValue, 0, sizeof(this->placementStateValue));
     }

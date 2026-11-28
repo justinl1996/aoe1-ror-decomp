@@ -29,6 +29,20 @@
 #include "../include/view.h"
 #include "../include/asm_draw.h"
 #include "../include/world.h"
+#include <stddef.h>
+
+// Whether a drawing node changed between frames is decided by comparing its
+// fields from Shape on: through Node_Type for a shape, through y4 (all four
+// corners) for a GDI node. The original compared 0x24 and 0x34 bytes, which is
+// that range in its 32-bit layout; on 64-bit the pointers are wider, and the
+// fixed lengths stopped at the first corner, so a selection box whose far
+// corner moved counted as unchanged and was not redrawn.
+static int clip_node_compare_size(const DClipInfo_Node* node) {
+    if (node->Node_Type != 0)
+        return (int) (offsetof(DClipInfo_Node, y4) + sizeof(node->y4) - offsetof(DClipInfo_Node, Shape));
+    return (int) (offsetof(DClipInfo_Node, x1) - offsetof(DClipInfo_Node, Shape));
+}
+
 
 static const char s_C__msdev_work_age1_x1_view_cpp[] = "C:\\msdev\\work\\age1_x1\\view.cpp";
 
@@ -2542,7 +2556,7 @@ no_mouse_process: {
                             DClipInfo_Node* old_node = this->prior_objs->Draw_Clip_Nodes[line];
                             int add_node = 1;
                             while (old_node != 0) {
-                                int compare_size = new_node->Node_Type != 0 ? 0x34 : 0x24;
+                                int compare_size = clip_node_compare_size(new_node);
                                 if (memcmp(&new_node->Shape, &old_node->Shape, compare_size) == 0) {
                                     add_node = 0;
                                     Clip_remove++;
@@ -2574,7 +2588,7 @@ no_mouse_process: {
                                 DClipInfo_Node* new_node2 = this->futur_objs->Draw_Clip_Nodes[line];
                                 int add_node = 1;
                                 while (new_node2 != 0) {
-                                    int compare_size = old_node->Node_Type != 0 ? 0x34 : 0x24;
+                                    int compare_size = clip_node_compare_size(old_node);
                                     if (memcmp(&new_node2->Shape, &old_node->Shape, compare_size) == 0) {
                                         add_node = 0;
                                         break;

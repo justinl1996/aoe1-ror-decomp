@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "../include/t_histry.h"
 #include "../include/world.h"
 #include "../include/basegame.h"
@@ -48,9 +49,22 @@ void TRIBE_History_Info::save(int outfile) {
 
     rge_write(outfile, &count, 4);
 
+    // Each event is a 16-byte record: event, 3 bytes of padding, time,
+    // world_time, and a non-zero word when another event follows. The
+    // original wrote the 32-bit struct itself, which on 64-bit has another
+    // layout.
     step = this->events;
     while (step) {
-        rge_write(outfile, step, 16);
+        unsigned char record[16];
+        int32_t time = (int32_t) step->time;
+        int32_t world_time = (int32_t) step->world_time;
+        uint32_t more = step->next != 0 ? 1u : 0u;
+        memset(record, 0, sizeof(record));
+        record[0] = step->event;
+        memcpy(record + 4, &time, 4);
+        memcpy(record + 8, &world_time, 4);
+        memcpy(record + 12, &more, 4);
+        rge_write(outfile, record, 16);
         step = step->next;
     }
 }
@@ -69,7 +83,16 @@ void TRIBE_History_Info::load(int infile) {
 
     while (count > 0) {
         TRIBE_History_Events* step = (TRIBE_History_Events*) calloc(1, sizeof(TRIBE_History_Events));
-        rge_read(infile, step, 16);
+        unsigned char record[16];
+        int32_t time;
+        int32_t world_time;
+        rge_read(infile, record, 16);
+        memcpy(&time, record + 4, 4);
+        memcpy(&world_time, record + 8, 4);
+        step->event = record[0];
+        step->time = time;
+        step->world_time = world_time;
+        step->next = 0;  // linked below
         *prev_ptr = step;
         prev_ptr = &step->next;
         count--;

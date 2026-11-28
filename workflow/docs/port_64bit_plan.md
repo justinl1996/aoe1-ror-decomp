@@ -120,3 +120,59 @@ Direct scan of `src/`, `include/`, and `port/` on branch `hd`:
 2. **Phase 3** (85 `calloc(..., 4)` fixes, `TPanel::action` `uintptr_t`, `Res_file.cpp` `HANDLE`, `port/asm/` `uint32_t`/`uintptr_t`) — still testable on 32-bit builds at every step!
 3. **Phase 4 + Phase 5 (Linux x86_64 first)** — bring up `make linux64` with ASan/UBSan and verify full gameplay + save/load under Xvfb.
 4. **Windows x64 (`llvm-mingw` / `clang-cl -m64`), macOS (`arm64`), and Web (`wasm32`/`wasm64`)** — once Linux LP64 + ASan is green, Windows LLP64 and macOS ARM64 require minimal platform-specific polish.
+
+## Audit after the port (2026-11-28)
+
+The places the port touched were checked again on the linux64 build, with
+the 32-bit build as the reference.
+
+How:
+
+- `sizeof` of all 459 types in `include/` on i686 and x86_64 (347 differ);
+- every whole-struct file read and write found by wrapping `rge_read`,
+  `rge_write` and `read` in templates that warn on a type whose size
+  differs;
+- clang's pointer and integer cast warnings over every source;
+- a sweep for byte-pointer strides and offsets (`(char*) p + i * 0x..`,
+  `p += 0x..`) and `(long*)` casts;
+- ASan linux64 runs: a random-map game with selection drags, moves,
+  training, scrolling, zoom, the menu and a minute of play; then a save
+  of a played game and loading it back.
+
+Fixed (each a raw 32-bit size or `long` width):
+
+- **view.cpp**: the dirty-region comparison of drawing nodes compared
+  0x24/0x34 bytes; on 64-bit that stopped before the selection box's far
+  corner, so a growing box was not redrawn. Now computed with `offsetof`.
+- **zone_map.cpp** (`do_zone_map`) and **map.cpp**
+  (`clear_map_view_info`): tiles stepped by 0x18, `RGE_Tile`'s 32-bit
+  size. The zone map read past the terrain rules (the crash). Typed now.
+- **Deflate.c** (`mem_copy`): 16-byte blocks copied as four
+  `unsigned long`, which is 32 bytes on LP64. Every save over-read its
+  input and overwrote the compression window. Now `unsigned int`.
+- **rmm_obj.cpp** (`to_close`): random-map lands stepped by 0x10, so after
+  the first land, object placement measured distances to the wrong
+  points. By member now.
+- **t_histry.cpp**: history events were saved as the raw struct (16
+  bytes on 32-bit, with a pointer at 12). Now written and read as the
+  32-bit record.
+- **tactical_unit_data.h**: `UnitData::lastTaskTime` is `uint32_t`, so the
+  AI's gatherer records keep their 24-byte saved size.
+- **taitacmd.cpp**: `placementStateValue.buildItem` (a pointer) is cleared
+  after loading; the 304 saved bytes stop short of it on 64-bit.
+- **Dsutil.c** (`SndObjDestroy`): `iAlloc` by `offsetof`, not 8.
+
+Checked and left as they are: struct reads of file formats (same layout
+on both); `rge_read`/`rge_write` of `long`, `unsigned long` and pointer
+arrays (the LP64 overloads in rge_fio.h); the 65 pointer-array
+allocations (all sized by `sizeof`); `Shape_Info`, `Blit_Queue_Entry`,
+`AIPlayPhase`, `ObjectMemory`, `AttackMemory`, `BuildingLot` strides
+(same size on both).
+
+Not fixed, outside the port's scope: flics.cpp (`FrameHead` read whole;
+no callers) and com_hand.cpp (multiplayer messages read as `unsigned
+long`).
+
+Not checked on 64-bit: campaigns, the scenario editor, long AI games,
+music. Saved games from 64-bit and 32-bit builds were not compared byte
+for byte.

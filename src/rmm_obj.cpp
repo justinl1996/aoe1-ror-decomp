@@ -163,12 +163,14 @@ unsigned char RGE_RMM_Object_Generator::to_close(RGE_Object_Info_Line& info_line
     long count = this->info.land_num;
     long i;
     for (i = 0; i < count; i++) {
-        long* p = (long*) ((char*) &this->info.lands[0].y + i * 0x10);
-        long dx = x - *(p - 1);
+        // By member: the original stepped 0x10 bytes from lands[0].y, the
+        // 32-bit size of a land entry, and read x just before y.
+        RGE_Land_Point_Info_Line* land = &this->info.lands[i];
+        long dx = x - land->x;
         if (dx < 0)
             dx = -dx;
 
-        long dy = y - *p;
+        long dy = y - land->y;
         if (dy < 0)
             dy = -dy;
 

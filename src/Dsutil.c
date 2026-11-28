@@ -144,7 +144,8 @@ SNDOBJ* __cdecl SndObjCreate(LPDIRECTSOUND pDS, const char* lpName, int iConcurr
 void __cdecl SndObjDestroy(void* pSO) {
     if (pSO != 0) {
         int i = 0;
-        if (*(int*) ((char*) pSO + 8) > 0) {
+        /* iAlloc: offset 8 only in the 32-bit layout. */
+        if (*(int*) ((char*) pSO + offsetof(SNDOBJ, iAlloc)) > 0) {
             do {
                 LPDIRECTSOUNDBUFFER buffer =
                     *(LPDIRECTSOUNDBUFFER*) ((char*) pSO + offsetof(SNDOBJ, Buffers) + i * sizeof(LPDIRECTSOUNDBUFFER));
@@ -153,7 +154,7 @@ void __cdecl SndObjDestroy(void* pSO) {
                     *(LPDIRECTSOUNDBUFFER*) ((char*) pSO + offsetof(SNDOBJ, Buffers) + i * sizeof(LPDIRECTSOUNDBUFFER)) = 0;
                 }
                 ++i;
-            } while (i < *(int*) ((char*) pSO + 8));
+            } while (i < *(int*) ((char*) pSO + offsetof(SNDOBJ, iAlloc)));
         }
         LocalFree((HLOCAL) pSO);
     }

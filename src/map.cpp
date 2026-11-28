@@ -532,14 +532,17 @@ void RGE_Map::clear_map_view_info() {
             col = 0;
             tile_row = this->map_row_offset[row];
             if (0 < this->map_width) {
-                unsigned char* view_data = &tile_row->last_drawn_shape;
+                // By member: the original stepped a byte pointer 0x18 at a
+                // time, RGE_Tile's 32-bit size, writing the five bytes around
+                // last_drawn_shape.
+                RGE_Tile* tile = tile_row;
                 do {
-                    view_data[-1] = 0;
-                    *view_data = 0xff;
-                    view_data[1] = 0;
-                    view_data[2] = 0;
-                    view_data[3] = 0xff;
-                    view_data += 0x18;
+                    tile->last_drawn_as = 0;
+                    tile->last_drawn_shape = 0xff;
+                    tile->draw_as = 0;
+                    tile->draw_attribute = 0;
+                    tile->last_drawn_shape2 = 0xff;
+                    ++tile;
                     col = col + 1;
                 } while (col < this->map_width);
             }
